@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/a3c8b6e52c.js" crossorigin="anonymous"></script>
+    <nav class="navbar">
+        <div class="container header">
+            <div class="row">
+                <div class="col">
+                    <a href="#" class="navbar-brand"><img src="../static/res/logo.png"/></a>
+                </div>
+                <div class="col search-back">
+                    <div class="text-field">
+                        <div class="text-field__icon text-field__icon_search">
+                            <input class="text-field__input" type="search" placeholder="Найти ресторан, блюдо или товар" width="38px">
+                            <button type="button" class="btn btn-primary">Поиск</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="address-input">
+                        <input type="text" placeholder="Укажите адрес доставки">
+                        <button type="button">OK</button>
+                    </div>
+                </div>
+                <div class="col avatar-user" id="avatar-user">
+                    <div class="user-round">
+                        <img class="avatar" src="../static/res/Account-User.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Все рестораны</h1>
+        <div class="div">
+            <a href="#">Всё</a>
+            <a href="#">Бургеры</a>
+            <a href="#">Пицца</a>
+            <a href="#">Суши</a>
+            <a href="#">Вок</a>
+            <a href="#">Паста</a>
+            <a href="#">Завтрак</a>
+            <a href="#">Обед</a>
+            <a href="#">Ужин</a>
+            <div class="dropdown">
+                <button class="dropbtn">Ещё</button>
+                <div class="dropdown-content">
+                  <a href="#">Link 1</a>
+                  <a href="#">Link 2</a>
+                  <a href="#">Link 3</a>
+                </div>
+              </div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            // Получаем элемент с классом avatar-user
+            const avatarUser = document.getElementById('avatar-user');
+            if (avatarUser) {
+                // Добавляем обработчик события для клика
+                avatarUser.addEventListener('click', function () {
+                    // Выполняем переход на страницу login
+                    window.location.href = '/login';  // Замените '/login' на ваш фактический путь к странице login
+                });
+            }
+        });
+    </script>
+</body>
+</html>
