@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 </head>
 <body>
@@ -30,7 +31,7 @@
                         <button type="button">OK</button>
                     </div>
                 </div>
-                <div class="col avatar-user" id="avatar-user">
+                <div class="col avatar-user" id="avatar-user" onclick="location.href='{% url 'log' %}'">
                     <div class="user-round">
                         <img class="avatar" src="../static/res/Account-User.png">
                     </div>
@@ -59,19 +60,12 @@
                 </div>
               </div>
         </div>
+        {% for restaurant in restaurants %}
+            <div class="restaurant">
+                <img src="{{ restaurant.image }}" alt="{{ restaurant.name }} image" style="width: 400px; height: 300px">
+                <h2 onclick="location.href='{% url 'restaurant' url_rest=restaurant.url_adress %}'">{{ restaurant.name }}</h2>
+            </div>
+        {% endfor %}
     </div>
-    <script>
-        window.addEventListener("DOMContentLoaded", function() {
-            // Получаем элемент с классом avatar-user
-            const avatarUser = document.getElementById('avatar-user');
-            if (avatarUser) {
-                // Добавляем обработчик события для клика
-                avatarUser.addEventListener('click', function () {
-                    // Выполняем переход на страницу login
-                    window.location.href = '/login';  // Замените '/login' на ваш фактический путь к странице login
-                });
-            }
-        });
-    </script>
 </body>
 </html>

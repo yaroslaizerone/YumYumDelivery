@@ -175,3 +175,39 @@ a{
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.cart-container {
+    position: fixed;
+    top: 0;
+    right: -300px; /* начальная позиция справа за пределами экрана */
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+}
+
+.cart-header {
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-items {
+    padding: 10px;
+}
+
+.close-cart {
+    background-color: #fff;
+    color: #333;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}

@@ -117,14 +117,23 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-FIREBASE_CONFIG = {
-
-    "apiKey": "AIzaSyCMk-jWD8RgFoFQSvMfDrjP25qmPwiQK0Q",
-    "authDomain": "yumyumdelivery-12ebb.firebaseapp.com",
-    "projectId": "yumyumdelivery-12ebb",
-    "storageBucket": "yumyumdelivery-12ebb.appspot.com",
-    "messagingSenderId": "772726972796",
-    "appId": "1:772726972796:web:0eb1ae51194aee6b7204f9"
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        '__name__': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
 }
-
-FIREBASE_DATABASE_URL = "https://console.firebase.google.com/project/yumyumdelivery-12ebb"
