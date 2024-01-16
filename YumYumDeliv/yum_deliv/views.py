@@ -1,11 +1,10 @@
 import logging
 import os
 import json
-import urllib
+import datetime
 
 from django.http import JsonResponse
 from requests.exceptions import HTTPError
-from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -36,19 +35,20 @@ storage = firebase.storage()
 
 
 def signIn(request):
-    return render(request, "Login1.html")
+    return render(request, "Login.html")
 
 
 def home(request):
-    rests = (
-        database.collection("restaurant")
-        .stream()
-    )
+    rests = database.collection("restaurant").stream()
+    type_rests = database.collection("type_rest").stream()
+
+    types = [type_rest.to_dict() for type_rest in type_rests]
     restaurants = [res.to_dict() for res in rests]
     context = {
-        "restaurants": restaurants
+        "restaurants": restaurants,
+        "type_rests": types
     }
-    return render(request, "homepage.html", context)
+    return render(request, "Homepage.html", context)
 
 
 # TODO Добавить cookie при авторизации
@@ -58,9 +58,9 @@ def postsignIn(request):
     try:
         user = authe.sign_in_with_email_and_password(email, pasw)
         uid = user['localId']
-
+        print(uid)
         # Установка cookie с именем 'uid' и значением uid
-        response = HttpResponse(render(request, "homepage.html", {"email": email}))
+        response = HttpResponse(render(request, "Homepage.html", {"email": email}))
         response.set_cookie('uid', uid)
 
         # Поиск по роли по uid
@@ -93,7 +93,7 @@ def postsignIn(request):
             return HttpResponse("Some default response or redirect")
     except Exception as e:
         message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
-        return render(request, "Login1.html", {"message": message})
+        return render(request, "Login.html", {"message": message})
 
 
 # TODO Удалять при выходе
@@ -102,7 +102,7 @@ def logout(request):
         del request.session['uid']
     except:
         pass
-    return render(request, "Login1.html")
+    return render(request, "Login.html")
 
 
 def signUp(request):
@@ -134,7 +134,7 @@ def postsignUp(request):
             data = {"uid": uid, "role": 1}
             database.collection("authentication").add(data)  # Use add() to auto-generate document ID
             logger.info("User saved to database successfully")
-            return render(request, "Login1.html", {"message": "Registration successful."})
+            return render(request, "Login.html", {"message": "Registration successful."})
         except Exception as db_error:
             # Log the database error
             logger.error(f"Error saving user to database: {db_error}")
@@ -155,10 +155,10 @@ def postReset(request):
     try:
         authe.send_password_reset_email(email)
         message = "A email to reset password is successfully sent"
-        return render(request, "Login1.html", {"msg": message})
+        return render(request, "Login.html", {"msg": message})
     except:
         message = "Something went wrong, Please check the email you provided is registered or not"
-        return render(request, "Login1.html", {"msg": message})
+        return render(request, "Login.html", {"msg": message})
 
 
 def adminRest(request, rest_slug):
@@ -168,16 +168,53 @@ def adminRest(request, rest_slug):
 
 # Вспомогательный метод
 def rest_context(slug):
-    types = (
+    types_dishes = (
         database.collection("type_dishes")
         .stream()
     )
-    types_data = [type.to_dict() for type in types]
+    type_rests = (
+        database.collection("type_rest")
+        .stream()
+    )
+    types_data_dish = [type.to_dict() for type in types_dishes]
+    type_data_rests = [type.to_dict() for type in type_rests]
+    rest_current = (
+        database.collection("restaurant")
+        .where('url_adress', '==', slug)
+        .stream()
+    )
+    rest = [res.to_dict() for res in rest_current]
+    orders_retaraunt = (
+        database.collection("orders")
+        .where("restaurant", "==", rest[0]['id'])
+        .stream()
+    )
+    orders = [order.to_dict() for order in orders_retaraunt]
+    menu = (
+        database.collection("dishes")
+        .where("restaurant", "==", rest[0]['id'])
+        .stream()
+    )
+    dishes = [dish.to_dict() for dish in menu]
     context = {
-        "categories": types_data,
-        "rest_slug": slug
+        "categories_dish": types_data_dish,
+        "categories_rest": type_data_rests,
+        "rest_slug": slug,
+        "rest": rest,
+        'orders': orders,
+        'dishes': dishes
     }
     return context
+
+
+def check_file_exists(file_path):
+    try:
+        # Check if the file exists in Firebase Storage
+        storage.child(file_path).get_metadata()
+        return True
+    except Exception as e:
+        # The file does not exist or an error occurred
+        return False
 
 
 def add_dish(request, rest_slug):
@@ -194,6 +231,7 @@ def add_dish(request, rest_slug):
         proteins = request.POST.get('proteins')
         carbohydrates = request.POST.get('carbohydrates')
         fats = request.POST.get('fats')
+
         # Получение id ресторана
         restaurant_request = (
             database.collection("role")
@@ -201,25 +239,37 @@ def add_dish(request, rest_slug):
             .stream()
         )
         restaurant = [rest.to_dict()['id_rest'] for rest in restaurant_request]
+
         # Получение фото
         uploaded_files = request.FILES
-        photo = uploaded_files.get('photo')
+        photo = uploaded_files.get('photo_dish')
+
+        # Check if the file with the same name already exists in Firebase Storage
         if photo:
             dict_path = 'dishes_photo'
             file_name = os.path.join(dict_path, photo.name)
-            upload = storage.child(file_name).put(photo)
             file_url = dict_path + '%5C' + photo.name
-            photo_url = upload.get("downloadTokens")
-            download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
-        data = {"id": id, "name": name, "description": description,
-                "dish_type": dish_type, "weight": weight,
-                "cost": cost, "calories": calories,
-                "proteins": proteins, "carbohydrates": carbohydrates,
-                "fats": fats, "restaurant": restaurant[0], "photo": download_url}
-        database.collection("dishes").add(data)
+
+            if check_file_exists(file_url):
+                # Use the existing file URL instead of uploading a new one
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
+            else:
+                # Upload the file to Firebase Storage
+                upload = storage.child(file_name).put(photo)
+                photo_url = upload.get("downloadTokens")
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
+
+            data = {"id": id, "name": name, "description": description,
+                    "dish_type": dish_type, "weight": weight,
+                    "cost": cost, "calories": calories,
+                    "proteins": proteins, "carbohydrates": carbohydrates,
+                    "fats": fats, "restaurant": restaurant[0], "photo": download_url}
+
+            database.collection("dishes").add(data)
 
     context = rest_context(rest_slug)
-    return render(request, 'RestAdmin.html', context)
+    render(request, 'RestAdmin.html', context)
+    return redirect('adminRest', rest_slug=rest_slug)
 
 
 def restaurant(request, url_rest):
@@ -314,12 +364,13 @@ def payOfOrder(request):
             intercom = request.POST.get('intercom')
             floor = request.POST.get('floor')
             comment = request.POST.get('comments')
+            data_time = datetime.datetime.now()
 
         new_order = {'id': id, 'user': user, 'dishes': dishes,
-                     'restaurant': id_rest, 'order_status': 1,
+                     'restaurant': id_rest, 'order_status': "Заказ оформлен",
                      'summa': summa, 'courier': 1, "house": house,
                      "street": street, "entrance": entrance,
-                     "intercom": intercom,
+                     "intercom": intercom, "data_time": data_time,
                      "floor": floor, "comment": comment
                      }
         database.collection("orders").add(new_order)
@@ -327,7 +378,7 @@ def payOfOrder(request):
             'order': dishes,
         }
 
-    return render(request, 'PayOfOrder.html')
+    return render(request, 'PayOfOrder.html', context)
 
 
 def ordered_take(request):
@@ -360,11 +411,162 @@ def ordered_take(request):
 def republuc(request, rest_slug):
     if request.method == 'POST':
         name_rest = request.POST.get('name_rest')
-        type_rest = request.POST.get('type_rest')
+        type_rest = int(request.POST.get('type-rest'))
         representative = request.POST.get('representative')
-        photo = request.FILES.get('photo')
+        avg_time_cook = request.POST.get('avg_time_cook')
+        url = request.POST.get('url_adress')
+        start_time = request.POST.get('start-work')
+        end_time = request.POST.get('end-work')
+        adress = request.POST.get('adress_rest')
 
+        new_data_rest = {
+            'adress': adress,
+            'avg_time_cook': int(avg_time_cook),
+            'end_work': end_time,
+            'start_work': start_time,
+            'name': name_rest,
+            'representative': representative,
+            'type': type_rest,
+            'url_adress': url
+        }
 
+        # Получение фото
+        uploaded_files = request.FILES
+        photo = uploaded_files.get('photo_rest')
+
+        if photo:
+            dict_path = 'rest_photo'
+            file_name = os.path.join(dict_path, photo.name)
+            file_path = f"{dict_path}%5C{photo.name}"
+
+            # Check if the photo file already exists
+            if check_file_exists(file_path):
+                # File already exists, use its download URL
+                new_data_rest['image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}?alt=media"
+            else:
+                # File doesn't exist, upload it
+                upload = storage.child(file_name).put(photo)
+                photo_url = upload.get("downloadTokens")
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}?alt=media&token={photo_url}"
+                new_data_rest['image'] = download_url
+
+        # Получение id ресторана
+        restaurant_request = (
+            database.collection("restaurant")
+            .where("url_adress", "==", rest_slug)
+        )
+        docs = restaurant_request.stream()
+        for doc in docs:
+            doc_data = doc.to_dict()
+            if condition(doc_data, rest_slug):
+                document_id = doc.id
+                database.collection("restaurant").document(document_id).update(new_data_rest)
 
     context = rest_context(rest_slug)
     return render(request, 'RestAdmin.html', context)
+
+
+def condition(doc_data, slug):
+    return 'id' in doc_data and doc_data['url_adress'] == slug
+
+
+def delete_dish(request, rest, dish_id):
+    if request.method == 'POST':
+        dish_request = (
+            database.collection("dishes")
+            .where("id", "==", int(dish_id))
+        )
+        docs = dish_request.stream()
+        for doc in docs:
+            document_id = doc.id
+            db.collection("dishes").document(document_id).delete()
+        return redirect('adminRest', rest_slug=rest)
+
+
+def edit_dish(request, rest, dish_id):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        dish_type = int(request.POST.get('type-food'))
+        weight = request.POST.get('weight')
+        cost = request.POST.get('cost')
+        calories = request.POST.get('calories')
+        proteins = request.POST.get('proteins')
+        carbohydrates = request.POST.get('carbohydrates')
+        fats = request.POST.get('fats')
+
+        # Get file data (photo)
+        uploaded_files = request.FILES
+        photo = uploaded_files.get('photo_dish')
+
+        # Check if a photo has been uploaded
+        if photo:
+            dict_path = 'dishes_photo'
+            file_name = os.path.join(dict_path, photo.name)
+            file_url = dict_path + '%5C' + photo.name
+
+            # Check if the file already exists
+            if check_file_exists(file_url):
+                # Use the existing file URL instead of uploading a new one
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
+            else:
+                # Upload the file to Firebase Storage
+                upload = storage.child(file_name).put(photo)
+                photo_url = upload.get("downloadTokens")
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
+        else:
+            # No new photo uploaded, check if preview image exists
+            preview_image_id = f'image-preview-edit_{dish_id}'
+            if request.POST.get(preview_image_id):
+                # Use the existing photo URL
+                download_url = request.POST.get(preview_image_id)
+            else:
+                # No photo uploaded and no preview image, set to None
+                download_url = None
+
+        data = {
+            "name": name,
+            "description": description,
+            "dish_type": dish_type,
+            "weight": weight,
+            "cost": cost,
+            "calories": calories,
+            "proteins": proteins,
+            "carbohydrates": carbohydrates,
+            "fats": fats
+        }
+
+        # Include photo in data if download_url is not None
+        if download_url:
+            data["photo"] = download_url
+
+        # Update the dish data
+        dish_request = (
+            database.collection("dishes")
+            .where("id", "==", int(dish_id))
+        )
+        docs = dish_request.stream()
+        for doc in docs:
+            document_id = doc.id
+            database.collection("dishes").document(document_id).update(data)
+
+        return redirect('adminRest', rest_slug=rest)
+
+
+def change_status(request, rest, order_id):
+    if request.method == "POST":
+        status_value = request.POST.get('status')
+        data = {
+            'order_status': status_value
+        }
+        # Update the dish data
+        dish_request = (
+            database.collection("orders")
+            .where("id", "==", int(order_id))
+        )
+        docs = dish_request.stream()
+        for doc in docs:
+            document_id = doc.id
+            database.collection("orders").document(document_id).update(data)
+
+        return redirect('adminRest', rest_slug=rest)

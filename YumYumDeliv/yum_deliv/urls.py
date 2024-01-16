@@ -11,14 +11,19 @@ urlpatterns = [
     # Сброс пароля
     path('reset/', views.reset),
     path('postReset/', views.postReset),
-    # URLs администратора
+    # URLs администратора ресторана
     path('adminRest/<slug:rest_slug>', views.adminRest, name="adminRest"),
     path('add_dish/<slug:rest_slug>', views.add_dish, name="add_dish"),
     path('republuc/<slug:rest_slug>', views.republuc, name="republuc"),
+    path('delete_dish/<slug:rest>/<slug:dish_id>', views.delete_dish, name='delete_dish'),
+    path('edit/<slug:rest>/<slug:dish_id>', views.edit_dish, name='edit_dish'),
+    path('change_status/<slug:rest>/<slug:order_id>', views.change_status, name='change_status'),
     # URL ресторана
     path('restaurant/<slug:url_rest>', views.restaurant, name="restaurant"),
     # URL Оплаты
     path('place_order/', views.place_order, name='place_order'),
     path('cart/', views.ordered, name='ordered'),
-    path('payOfOrder/', views.payOfOrder, name='payOfOrder')
+    path('payOfOrder/', views.payOfOrder, name='payOfOrder'),
+    #URL пользователя
+    path('orders/<slug:uid>', views.logout, name="orders"),
 ]

@@ -1,0 +1,547 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YumYumDelivery</title>
+    <!-- jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <!-- Simple jQuery modal library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+    <!-- Bootstrap and other styles/scripts -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
+        crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Typedata address suggestions styles and script -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=f40eb2dc-380d-4826-8076-4c07290dc00b&lang=ru_RU" type="text/javascript"></script>
+    <style>
+        #address-dialog {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Small gap between input groups and buttons */
+            padding: 20px; /* Optional padding for better spacing */
+        }
+        .avatar{
+          width: 60px;
+          height: 60px;
+          max-height: 60px;
+          border-radius: 50%;
+        }
+
+        .row{
+            align-items: center;
+        }
+
+        .address-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Small gap between input elements within the group */
+        }
+
+        input[type="search"], input[type="text"] {
+            width: 100%;
+            padding: 8px; /* Adjust as needed */
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px; /* Adjust as needed */
+        }
+
+        #map {
+                width: 1000px;
+                height: 300px;
+                position: relative;
+                z-index: 0;
+            }
+        .user-round.dropdown .dropdown-toggle {
+            background-color: transparent; /* Прозрачный фон кнопки */
+            border: none; /* Убираем границу кнопки */
+            padding: 0; /* Убираем внутренний отступ кнопки */
+            box-shadow: none; /* Убираем тень кнопки */
+        }
+
+        .user-round.dropdown .dropdown-toggle:focus {
+            outline: none; /* Убираем рамку фокуса при клике */
+        }
+
+        .user-round.dropdown .dropdown-menu {
+            border-radius: 20px; /* Радиус закругления углов выпадающего меню */
+        }
+
+        .user-round.dropdown .dropdown-item {
+            border-radius: 20px; /* Радиус закругления углов элементов меню */
+        }
+
+        .user-round.dropdown .dropdown-divider {
+            margin: 0; /* Убираем отступ у разделителя */
+        }
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar-user{
+            max-width: 60px;
+        }
+
+        .menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 150px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu li {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+
+        .menu a:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/a3c8b6e52c.js" crossorigin="anonymous"></script>
+    <header class="header-main">
+        <nav class="navbar">
+            <div class="container">
+                <div class="row">
+                    <div class="col logo-compani">
+                        <a href="/" class="navbar-brand"><img src="../static/res/logo.png" /></a>
+                    </div>
+                    <div class="col search-back">
+                        <div class="text-field">
+                            <div class="text-field__icon text-field__icon_search">
+                                <input class="text-field__input" type="search" placeholder="Найти ресторан"
+                                    width="38px">
+                                <button type="button" class="btn btn-primary">Поиск</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="address-container">
+                            <div class="dropdown">
+                                <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
+                               <div class="menu" id="menu-adress">
+                                    <ul>
+                                        <li><p id="add-adress">Добавить адрес</p></li>
+                                    </ul>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col avatar-user">
+                        <div class="avatar-container">
+                            <img src="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666206241_12-mykaleidoscope-ru-p-kartinka-na-zastavku-oboi-12.jpg" alt="User Avatar" class="avatar" id="avatar">
+                            <div class="menu" id="menu">
+                                <ul>
+                                    <li><label class="dropdown-item">Мои данные</label></li>
+                                    <li><a class="dropdown-item" herf="{% url 'log' %}">Мои заказы</a></li>
+                                    <li><label class="dropdown-item">Мой адреса</label></li>
+                                    <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <h1 id="main-title">Все рестораны</h1>
+        <div class="div">
+            <a href="#" data-type="0">Все</a>
+            {% for type_res in type_rests %}
+                {% if forloop.counter <= 3 %}
+                    <a href="#" data-type="{{ type_res.id }}">{{ type_res.type }}</a>
+                {% else %}
+                    {% if forloop.counter == 4 %}
+                    <div class="dropdown">
+                        <button class="dropbtn">Ещё</button>
+                        <div class="dropdown-content">
+                            {% endif %}
+                            <a href="#" data-type="{{ type_res.id }}">{{ type_res.type }}</a>
+                            {% if forloop.last %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="restaurant-block">
+            {% for restaurant in restaurants %}
+            <div class="restaurant-item" data-type="{{ restaurant.type }}">
+                <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
+                <h2 onclick="location.href='{% url 'restaurant' url_rest=restaurant.url_adress %}'">{{ restaurant.name }}</h2>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="address-dialog">
+        <div class="address-input-group">
+            <input id="typedataSuggestions" class="adress-input" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес">
+            <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
+        </div>
+        <div class="address-input-group">
+            <input id="flat" type="number" placeholder="Квартира"/>
+            <input id="intercom" type="number" placeholder="Домофон"/>
+            <input id="entrance" type="number" placeholder="Подъезд"/>
+            <input id="floor" type="number" placeholder="Этаж"/>
+        </div>
+         <div id="map-dialog" style="display: none;">
+            <div id="map" style="height: 300px;"></div>
+        </div>
+        <button id="close-address-dialog">Закрыть</button>
+        <button id="save-address-dialog">Сохранить адрес</button>
+    </div>
+
+
+    <script>
+         $(document).ready(function () {
+                const newAddressInput = document.querySelector('.adress-input');
+
+                $('#add-adress').click(function () {
+                    const dialog = $("#address-dialog");
+                    dialog.show();
+
+                    if (!dialog.dialog('instance')) {
+                        dialog.dialog({
+                            autoOpen: false,
+                            width: 'auto',
+                            modal: true
+                        });
+                    }
+                    dialog.dialog('open');
+                });
+
+                $('#close-address-dialog').click(function () {
+                    $("#address-dialog").dialog('close');
+                });
+
+                function init() {
+                        myMap = new ymaps.Map("map", {
+                            center: [55.04, 82.91],
+                            zoom: 14
+                        });
+
+                        locationDot = createMarker(myMap.getCenter(), true);
+                        locationDot.events.add('dragend', function (event) {
+                            reverseGeocode();
+                        });
+
+                    }
+
+                function createMarker(coordinates, draggable) {
+                    if (!coordinates || coordinates.length < 2) {
+                        console.error('Invalid coordinates:', coordinates);
+                        return;
+                    }
+
+                    // Create a geometry object for the Placemark constructor
+                    var geometry = {
+                        type: 'Point',
+                        coordinates: coordinates
+                    };
+
+                    var marker = new ymaps.Placemark(geometry.coordinates, {}, {
+                        draggable: draggable
+                    });
+                    myMap.geoObjects.add(marker);
+
+                    // You may want to center the map to the new marker
+                    myMap.setCenter(geometry.coordinates);
+
+                    return marker;
+                }
+
+
+                function reverseGeocode() {
+                    var coordinates = locationDot.geometry.getCoordinates();
+
+                    if (!Array.isArray(coordinates) || coordinates.length < 2) {
+                        console.error('Invalid coordinates:', coordinates);
+                        return;
+                    }
+
+                    fetch('https://api.opencagedata.com/geocode/v1/json?q=' + coordinates[0] + ',' + coordinates[1] + '&key=67c24bfd1b1b4786a3e7a0538ca9b1b5&pretty=1')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.results && data.results.length > 0) {
+                                var components = data.results[0].components;
+
+                                // Получаем название улицы и номер дома
+                                var street = components.road || '';
+                                var houseNumber = components.house_number || '';
+                                // Обновляем адрес в блоке
+                                newAddressInput.value = street + ', ' + houseNumber;
+                            } else {
+                                // Если нет информации о адресе, очищаем блок
+                                console.error('Не удалось получить адрес по координатам.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при выполнении запроса к геокодеру:', error);
+                        });
+                }
+                ymaps.ready(init);
+            });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            $('#address-dialog').hide();
+            $('#map-dialog').hide();
+            const restaurantItems = document.querySelectorAll('.restaurant-item');
+            const typeLinks = document.querySelectorAll('.div a');
+            const searchInput = document.querySelector('.text-field__input');
+            const searchButton = document.querySelector('.btn.btn-primary');
+            const restaurantBlock = document.querySelector('.restaurant-block');
+            const noResultsMessage = document.createElement('h2');
+            noResultsMessage.textContent = 'Ресторан не найден';
+            noResultsMessage.style.display = 'none';
+            restaurantBlock.appendChild(noResultsMessage);
+            const h1Label = document.createElement('span');
+            const h1 = document.querySelector('#main-title');
+            h1.appendChild(h1Label);
+
+            typeLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const selectedType = this.dataset.type.toLowerCase();
+                    const searchQuery = searchInput.value.trim().toLowerCase();
+
+                    typeLinks.forEach(typeLink => {
+                        const typeLinkType = typeLink.dataset.type.toLowerCase();
+                        if (selectedType === '0' || typeLinkType === selectedType) {
+                            typeLink.classList.add('selected-type');
+                        } else {
+                            typeLink.classList.remove('selected-type');
+                        }
+                    });
+
+                    restaurantItems.forEach(item => {
+                        const restaurantName = item.querySelector('h2').textContent.trim().toLowerCase();
+                        const itemType = item.dataset.type.toLowerCase();
+
+                        if ((itemType === '0' || itemType === selectedType) &&
+                            (restaurantName.includes(searchQuery) || itemType === searchQuery)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    updateNoResultsMessage();
+                    updateH1Label(selectedType);
+                });
+            });
+
+            searchButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                const searchQuery = searchInput.value.trim().toLowerCase();
+                const selectedType = document.querySelector('.div a.selected-type').dataset.type.toLowerCase();
+
+                restaurantItems.forEach(item => {
+                    const restaurantName = item.querySelector('h2').textContent.trim().toLowerCase();
+                    const itemType = item.dataset.type.toLowerCase();
+
+                    if ((itemType === '0' || itemType === selectedType) &&
+                        (restaurantName.includes(searchQuery) || itemType === searchQuery)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                updateNoResultsMessage();
+            });
+
+            function updateNoResultsMessage() {
+                const visibleItems = Array.from(restaurantItems).filter(item => item.style.display !== 'none');
+                if (visibleItems.length === 0) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+
+            function updateH1Label(selectedType) {
+                if (selectedType === '0') {
+                    h1Label.textContent = '';
+                } else {
+                    let selectedLinkText = '';
+                    for (const link of typeLinks) {
+                        if (link.dataset.type.toLowerCase() === selectedType) {
+                            selectedLinkText = link.textContent.trim();
+                            break;
+                        }
+                    }
+                    h1Label.textContent = ` - ${selectedLinkText}`;
+                }
+            }
+
+        });
+        document.getElementById('avatar').addEventListener('click', function () {
+            var menu = document.getElementById('menu');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            var menu = document.getElementById('menu');
+            var avatar = document.getElementById('avatar');
+            if (event.target !== avatar && event.target !== menu) {
+                menu.style.display = 'none';
+            }
+        });
+        document.getElementById('savedAddressesBtn').addEventListener('click', function () {
+            toggleMenuDisplay('menu-adress');
+        });
+
+
+        document.addEventListener('click', function (event) {
+            if (event.target !== document.getElementById('savedAddressesBtn') && event.target !== document.getElementById('menu-adress')) {
+                hideMenu('menu-adress');
+            }
+        });
+
+        function toggleMenuDisplay(menuId) {
+            var menu = document.getElementById(menuId);
+            if (menu.style.display === 'block') {
+                hideMenu(menuId);
+            } else {
+                showMenu(menuId);
+            }
+        }
+
+        function showMenu(menuId) {
+            var menu = document.getElementById(menuId);
+            if (menu) {
+                menu.style.display = 'block';
+            }
+        }
+
+        function hideMenu(menuId) {
+            var menu = document.getElementById(menuId);
+            if (menu) {
+                menu.style.display = 'none';
+            }
+        }
+        document.getElementById('typedataSuggestions').addEventListener('input', function(event) {
+            const inputValue = event.target.value;
+            const commaIndex = inputValue.indexOf(',');
+
+            if (commaIndex === -1) {
+                const streetName = inputValue.split(' ')[0];
+                if (streetName) {
+                    const restOfAddress = inputValue.substring(streetName.length).trim();
+                    event.target.value = `${streetName}, ${restOfAddress}`;
+                }
+            }
+        });
+
+        document.getElementById('save-address-dialog').addEventListener('click', function() {
+            const streetAndNumber = document.getElementById('typedataSuggestions').value;
+            const flat = document.getElementById('flat').value;
+            const intercom = document.getElementById('intercom').value;
+            const entrance = document.getElementById('entrance').value;
+            const floor = document.getElementById('floor').value;
+
+            if (streetAndNumber && flat && intercom && entrance && floor) {
+                const fullAddress = `${streetAndNumber}, кв. ${flat}, домофон ${intercom}, подъезд ${entrance}, этаж ${floor}`;
+
+                document.cookie = `user-address=${encodeURIComponent(fullAddress)}; expires=Thu, 01 Jan 2030 00:00:00 UTC; path=/`;
+
+                const menuAdress = document.getElementById('menu-adress');
+                const newAddressItem = document.createElement('li');
+                const newAddressLabel = document.createElement('label');
+                newAddressLabel.textContent = streetAndNumber;
+                newAddressItem.appendChild(newAddressLabel);
+                menuAdress.querySelector('ul').appendChild(newAddressItem);
+
+                $("#address-dialog").dialog('close');
+            } else {
+                alert('Пожалуйста, заполните все поля перед сохранением адреса.');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedAddress = getCookie('user-address');
+            if (savedAddress) {
+                const menuAdress = document.getElementById('menu-adress');
+                const newAddressItem = document.createElement('li');
+                const newAddressLabel = document.createElement('label');
+                newAddressLabel.textContent = formatAddress(savedAddress); // Форматируем адрес
+                newAddressItem.appendChild(newAddressLabel);
+                menuAdress.querySelector('ul').appendChild(newAddressItem);
+                const savedAddressesBtn = document.getElementById('savedAddressesBtn');
+                savedAddressesBtn.textContent = formatAddress(savedAddress);
+            }
+        });
+
+        function getCookie(cookieName) {
+            const name = cookieName + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+            for (let i = 0; i < cookieArray.length; i++) {
+                let cookie = cookieArray[i].trim();
+                if (cookie.indexOf(name) === 0) {
+                    return cookie.substring(name.length, cookie.length);
+                }
+            }
+            return null;
+        }
+
+        function formatAddress(address) {
+                const firstCommaIndex = address.indexOf(',');
+                if (firstCommaIndex !== -1) {
+                    const secondCommaIndex = address.indexOf(',', firstCommaIndex + 1);
+                    if (secondCommaIndex !== -1) {
+                        return address.substring(0, secondCommaIndex).trim();
+                    }
+                }
+                return address.trim();
+            }
+
+            document.getElementById('menu-adress').addEventListener('click', function (event) {
+                const target = event.target;
+                if (target.tagName === 'LABEL' && !target.classList.contains('add-address')) {
+                    const selectedAddress = target.textContent;
+                    document.getElementById('savedAddressesBtn').textContent = selectedAddress;
+                }
+            });
+    </script>
+</body>
+</html>

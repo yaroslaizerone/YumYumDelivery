@@ -1,33 +1,99 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Include the necessary stylesheets -->
-    <link rel="stylesheet" href="https://snipp.ru/cdn/select2/4.0.13/dist/css/select2.min.css">
-    <!-- Include jQuery -->
-    <script src="https://snipp.ru/cdn/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://snipp.ru/cdn/select2/4.0.13/dist/js/select2.min.js"></script>
-    <script src="https://snipp.ru/cdn/select2/4.0.13/dist/js/i18n/ru.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
-        $(document).ready(function() {
+        function handleImageUploadEdit(dishId) {
+            const inputPhotoEdit = document.getElementById(`photo_dish-edit_${dishId}`);
+            const imagePreviewEdit = document.getElementById(`image-preview-edit_${dishId}`);
+            const imagePreviewContainerEdit = document.getElementById(`image-preview-container-edit_${dishId}`);
+
+            const file = inputPhotoEdit.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreviewEdit.src = e.target.result;
+                    imagePreviewEdit.style.display = 'block';
+                    imagePreviewContainerEdit.style.display = 'block';
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+    $(document).ready(function() {
             // Скрыть все формы при загрузке страницы
             $('form').hide();
+            $('#menu-form').hide();
+            {% for dish in dishes %}
+                $('#menu-dialog-edit_{{ dish.id }}').hide();
+            {% endfor %}
+            {% for order in orders %}
+                $('#status-dialog_{{ order.id }}').hide();
+            {% endfor %}
+
 
             // Обработчик для "Блюда ресторана"
             $('#menu-link').click(function() {
                 $('form').hide();
+                $('form[id^="delete_dish_"]').show();
                 $('#menu-form').show();
+                $('#add-form').show();
             });
 
             // Обработчик для "Информация ресторана"
             $('#info-link').click(function() {
                 $('form').hide();
+                $('#menu-form').hide();
                 $('#info-form').show();
             });
+
+            // Обработчик для "Заказов ресторана"
+            $('#orders-link').click(function() {
+                $('form').hide();
+                $('#menu-form').hide();
+                $('#orders-form').show();
+            });
+
 
             $('.js-select2').select2({
                 placeholder: "Выберите тип блюда",
                 maximumSelectionLength: 2,
                 language: "ru"
+            });
+
+            // Открытие диалога добавления блюда
+            $("#menu-dialog").dialog({
+                autoOpen: false,
+                width: 400,
+                modal: true
+            });
+
+            // Открытие диалога на кнопку
+            $('#open-menu-dialog-btn').click(function() {
+                $('form').hide();
+                $('#menu-form').show();
+                $('#add-form').show();
+
+                $("#menu-dialog").dialog("open");
+
+                // Инициализация Select2 для элемента с id 'type-food'
+                $('#type-food').select2({
+                    placeholder: "Выберите тип блюда",
+                    maximumSelectionLength: 2,
+                    language: "ru"
+                });
+            });
+
+            // Закрытие диалога на кнопку
+            $('#close-dialog').click(function() {
+                $("#menu-dialog").dialog("close");
             });
         });
     </script>
@@ -40,121 +106,224 @@
 <div class="admin-panel">
     <h1 id="menu-link">Блюда ресторана</h1>
     <h1 id="info-link">Информация ресторана</h1>
-    <h1>Заказы</h1>
+    <h1 id="orders-link">Заказы</h1>
     <h1>Статистика</h1>
 </div>
 
-<form id="menu-form" action="/add_dish/{{rest_slug}}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br>
+<div id="menu-form" enctype="multipart/form-data">
+    <ul id="dishes-list">
+    {% for dish in dishes %}
+        <li>
+            <img src="{{ dish.photo }}" alt="{{ dish.name }}" style="width: 400px;  height: 300px">
+            <div class="dish-info">
+                <div>
+                    <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽
+                </div>
+                <div>
+                    <form id="delete_dish_{{ dish.id }}" method="post" action="/delete_dish/{{ rest_slug }}/{{ dish.id }}">
+                        {% csrf_token %}
+                        <button type="submit">Удалить</button>
+                    </form>
+                    <button id="open-menu-dialog-btn-edit_{{ dish.id }}">Редактировать</button>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+    <button id="open-menu-dialog-btn">Добавить блюдо</button>
+    <div id="menu-dialog">
+        <form id="add-form" action="/add_dish/{{rest_slug}}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br>
 
-    <label for="description">Description:</label>
-    <textarea id="description" name="description" required></textarea><br>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea><br>
 
-    <!-- Replace the existing <select> with Select2 -->
-    <label for="type-food">Type of dishes:</label>
-    <select class="js-select2" id="type-food" name="type-food" placeholder="Выберите тип блюда" style="width: 150px">
-        {% for category in categories %}
-            <option value="{{category.id}}">{{category.type}}</option>
+            <label for="type-food">Type of dishes:</label>
+            <select class="js-select2" id="type-food" name="type-food" placeholder="Выберите тип блюда" style="width: 150px">
+                {% for category in categories_dish %}
+                    <option value="{{category.id}}">{{category.type}}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="weight">Weight (grams):</label>
+            <input type="number" id="weight" name="weight" required><br>
+
+            <label for="cost">Cost:</label>
+            <input type="number" id="cost" name="cost" required><br>
+
+            <label for="photo_dish">Photo:</label>
+            <input type="file" id="photo_dish" name="photo_dish" accept="image/*" onchange="handleImageUpload()"><br>
+
+            <div id="image-preview-container">
+                <img id="image-preview" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+            </div>
+
+            <label for="calories">Calories:</label>
+            <input type="number" id="calories" name="calories" required><br>
+
+            <label for="proteins">Proteins:</label>
+            <input type="number" id="proteins" name="proteins" required><br>
+
+            <label for="carbohydrates">Carbohydrates:</label>
+            <input type="number" id="carbohydrates" name="carbohydrates" required><br>
+
+            <label for="fats">Fats:</label>
+            <input type="number" id="fats" name="fats" required><br>
+
+            <button type="submit">Add Dish</button>
+        </form>
+        <button id="close-dialog">Close</button>
+    </div>
+    {% for dish in dishes %}
+        <div id="menu-dialog-edit_{{ dish.id }}">
+            <form id="edit-form_{{ dish.id }}" action="/edit/{{ rest_slug }}/{{ dish.id }}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="name">Name:</label>
+                <input type="text" id="name-edit_{{ dish.id }}" name="name" value="{{ dish.name }}" required><br>
+
+                <label for="description">Description:</label>
+                <textarea id="description-edit_{{ dish.id }}" name="description" required>{{ dish.description }}</textarea><br>
+
+                <label for="type-food">Type of dishes:</label>
+                <select class="js-select2" id="type-food-edit_{{ dish.id }}" name="type-food" placeholder="Выберите тип блюда" style="width: 150px">
+                    {% for category in categories_dish %}
+                        <option value="{{category.id}}" {% if category.id == dish.dish_type %}selected{% endif %}>
+                            {{category.type}}
+                        </option>
+                    {% endfor %}
+                </select><br>
+
+                <label for="weight">Weight (grams):</label>
+                <input type="number" id="weight-edit_{{ dish.id }}" name="weight" value="{{ dish.weight }}" required><br>
+
+                <label for="cost">Cost:</label>
+                <input type="number" id="cost-edit_{{ dish.id }}" name="cost" value="{{ dish.cost }}" required><br>
+
+                <label for="photo_dish">Photo:</label>
+                <input type="file" id="photo_dish-edit_{{ dish.id }}" name="photo_dish" accept="image/*" onchange="handleImageUploadEdit('{{ dish.id }}')"><br>
+
+                <div id="image-preview-container-edit">
+                    <img id="image-preview-edit_{{ dish.id }}" src="{{ dish.photo }}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+                </div>
+
+                <label for="calories">Calories:</label>
+                <input type="number" id="calories-edit_{{ dish.id }}" name="calories" value="{{ dish.calories }}" required><br>
+
+                <label for="proteins">Proteins:</label>
+                <input type="number" id="proteins-edit_{{ dish.id }}" name="proteins" value="{{ dish.proteins }}" required><br>
+
+                <label for="carbohydrates">Carbohydrates:</label>
+                <input type="number" id="carbohydrates-edit_{{ dish.id }}" name="carbohydrates" value="{{ dish.carbohydrates }}" required><br>
+
+                <label for="fats">Fats:</label>
+                <input type="number" id="fats-edit_{{ dish.id }}" name="fats" value="{{ dish.fats }}" required><br>
+                    <button type="submit">Edit Dish</button>
+                </form>
+                <button id="close-dialog-edit_{{ dish.id }}">Close</button>
+        </div>
         {% endfor %}
-        <!-- Add other options as needed -->
-    </select><br>
-
-    <label for="weight">Weight (grams):</label>
-    <input type="number" id="weight" name="weight" required><br>
-
-    <label for="cost">Cost:</label>
-    <input type="number" id="cost" name="cost" required><br>
-
-    <label for="picture">Photo:</label>
-    <input type="file" id="picture" name="photo" accept="image/*" onchange="handleImageUpload()"><br>
-
-    <!-- Добавляем элемент для предварительного просмотра изображения -->
-    <div id="image-preview-container">
-        <img id="image-preview" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
     </div>
 
-    <label for="calories">Calories:</label>
-    <input type="number" id="calories" name="calories" required><br>
-
-    <label for="proteins">Proteins:</label>
-    <input type="number" id="proteins" name="proteins" required><br>
-
-    <label for="carbohydrates">Carbohydrates:</label>
-    <input type="number" id="carbohydrates" name="carbohydrates" required><br>
-
-    <label for="fats">Fats:</label>
-    <input type="number" id="fats" name="fats" required><br>
-
-    <button type="submit">Add Dish</button>
-</form>
-
-<form id="info-form" method="post" enctype="multipart/form-data">
+<form id="info-form" action="/republuc/{{rest_slug}}" method="post" enctype="multipart/form-data">
     <div class="container mt-5">
         <h2>Редактирование информации ресторана</h2>
         {% csrf_token %}
         <div class="mb-3">
             <label for="name_rest" class="form-label">Название ресторана:</label>
-            <input type="text" class="form-control" id="name_rest" name="name_rest" required>
+            <input type="text" class="form-control" id="name_rest" name="name_rest" value="{{ rest.0.name }}" required>
         </div>
         <div class="mb-3">
-            <label for="type_rest" class="form-label">Тип ресторана:</label>
-            <input type="text" class="form-control" id="type_rest" name="type_rest" required>
+            <label for="adress_rest" class="form-label">Адресс ресторана:</label>
+            <input type="text" class="form-control" id="adress_rest" name="adress_rest" value="{{ rest.0.adress }}" required>
         </div>
+        <label for="type-rest">Тип ресторана:</label>
+        <select class="js-select2" id="type-rest" name="type-rest" placeholder="Выберите тип ретсорана" style="width: 150px">
+            {% for category in categories_rest %}
+                <option value="{{category.id}}" {% if category.id == rest.0.type %}selected{% endif %}>
+                    {{category.type}}
+                </option>
+            {% endfor %}
+        </select><br>
         <div class="mb-3">
             <label for="representative" class="form-label">Владелец:</label>
-            <input type="text" class="form-control" id="representative" name="representative" required>
+            <input type="text" class="form-control" id="representative" name="representative" value="{{ rest.0.representative }}" required>
         </div>
         <div class="mb-3">
             <label for="url_adress" class="form-label">Адрес URL:</label>
-            <input type="text" class="form-control" id="url_adress" name="url_adress" required>
+            <input type="text" class="form-control" id="url_adress" name="url_adress" value="{{ rest.0.url_adress }}" required>
         </div>
         <div class="mb-3">
             <label for="avg_time_cook" class="form-label">Cреднее время приготовления (в минутах):</label>
-            <input type="time" class="form-control" id="avg_time_cook" name="avg_time_cook" required>
+            <input type="number" class="form-control" id="avg_time_cook" name="avg_time_cook" value="{{ rest.0.avg_time_cook }}" required>
         </div>
         <div class="mb-3">
-            <label for="end_work" class="form-label">Время окончания рабоечего времени(в формате XX:XX):</label>
-            <input type="time" class="form-control" id="end_work" name="end_work" required>
+            <label for="start-work" class="form-label">Время начала рабоечего времени(в формате XX:XX):</label>
+            <input type="time" class="form-control" id="start-work" name="start-work" value="{{ rest.0.start_work}}" required>
         </div>
-        <!-- Добавьте остальные поля для изменения данных по аналогии -->
         <div class="mb-3">
-            <label for="photo">Photo:</label>
-            <input type="file" id="photo" name="photo" accept="image/*"><br>
+            <label for="end-work" class="form-label">Время окончания рабоечего времени(в формате XX:XX):</label>
+            <input type="time" class="form-control" id="end-work" name="end-work" value="{{ rest.0.end_work }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="photo_rest">Photo:</label>
+            <input type="file" id="photo_rest" name="photo_rest" accept="image/*" onchange="handleImageUploadRest()"><br>
+
+            <div id="image-preview-container-rest">
+                <img id="image-preview-rest" src="{{ rest.0.image }}" alt="Preview" style="max-width: 300px; max-height: 300px; display: block;">
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить изменения</button>
     </div>
 </form>
-
-<form id="orders" method="post" enctype="multipart/form-data">
+<div id="orders-block">
     <div class="container mt-5">
         <h2>Заказы ресторана</h2>
-        {% csrf_token %}
         {% for order in orders %}
-        <div class="order">
-            <p><strong>ID заказа:</strong> {{ order.id }}</p>
-            <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
-            <p><strong>Блюда:</strong>
-                {% for dish_id in order.dishes %}
-                    {{ dish_id }},
-                {% endfor %}
-            </p>
-            <p><strong>Сумма заказа:</strong> {{ order.summa }}</p>
-            <p><strong>Курьер:</strong> <a href="{{ order.courier }}">{{ order.courier }}</a></p>
-            <p><strong>Ресторан:</strong> <a href="{{ order.restaurant }}">{{ order.restaurant }}</a></p>
-        </div>
+            <div class="order">
+                <p><strong>ID заказа:</strong> {{ order.id }}</p>
+                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
+                <p><strong>Блюда:</strong>
+                    {% for dish in order.dishes %}
+                        <img src="{{ dish.photo }}" alt="{{ dish.name }}" style="height: 200px; width: 300px;">
+                        <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
+                    {% endfor %}
+                </p>
+                <p><strong>Сумма заказа:</strong> {{ order.summa }} ₽</p>
+                <p><strong>Курьер:</strong> <a href="{{ order.courier }}">{{ order.courier }}</a></p>
+                <button id="status_{{ order.id }}" type="button">Изменить статус заказа</button>
+            </div>
+            <div id="status-dialog_{{ order.id }}">
+                <form id="status-form_{{ order.id }}" method="post" action="/change_status/{{ rest_slug }}/{{ order.id }}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="status-dish_{{ order.id }}">Статус заказа:</label>
+                    <select class="js-select2" id="status-dish_{{ order.id }}" name="status" style="width: 150px" required>
+                        <option value="Заказ оформлен" selected>Заказ оформлен</option>
+                        <option value="Сборка">Сборка</option>
+                        <option value="Передан курьеру">Передан курьеру</option>
+                    </select><br>
+                </form>
+            </div>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
     </div>
-</form>
+</div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const inputPhoto = document.getElementById('picture');
+    document.addEventListener('DOMContentLoaded', function () {
+        const openMenuDialogBtn = document.getElementById('open-menu-dialog-btn');
+        const closeDialogBtn = document.getElementById('close-dialog');
+
+        const inputPhoto = document.getElementById('photo_dish');
         const imagePreview = document.getElementById('image-preview');
         const imagePreviewContainer = document.getElementById('image-preview-container');
 
         inputPhoto.addEventListener('change', handleImageUpload);
+
+        const inputPhotoRest = document.getElementById('photo_rest');
+        const imagePreviewRest = document.getElementById('image-preview-rest');
+        const imagePreviewContainerRest = document.getElementById('image-preview-container-rest');
+
+        inputPhotoRest.addEventListener('change', handleImageUploadRest);
 
         function handleImageUpload() {
             const file = inputPhoto.files[0];
@@ -162,7 +331,7 @@
             if (file) {
                 const reader = new FileReader();
 
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
                     imagePreviewContainer.style.display = 'block';
@@ -171,6 +340,151 @@
                 reader.readAsDataURL(file);
             }
         }
+
+
+
+        function handleImageUploadRest() {
+            const file = inputPhotoRest.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreviewRest.src = e.target.result;
+                    imagePreviewRest.style.display = 'block';
+                    imagePreviewContainerRest.style.display = 'block';
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        openMenuDialogBtn.addEventListener('click', function () {
+            const dialog = $("#menu-dialog");
+            if (dialog.dialog('instance') === undefined) {
+                // Initialize the dialog if not already initialized
+                dialog.dialog({
+                    autoOpen: false,
+                    width: 400,
+                    modal: true
+                });
+            }
+
+            // Open the dialog
+            dialog.dialog('open');
+
+            // Initialize Select2 for the element with id 'type-food'
+            $('#type-food').select2({
+                placeholder: "Выберите тип блюда",
+                maximumSelectionLength: 2,
+                language: "ru",
+                tags: true,
+                dropdownParent: $("#menu-dialog")
+            });
+        });
+
+        closeDialogBtn.addEventListener('click', function () {
+            const dialog = $("#menu-dialog");
+            if (dialog.dialog('instance') !== undefined) {
+                // Close the dialog if initialized
+                dialog.dialog('close');
+            }
+        });
+
+        // Открытие диалога добавления блюда
+        $("#menu-dialog").dialog({
+            autoOpen: false,
+            width: 400,
+            modal: true
+        });
+
+        // Открытие диалога редактирования блюда
+        {% for dish in dishes %}
+            $('#open-menu-dialog-btn-edit_{{ dish.id }}').click(function () {
+                const editDialog = $("#menu-dialog-edit_{{ dish.id }}");
+                if (editDialog.dialog('instance') === undefined) {
+                    // Initialize the edit dialog if not already initialized
+                    editDialog.dialog({
+                        autoOpen: false,
+                        width: 400,
+                        modal: true
+                    });
+                }
+                $('form').hide();
+                $('#menu-form').hide();
+                $('#edit-form_{{ dish.id }}').show();
+
+                // Open the edit dialog
+                editDialog.dialog('open');
+
+                // Initialize Select2 for the element with id 'type-food-edit_{{ dish.id }}'
+                $('#type-food-edit_{{ dish.id }}').select2({
+                    placeholder: "Выберите тип блюда",
+                    maximumSelectionLength: 2,
+                    language: "ru",
+                    tags: true,
+                    dropdownParent: $("#menu-dialog-edit_{{ dish.id }}")
+                });
+
+                // Load the existing image preview in the edit dialog
+                const existingImage = $('#image-preview-edit_{{ dish.id }}').attr('src');
+                if (existingImage) {
+                    $('#image-preview-edit_{{ dish.id }}').css('display', 'block');
+                    $('#image-preview-container-edit_{{ dish.id }}').css('display', 'block');
+                }
+            });
+
+            // Close edit dialogs
+            $('#close-dialog-edit_{{ dish.id }}').click(function () {
+                $("#menu-dialog-edit_{{ dish.id }}").dialog("close");
+            });
+        {% endfor %}
+
+        {% for order in orders %}
+            $('#status_{{ order.id }}').click(function () {
+                const statusDialog = $("#status-dialog_{{ order.id }}");
+                const submitForm = $("#status-form_{{ order.id }}");
+
+                if (statusDialog.dialog('instance') === undefined) {
+                    // Initialize the status dialog if not already initialized
+                    statusDialog.dialog({
+                        autoOpen: false,
+                        width: 400,
+                        modal: true,
+                        buttons: {
+                            'Submit': function() {
+                                submitForm.submit();  // Submit the form when the dialog's Submit button is clicked
+                                $(this).dialog('close');
+                            },
+                            'Cancel': function() {
+                                $(this).dialog('close');
+                            }
+                        }
+                    });
+                }
+
+                $('form').hide();
+                $('#menu-form').hide();
+                $('#status-form_{{ order.id }}').show();
+
+                // Open the status dialog
+                statusDialog.dialog('open');
+
+                // Initialize Select2 for the element with id 'status-dish'
+                $('#status-dish_{{ order.id }}').select2({
+                    placeholder: "Выберите статус заказа",
+                    language: "ru",
+                    tags: true,
+                    dropdownParent: $("#status-dialog_{{ order.id }}")
+                });
+            });
+
+            // Close status dialogs
+            $('#close-dialog-status_{{ order.id }}').click(function () {
+                $("#status-dialog_{{ order.id }}").dialog("close");
+            });
+        {% endfor %}
+
     });
 </script>
 </body>

@@ -1,18 +1,44 @@
-nav.navbar {
+body {
+  margin: 0;
   padding: 0;
 }
-a{
-  text-decoration: none;
-  color: #000000;
+
+.navbar {
+  background-color: #38A9CC;
+  padding: 10px 0;
 }
-.row{
+
+.navbar-brand img {
+  max-height: 100px;
+  width: auto;
+}
+
+.navbar-search {
   display: flex;
-  justify-content: center;
   align-items: center;
 }
-.header{
-    background-color: #38A9CC;
-    min-width: 1920px;
+
+.text-field__input {
+  margin-right: 10px;
+}
+
+.address-input {
+  display: flex;
+  align-items: center;
+}
+
+.address-input input {
+  margin-right: 10px;
+}
+
+.avatar-user {
+  cursor: pointer;
+}
+
+
+a {
+  text-decoration: none;
+  color: #000000;
 }
 .form-control{
     size: auto;
@@ -80,7 +106,7 @@ a{
 
 .search-back .text-field__input {
   height: 54px;
-  width: 400px;
+  width: 395px;
   padding-left: 2rem;
 }
 
@@ -113,23 +139,39 @@ a{
   border-radius: 5px;
   cursor: pointer;
 }
-.user-round{
-  background-color: #f2f2f2;
-  border-radius: 50px;
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.user-round.dropdown .dropdown-toggle {
+    background-color: transparent; /* Прозрачный фон кнопки */
+    border: none; /* Убираем границу кнопки */
+    padding: 0; /* Убираем внутренний отступ кнопки */
+    box-shadow: none; /* Убираем тень кнопки */
 }
-.avatar{
-  width: 48px;
-  height: 48px;
+
+.user-round.dropdown .dropdown-toggle:focus {
+    outline: none; /* Убираем рамку фокуса при клике */
+}
+
+.user-round.dropdown .dropdown-menu {
+    border-radius: 20px; /* Радиус закругления углов выпадающего меню */
+}
+
+.user-round.dropdown .dropdown-item {
+    border-radius: 20px; /* Радиус закругления углов элементов меню */
+}
+
+.user-round.dropdown .dropdown-divider {
+    margin: 0;
 }
 
 .avatar-user {
-  margin-left: 370px;
+    margin-left: 10px;
+    margin-right: auto;
 }
+
+.col {
+    display: flex;
+    align-items: center;
+}
+
 .dropbtn {
   background-color: #4CAF50;
   color: white;
@@ -210,4 +252,30 @@ body {
     border: none;
     padding: 5px 10px;
     cursor: pointer;
+}
+.dialog{
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  border: solid;
+  padding: 1em;
+  background: white;
+  color: black;
+}
+.restaurant-block {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.restaurant-item {
+    text-align: center;
+}
+
+.photo-rest {
+    width: 400px;
+    height: 300px;
+    border-radius: 10px;
 }
