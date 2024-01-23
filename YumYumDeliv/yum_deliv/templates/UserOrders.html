@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Orders</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .order-list {
+            cursor: pointer;
+        }
+
+        .img-thumbnail {
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Список заказов</h2>
+            <ul class="list-group">
+                {% for order in orders %}
+                    <li class="list-group-item order-list" data-order-id="{{ order.id }}">
+                        <div>Заказ #{{ order.id }}</div>
+                        <div>Время заказа {{ order.data_time }}</div>
+                        <div>{{ order.order_status }}</div>
+                        <div>Сумма заказа {{ order.summa }} ₽</div>
+                        <div></div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <h2>Информация о заказе</h2>
+            <div id="order-details">
+                {% for order in orders %}
+                    <div id="od-{{ order.id }}" hidden class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Информация о заказе #{{ order.id }}</h5>
+                            <p class="card-text"><strong>Comment:</strong> {{ order.comment }}</p>
+                            <p class="card-text"><strong>Courier:</strong> {{ order.courier }}</p>
+                            <p class="card-text"><strong>Data Time:</strong> {{ order.data_time }}</p>
+                            <p class="card-text"><strong>Address:</strong> {{ order.street }}, {{ order.house }},
+                                Подъезд: {{ order.entrance }}, Этаж: {{ order.floor }}, Квартира: {{ order.house }}
+                            </p>
+                            <!-- Добавьте остальные поля заказа -->
+                            <h5 class="card-title mt-3">Состав заказа</h5>
+                            <div class="card">
+                                <ul class="list-group list-group-flush">
+                                    {% for dish in order.dishes %}
+                                        <li class="list-group-item">
+                                            <img src="{{ dish.photo }}" alt="{{ dish.name }}" class="img-thumbnail">
+                                            <strong>{{ dish.name }}</strong>
+                                            <p>Количество: {{ dish.quantity }}</p>
+                                            <p>Цена: {{ dish.cost }} ₽</p>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
+                                    data-target="#supportModal">
+                                Обратиться в поддержку
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for support -->
+<div class="modal" tabindex="-1" role="dialog" id="supportModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Обращение в поддержку</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Форма для обращения в поддержку -->
+                <form>
+                    <div class="form-group">
+                        <label for="email">Email для связи:</label>
+                        <input type="email" class="form-control" id="email" placeholder="Введите ваш email">
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">Причина обращения:</label>
+                        <input type="text" class="form-control" id="reason" placeholder="Укажите причину обращения">
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">Комментарий:</label>
+                        <textarea class="form-control" id="comment" rows="3"
+                                  placeholder="Оставьте комментарий к обращению"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="attachment">Прикрепить фото:</label>
+                        <input type="file" class="form-control-file" id="attachment">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var orderListItems = document.querySelectorAll('.order-list');
+        var orderDetailsContainer = document.getElementById('order-details');
+
+        orderListItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                var orderId = item.getAttribute('data-order-id');
+
+                // Скрываем все блоки с информацией о заказах
+                var orderDetailBlocks = document.querySelectorAll('[id^="od-"]');
+                orderDetailBlocks.forEach(function (block) {
+                    block.hidden = true;
+                });
+
+                // Показываем информацию только о выбранном заказе
+                var selectedOrderDetailBlock = document.getElementById('od-' + orderId);
+                if (selectedOrderDetailBlock) {
+                    selectedOrderDetailBlock.hidden = false;
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
