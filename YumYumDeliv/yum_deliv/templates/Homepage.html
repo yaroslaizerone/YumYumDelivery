@@ -23,11 +23,33 @@
     <!-- Typedata address suggestions styles and script -->
     <script src="https://api-maps.yandex.ru/2.1/?apikey=f40eb2dc-380d-4826-8076-4c07290dc00b&lang=ru_RU" type="text/javascript"></script>
     <style>
-        #address-dialog {
+
+        @media only screen and (max-width: 1900px) {
+            .logo {
+                content: url('../static/res/logo-mini.png');
+                background-size: contain;
+                width: 60px;
+                height: 60px;
+            }
+        }
+        #address-dialog{
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Small gap between input groups and buttons */
-            padding: 20px; /* Optional padding for better spacing */
+            gap: 10px;
+            padding: 20px;
+        }
+
+        #user-data-dialog {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px; /* Задайте максимальную ширину вашего диалогового окна */
+            margin: auto; /* Центрирование диалогового окна по горизонтали */
         }
         .avatar{
           width: 60px;
@@ -35,7 +57,10 @@
           max-height: 60px;
           border-radius: 50%;
         }
-
+        .col .address-container{
+            align-items: center;
+            display: inline-block;
+        }
         .row{
             align-items: center;
         }
@@ -124,6 +149,50 @@
         .menu a:hover {
             background-color: #f0f0f0;
         }
+
+        .user-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #user-data-form {
+            width: 100%;
+        }
+
+        #user-data-form input,
+        #user-data-form button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #user-data-form input[type="file"] {
+            border: none;
+        }
+
+        #image-preview-container {
+            margin-bottom: 10px;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #close-data-dialog,
+        #save-data-dialog {
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+        }
+
+        #close-data-dialog:hover,
+        #save-data-dialog:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
@@ -137,7 +206,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col logo-compani">
-                        <a href="/" class="navbar-brand"><img src="../static/res/logo.png" /></a>
+                        <a href="/" class="navbar-brand"><img class="logo" src="../static/res/logo.png" /></a>
                     </div>
                     <div class="col search-back">
                         <div class="text-field">
@@ -148,8 +217,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="address-container">
+                        <div class="col address-container" style="max-width: 250px">
                             <div class="dropdown">
                                 <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
                                <div class="menu" id="menu-adress">
@@ -159,15 +227,21 @@
                                </div>
                             </div>
                         </div>
-                    </div>
                     <div class="col avatar-user">
                         <div class="avatar-container">
-                            <img src="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666206241_12-mykaleidoscope-ru-p-kartinka-na-zastavku-oboi-12.jpg" alt="User Avatar" class="avatar" id="avatar">
+                            {% for us in user %}
+                                {% if us.image %}
+                                        <img src="{{ us.image }}" alt="User Avatar" class="avatar" id="avatar-custom">
+                                    {% else %}
+                                        <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
+                                             alt="Default Avatar" class="avatar" id="avatar">
+                                    {% endif %}
+                                {% endfor %}
                             <div class="menu" id="menu">
                                 <ul>
-                                    <li><label class="dropdown-item">Мои данные</label></li>
-                                    <li><a class="dropdown-item" herf="{% url 'log' %}">Мои заказы</a></li>
-                                    <li><label class="dropdown-item">Мой адреса</label></li>
+                                    <li><label class="dropdown-item" id="my-data-btn">Мои данные</label></li>
+                                    <li><a class="dropdown-item" href="/orders/{{ user.0.uid }}">Мои заказы</a></li>
+                                    <li><label class="dropdown-item" id="my-adress-btn">Мой адреса</label></li>
                                     <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
                                 </ul>
                             </div>
@@ -202,7 +276,7 @@
             {% for restaurant in restaurants %}
             <div class="restaurant-item" data-type="{{ restaurant.type }}">
                 <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
-                <h2 onclick="location.href='{% url 'restaurant' url_rest=restaurant.url_adress %}'">{{ restaurant.name }}</h2>
+                <h2 onclick="location.href='/restaurant/{{ restaurant.url_adress }}'">{{ restaurant.name }}</h2>
             </div>
             {% endfor %}
         </div>
@@ -225,6 +299,24 @@
         <button id="save-address-dialog">Сохранить адрес</button>
     </div>
 
+    <div id="user-data-dialog">
+        <div class="user-input-group">
+            {% for us in user %}
+            <form id="user-data-form" action="update_user_data/{{us.uid}}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                    <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
+                    <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
+                    <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)" value="{{us.middle_name}}"><br>
+                    <input type="file" id="photo_client" name="photo_client" accept="image/*" onchange="handleImageUpload()"><br>
+                    <div id="image-preview-container">
+                        <img id="image-preview" src="{{us.image}}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+                    </div>
+                    <button id="close-data-dialog" type="button">Закрыть</button>
+                    <button id="save-data-dialog" type="submit">Сохранить данные</button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
 
     <script>
          $(document).ready(function () {
@@ -267,7 +359,6 @@
                         return;
                     }
 
-                    // Create a geometry object for the Placemark constructor
                     var geometry = {
                         type: 'Point',
                         coordinates: coordinates
@@ -278,7 +369,6 @@
                     });
                     myMap.geoObjects.add(marker);
 
-                    // You may want to center the map to the new marker
                     myMap.setCenter(geometry.coordinates);
 
                     return marker;
@@ -320,6 +410,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             $('#address-dialog').hide();
             $('#map-dialog').hide();
+            $('#user-data-dialog').hide();
             const restaurantItems = document.querySelectorAll('.restaurant-item');
             const typeLinks = document.querySelectorAll('.div a');
             const searchInput = document.querySelector('.text-field__input');
@@ -332,6 +423,25 @@
             const h1Label = document.createElement('span');
             const h1 = document.querySelector('#main-title');
             h1.appendChild(h1Label);
+
+            function getCookie(cookieName) {
+                const name = cookieName + "=";
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const cookieArray = decodedCookie.split(';');
+                for (let i = 0; i < cookieArray.length; i++) {
+                    let cookie = cookieArray[i].trim();
+                    if (cookie.indexOf(name) === 0) {
+                        return cookie.substring(name.length, cookie.length);
+                    }
+                }
+                return null;
+            }
+
+            const uid = getCookie('uid');
+            if (uid) {
+                document.getElementById('user-data-form').action = `/update_user_data/${uid}`;
+            }
+
 
             typeLinks.forEach(link => {
                 link.addEventListener('click', function (event) {
@@ -410,25 +520,25 @@
             }
 
         });
-        document.getElementById('avatar').addEventListener('click', function () {
-            var menu = document.getElementById('menu');
-            if (menu.style.display === 'block') {
-                menu.style.display = 'none';
-            } else {
-                menu.style.display = 'block';
-            }
+        $(document).ready(function() {
+            $('#avatar, #avatar-custom').click(function () {
+                var menu = $('#menu');
+                if (menu.is(':visible')) {
+                    menu.hide();
+                } else {
+                    menu.show();
+                }
+            });
+
+            $(document).click(function (event) {
+                var menu = $('#menu');
+                var avatars = $('#avatar, #avatar-custom');
+                if (!avatars.is(event.target) && !menu.is(event.target)) {
+                    menu.hide();
+                }
+            });
         });
 
-        document.addEventListener('click', function (event) {
-            var menu = document.getElementById('menu');
-            var avatar = document.getElementById('avatar');
-            if (event.target !== avatar && event.target !== menu) {
-                menu.style.display = 'none';
-            }
-        });
-        document.getElementById('savedAddressesBtn').addEventListener('click', function () {
-            toggleMenuDisplay('menu-adress');
-        });
 
 
         document.addEventListener('click', function (event) {
@@ -436,7 +546,9 @@
                 hideMenu('menu-adress');
             }
         });
-
+        document.getElementById('savedAddressesBtn').addEventListener('click', function () {
+                    toggleMenuDisplay('menu-adress');
+                });
         function toggleMenuDisplay(menuId) {
             var menu = document.getElementById(menuId);
             if (menu.style.display === 'block') {
@@ -470,6 +582,45 @@
                     event.target.value = `${streetName}, ${restOfAddress}`;
                 }
             }
+        });
+
+        function handleImageUpload() {
+                    const inputPhotoEdit = document.getElementById(`photo_client`);
+                    const imagePreviewEdit = document.getElementById(`image-preview`);
+                    const imagePreviewContainerEdit = document.getElementById(`image-preview-container`);
+
+                    const file = inputPhotoEdit.files[0];
+
+                    if (file) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            imagePreviewEdit.src = e.target.result;
+                            imagePreviewEdit.style.display = 'block';
+                            imagePreviewContainerEdit.style.display = 'block';
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                };
+
+        document.getElementById('my-data-btn').addEventListener('click', function() {
+                    const dialog = $("#user-data-dialog");
+                    dialog.show();
+
+                    if (!dialog.dialog('instance')) {
+                        dialog.dialog({
+                            autoOpen: false,
+                            width: 'auto',
+                            modal: true
+                        });
+                    }
+                    dialog.dialog('open');
+        });
+
+        document.getElementById('close-data-dialog').addEventListener('click', function() {
+            const dialog = $("#user-data-dialog");
+            dialog.dialog('close');
         });
 
         document.getElementById('save-address-dialog').addEventListener('click', function() {

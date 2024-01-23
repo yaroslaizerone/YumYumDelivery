@@ -1,161 +1,187 @@
-body {
-  margin: 0;
-  padding: 0;
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 .navbar {
-  background-color: #38A9CC;
-  padding: 10px 0;
+    background-color: #38A9CC;
+    padding: 10px 0;
 }
 
 .navbar-brand img {
-  max-height: 100px;
-  width: auto;
+    max-height: 100px;
+    width: auto;
 }
 
+.logo{
+    max-width: 350px;
+    width: 350px;
+}
+
+
 .navbar-search {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .text-field__input {
-  margin-right: 10px;
+    margin-right: 10px;
 }
 
 .address-input {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .address-input input {
-  margin-right: 10px;
+    margin-right: 10px;
 }
 
 .avatar-user {
-  cursor: pointer;
+    cursor: pointer;
 }
-
 
 a {
-  text-decoration: none;
-  color: #000000;
+    text-decoration: none;
+    color: #000000;
 }
-.form-control{
+
+.form-control {
     size: auto;
 }
+
 .fa-magnifying-glass {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
 }
-.navbar-brand{
-  padding-left: 50px;
+
+.navbar-brand {
+    padding-left: 50px;
 }
-.btn-primary{
-  height: 43px;
-  margin-top: -5px;
+
+.btn-primary {
+    height: 43px;
+    margin-top: -5px;
 }
+
 .text-field__icon {
-  position: relative;
+    position: relative;
 }
+
 .text-field__icon::before {
-  content: '';
-  color: #bdbdbd;
-  position: absolute;
-  display: flex;
-  align-items: center;
-  top: 0;
-  bottom: 0;
-  left: 0.625rem;
-  top: 50%;
-  transform: translateY(-50%);
+    content: '';
+    color: #bdbdbd;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0;
+    bottom: 0;
+    left: 0.625rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
+
 .text-field__icon .text-field__input {
-  padding-left: 2rem;
+    padding-left: 2rem;
 }
 
 .text-field__input {
-  height: 43px;
-  width: 180px;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+    height: 43px;
+    width: 180px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
 }
+
 /* иконка лупы */
 .text-field__icon_search::before {
-  width: 1rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bdbdbd' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
+    width: 1rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bdbdbd' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
 }
+
 .search-back {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid #0d6efd;
-  background: #0d6efd;
-  border-radius: 10px;
-  margin-left:50px;
-  min-width: 510px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #0d6efd;
+    background: #0d6efd;
+    border-radius: 10px;
+    margin-left: 50px;
+    min-width: 510px;
 }
 
 .search-back .text-field {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .search-back .text-field__input {
-  height: 54px;
-  width: 395px;
-  padding-left: 2rem;
+    height: 54px;
+    width: 395px;
+    padding-left: 2rem;
 }
 
 .search-back .btn-primary {
-  height: 54px;
-  margin-top: -5px;
+    height: 54px;
+    margin-top: -5px;
 }
 
 .address-input {
-  display: flex;
-  align-items: center;
-  background-color: #f2f2f2;
-  padding: 10px;
-  border-radius: 5px;
+    display: flex;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 .address-input input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 5px;
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 5px;
 }
 
 .address-input button {
-  margin-left: 10px;
-  padding: 5px 10px;
-  background-color: #38A9CC;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #38A9CC;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
+
 .user-round.dropdown .dropdown-toggle {
-    background-color: transparent; /* Прозрачный фон кнопки */
-    border: none; /* Убираем границу кнопки */
-    padding: 0; /* Убираем внутренний отступ кнопки */
-    box-shadow: none; /* Убираем тень кнопки */
+    background-color: transparent;
+    /* Прозрачный фон кнопки */
+    border: none;
+    /* Убираем границу кнопки */
+    padding: 0;
+    /* Убираем внутренний отступ кнопки */
+    box-shadow: none;
+    /* Убираем тень кнопки */
 }
 
 .user-round.dropdown .dropdown-toggle:focus {
-    outline: none; /* Убираем рамку фокуса при клике */
+    outline: none;
+    /* Убираем рамку фокуса при клике */
 }
 
 .user-round.dropdown .dropdown-menu {
-    border-radius: 20px; /* Радиус закругления углов выпадающего меню */
+    border-radius: 20px;
+    /* Радиус закругления углов выпадающего меню */
 }
 
 .user-round.dropdown .dropdown-item {
-    border-radius: 20px; /* Радиус закругления углов элементов меню */
+    border-radius: 20px;
+    /* Радиус закругления углов элементов меню */
 }
 
 .user-round.dropdown .dropdown-divider {
@@ -168,55 +194,58 @@ a {
 }
 
 .col {
-    display: flex;
     align-items: center;
+    display: inline-block;
 }
 
 .dropbtn {
-  background-color: #4CAF50;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
 }
 
 /* The container <div> - needed to position the dropdown content */
 .dropdown {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
 /* Links inside the dropdown */
 .dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-content a:hover {
+    background-color: #f1f1f1
+}
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
-  display: block;
+    display: block;
 }
 
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover .dropbtn {
-  background-color: #3e8e41;
+    background-color: #3e8e41;
 }
+
 body {
     margin: 0;
     padding: 0;
@@ -225,7 +254,8 @@ body {
 .cart-container {
     position: fixed;
     top: 0;
-    right: -300px; /* начальная позиция справа за пределами экрана */
+    right: -300px;
+    /* начальная позиция справа за пределами экрана */
     width: 300px;
     height: 100%;
     background-color: #fff;
@@ -253,16 +283,22 @@ body {
     padding: 5px 10px;
     cursor: pointer;
 }
-.dialog{
-  position: absolute;
-  left: 0;
-  right: 0;
-  margin: auto;
-  border: solid;
-  padding: 1em;
-  background: white;
-  color: black;
+
+.dialog {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border: solid;
+    padding: 1em;
+    background: white;
+    color: black;
 }
+
+.header-main {
+    margin: 0;
+}
+
 .restaurant-block {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

@@ -25,5 +25,7 @@ urlpatterns = [
     path('cart/', views.ordered, name='ordered'),
     path('payOfOrder/', views.payOfOrder, name='payOfOrder'),
     #URL пользователя
-    path('orders/<slug:uid>', views.logout, name="orders"),
+    path('orders/<slug:uid>', views.orders, name="orders"),
+    path('update_user_data/<slug:uid>', views.update_user_data, name="updata_user_data"),
+
 ]

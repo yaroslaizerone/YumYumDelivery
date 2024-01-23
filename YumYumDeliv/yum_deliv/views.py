@@ -3,7 +3,7 @@ import os
 import json
 import datetime
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from requests.exceptions import HTTPError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -39,61 +39,71 @@ def signIn(request):
 
 
 def home(request):
-    rests = database.collection("restaurant").stream()
-    type_rests = database.collection("type_rest").stream()
+    try:
+        uid = request.COOKIES.get('uid')
+        users = (
+            database.collection("client-data")
+            .where("uid", "==", uid)
+            .stream()
+        )
+        user = [us.to_dict() for us in users]
+        rests = database.collection("restaurant").stream()
+        type_rests = database.collection("type_rest").stream()
 
-    types = [type_rest.to_dict() for type_rest in type_rests]
-    restaurants = [res.to_dict() for res in rests]
-    context = {
-        "restaurants": restaurants,
-        "type_rests": types
-    }
-    return render(request, "Homepage.html", context)
+        types = [type_rest.to_dict() for type_rest in type_rests]
+        restaurants = [res.to_dict() for res in rests]
+        context = {
+            "restaurants": restaurants,
+            "type_rests": types,
+            "user": user,
+        }
+        return render(request, "Homepage.html", context)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return HttpResponseServerError("Internal Server Error", content_type="text/plain")
 
 
 # TODO Добавить cookie при авторизации
 def postsignIn(request):
-    email = request.POST.get('email')
-    pasw = request.POST.get('pass')
-    try:
-        user = authe.sign_in_with_email_and_password(email, pasw)
-        uid = user['localId']
-        print(uid)
-        # Установка cookie с именем 'uid' и значением uid
-        response = HttpResponse(render(request, "Homepage.html", {"email": email}))
-        response.set_cookie('uid', uid)
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        pasw = request.POST.get('pass')
+        try:
+            user = authe.sign_in_with_email_and_password(email, pasw)
+            uid = user['localId']
 
-        # Поиск по роли по uid
-        roles = (
-            database.collection("authentication")
-            .where("uid", "==", uid)
-            .stream()
-        )
-        # Получение роли из запроса
-        role_data = []
-        for role in roles:
-            role_data.append(role.to_dict())
-        user_role = role_data[0]['role']
-        # TODO Переделать на if, так как case для каждого администратора не напишешь
-        if user_role == '1':
-            return redirect('/')
-        elif user_role == '2':
-            role = (
-                database.collection("role")
-                .where("id", "==", 2)
+            roles = (
+                database.collection("authentication")
+                .where("uid", "==", uid)
                 .stream()
             )
             role_data = []
-            for rol in role:
-                role_data.append(rol.to_dict())
-            for r in role_data:
-                return redirect('adminRest', rest_slug=r['role'])
-        else:
-            logger.info(user_role)
-            return HttpResponse("Some default response or redirect")
-    except Exception as e:
-        message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
-        return render(request, "Login.html", {"message": message})
+            for role in roles:
+                role_data.append(role.to_dict())
+            user_role = role_data[0]['role']
+            # TODO Переделать на if, так как case для каждого администратора не напишешь
+            if user_role == '1':
+                response = redirect('/')
+            elif user_role == '2':
+                role = (
+                    database.collection("role")
+                    .where("id", "==", 2)
+                    .stream()
+                )
+                role_data = []
+                for rol in role:
+                    role_data.append(rol.to_dict())
+                for r in role_data:
+                    response = redirect('adminRest', rest_slug=r['role'])
+            else:
+                logger.info(user_role)
+                return HttpResponse("Some default response or redirect")
+
+            response.set_cookie('uid', uid)
+            return response
+        except Exception as e:
+            message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
+            return render(request, "Login.html", {"message": message})
 
 
 # TODO Удалять при выходе
@@ -439,15 +449,12 @@ def republuc(request, rest_slug):
             file_name = os.path.join(dict_path, photo.name)
             file_path = f"{dict_path}%5C{photo.name}"
 
-            # Check if the photo file already exists
             if check_file_exists(file_path):
-                # File already exists, use its download URL
-                new_data_rest['image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}?alt=media"
+                new_data_rest['image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
             else:
-                # File doesn't exist, upload it
                 upload = storage.child(file_name).put(photo)
                 photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}?alt=media&token={photo_url}"
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{photo.name}?alt=media&token={photo_url}"
                 new_data_rest['image'] = download_url
 
         # Получение id ресторана
@@ -570,3 +577,73 @@ def change_status(request, rest, order_id):
             database.collection("orders").document(document_id).update(data)
 
         return redirect('adminRest', rest_slug=rest)
+
+
+def update_user_data(request, uid):
+    if request.method == 'POST':
+        try:
+            user_data = {
+                'name': request.POST.get('name'),
+                'surname': request.POST.get('surname'),
+                'middle_name': request.POST.get('middle-name'),
+            }
+
+            uploaded_files = request.FILES
+            photo_client = uploaded_files.get('photo_client')
+
+            if photo_client:
+                dict_path = 'avatars'
+                file_name = os.path.join(dict_path, photo_client.name)
+                file_path = f"{dict_path}%5C{photo_client.name}"
+
+                # Check if the file already exists
+                if check_file_exists(file_path):
+                    # Use the existing file URL instead of uploading a new one
+                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{file_name}?alt=media"
+
+                else:
+                    # Upload the file to Firebase Storage
+                    upload = storage.child(file_name).put(photo_client)
+                    photo_url = upload.get("downloadTokens")
+                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{photo_client.name}?alt=media&token={photo_url}"
+            else:
+                # No new photo uploaded, check if preview image exists
+                preview_image_id = f'image-preview-edit_{uid}'
+                if request.POST.get(preview_image_id):
+                    # Use the existing photo URL
+                    download_url = request.POST.get(preview_image_id)
+                else:
+                    # No photo uploaded and no preview image, set to None
+                    download_url = None
+
+            if download_url:
+                user_data["image"] = download_url
+            # Обновление данных пользователя в базе данных
+            user_request = (
+                database.collection("client-data")
+                .where("uid", "==", uid)
+            )
+            user_docs = user_request.stream()
+            for user_doc in user_docs:
+                user_doc_id = user_doc.id
+                database.collection("client-data").document(user_doc_id).update(user_data)
+
+            return redirect('/')
+        except Exception as e:
+            return HttpResponse(f"An error occurred: {str(e)}")
+
+    return HttpResponse("Invalid request method")
+
+
+def orders(request, uid):
+    orders_request = (
+        database.collection("orders")
+        .where("user", "==", uid)
+        .stream()
+    )
+    orders_user = [orders.to_dict() for orders in orders_request]
+    context = {
+        "orders": orders_user
+    }
+
+    return render(request, 'UserOrders.html', context)
