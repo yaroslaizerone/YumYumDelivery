@@ -220,31 +220,44 @@
                         <div class="col address-container" style="max-width: 250px">
                             <div class="dropdown">
                                 <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
-                               <div class="menu" id="menu-adress">
+                                <div class="menu" id="menu-adress">
                                     <ul>
                                         <li><p id="add-adress">Добавить адрес</p></li>
+                                        {% for adr in adress %}
+                                            <li><p class="dropdown-item">{{ adr.streetAndNumber }}</p></li>
+                                        {% endfor %}
                                     </ul>
-                               </div>
+                                </div>
                             </div>
                         </div>
                     <div class="col avatar-user">
                         <div class="avatar-container">
-                            {% for us in user %}
-                                {% if us.image %}
+                            {% if user != None %}
+                                {% for us in user %}
+                                    {% if us.image %}
                                         <img src="{{ us.image }}" alt="User Avatar" class="avatar" id="avatar-custom">
                                     {% else %}
                                         <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
                                              alt="Default Avatar" class="avatar" id="avatar">
                                     {% endif %}
                                 {% endfor %}
-                            <div class="menu" id="menu">
-                                <ul>
-                                    <li><label class="dropdown-item" id="my-data-btn">Мои данные</label></li>
-                                    <li><a class="dropdown-item" href="/orders/{{ user.0.uid }}">Мои заказы</a></li>
-                                    <li><label class="dropdown-item" id="my-adress-btn">Мой адреса</label></li>
-                                    <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
-                                </ul>
-                            </div>
+                                <div class="menu" id="menu">
+                                    <ul>
+                                        <li><label class="dropdown-item" id="my-data-btn">Мои данные</label></li>
+                                        <li><a class="dropdown-item" href="/orders/{{ user.0.uid }}">Мои заказы</a></li>
+                                        <li><label class="dropdown-item" id="my-adress-btn">Мой адреса</label></li>
+                                        <li><a class="dropdown-item" id="logout-btn">Выйти</a></li>
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
+                                     alt="Default Avatar" class="avatar" id="avatar-anonim">
+                                <div class="menu" id="menu-anonim">
+                                    <ul>
+                                        <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -282,42 +295,54 @@
         </div>
     </div>
     <div id="address-dialog">
-        <div class="address-input-group">
-            <input id="typedataSuggestions" class="adress-input" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес">
-            <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
+        {% if user != None %}
+            {% for us in user %}
+                <form id="user_add_adress" method="post" action="/user_add_adress/{{ us.uid }}">
+                    {% csrf_token %}
+                    <input required id="typedataSuggestions" name="adress" class="adress-input" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес">
+                    <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
+
+                    <div class="address-input-group">
+                        <input id="flat" name="flat" type="number" placeholder="Квартира" required>
+                        <input id="intercom" name="intercom" type="number" placeholder="Домофон" required>
+                        <input id="entrance" name="entrance" type="number" placeholder="Подъезд" required>
+                        <input id="floor" name="floor" type="number" placeholder="Этаж" required>
+                    </div>
+                     <div id="map-dialog" style="display: none;">
+                        <div id="map" style="height: 300px;"/>
+                     </div>
+                    <button id="close-address-dialog" type="button">Закрыть</button>
+                    <button id="save-address-dialog" type="submit">Сохранить адрес</button>
+                </form>
+            {% endfor %}
+        {% endif %}
         </div>
-        <div class="address-input-group">
-            <input id="flat" type="number" placeholder="Квартира"/>
-            <input id="intercom" type="number" placeholder="Домофон"/>
-            <input id="entrance" type="number" placeholder="Подъезд"/>
-            <input id="floor" type="number" placeholder="Этаж"/>
-        </div>
-         <div id="map-dialog" style="display: none;">
-            <div id="map" style="height: 300px;"></div>
-        </div>
-        <button id="close-address-dialog">Закрыть</button>
-        <button id="save-address-dialog">Сохранить адрес</button>
     </div>
 
     <div id="user-data-dialog">
         <div class="user-input-group">
-            {% for us in user %}
-            <form id="user-data-form" action="update_user_data/{{us.uid}}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                    <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
-                    <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
-                    <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)" value="{{us.middle_name}}"><br>
-                    <input type="file" id="photo_client" name="photo_client" accept="image/*" onchange="handleImageUpload()"><br>
-                    <div id="image-preview-container">
-                        <img id="image-preview" src="{{us.image}}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
-                    </div>
-                    <button id="close-data-dialog" type="button">Закрыть</button>
-                    <button id="save-data-dialog" type="submit">Сохранить данные</button>
-            </form>
-            {% endfor %}
+             {% if user != None %}
+                {% for us in user %}
+                <form id="user-data-form" action="update_user_data/{{us.uid}}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                        <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
+                        <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
+                        <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)" value="{{us.middle_name}}"><br>
+                        <input type="file" id="photo_client" name="photo_client" accept="image/*" onchange="handleImageUpload()"><br>
+                        <div id="image-preview-container">
+                            <img id="image-preview" src="{{us.image}}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+                        </div>
+                        <button id="close-data-dialog" type="button">Закрыть</button>
+                        <button id="save-data-dialog" type="submit">Сохранить данные</button>
+                </form>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 
+    <div class="menu" id="dialog-all-adress">
+
+    </div>
     <script>
          $(document).ready(function () {
                 const newAddressInput = document.querySelector('.adress-input');
@@ -438,8 +463,12 @@
             }
 
             const uid = getCookie('uid');
+            $("#user_add_adress").attr("action", "/user_add_adress/" + uid);
             if (uid) {
-                document.getElementById('user-data-form').action = `/update_user_data/${uid}`;
+                const userDataForm = document.getElementById('user-data-form');
+                if (userDataForm) {
+                    userDataForm.action = `/update_user_data/${uid}`;
+                }
             }
 
 
@@ -520,26 +549,58 @@
             }
 
         });
-        $(document).ready(function() {
-            $('#avatar, #avatar-custom').click(function () {
-                var menu = $('#menu');
-                if (menu.is(':visible')) {
-                    menu.hide();
-                } else {
-                    menu.show();
+        $("#my-adress-btn").on("click", function() {
+            // Создаем диалоговое окно с заданным текстом
+            $("#dialog-all-adress").dialog({
+              title: "Сохранённые адреса",
+              modal: true,
+              buttons: {
+                Ok: function() {
+                  $(this).dialog("close");
                 }
-            });
+              },
+              close: function() {
+                const dialog = $("#dialog-all-adress");
+                dialog.dialog('close');
+              }
+            })
+          });
+        var avatarElement = $('#avatar, #avatar-custom, #avatar-anonim');
 
-            $(document).click(function (event) {
-                var menu = $('#menu');
-                var avatars = $('#avatar, #avatar-custom');
-                if (!avatars.is(event.target) && !menu.is(event.target)) {
-                    menu.hide();
-                }
-            });
+         $("#logout-btn").on("click", function() {
+            // Очищаем cookie с идентификатором пользователя
+            document.cookie = "uid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+            // Перезагружаем страницу
+            location.reload();
         });
 
+        avatarElement.click(function () {
+            var menu = $(this).next('.menu'); // Используйте .next(), чтобы найти следующий элемент с классом 'menu'
+            if (menu.is(':visible')) {
+                menu.hide();
+            } else {
+                menu.show();
+            }
+        });
 
+        $(document).click(function (event) {
+            if (!avatarElement.is(event.target) && !avatarElement.next('.menu').is(event.target)) {
+                avatarElement.next('.menu').hide();
+            }
+        });
+
+        // Функция для получения значения cookie по имени
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
 
         document.addEventListener('click', function (event) {
             if (event.target !== document.getElementById('savedAddressesBtn') && event.target !== document.getElementById('menu-adress')) {
@@ -623,57 +684,6 @@
             dialog.dialog('close');
         });
 
-        document.getElementById('save-address-dialog').addEventListener('click', function() {
-            const streetAndNumber = document.getElementById('typedataSuggestions').value;
-            const flat = document.getElementById('flat').value;
-            const intercom = document.getElementById('intercom').value;
-            const entrance = document.getElementById('entrance').value;
-            const floor = document.getElementById('floor').value;
-
-            if (streetAndNumber && flat && intercom && entrance && floor) {
-                const fullAddress = `${streetAndNumber}, кв. ${flat}, домофон ${intercom}, подъезд ${entrance}, этаж ${floor}`;
-
-                document.cookie = `user-address=${encodeURIComponent(fullAddress)}; expires=Thu, 01 Jan 2030 00:00:00 UTC; path=/`;
-
-                const menuAdress = document.getElementById('menu-adress');
-                const newAddressItem = document.createElement('li');
-                const newAddressLabel = document.createElement('label');
-                newAddressLabel.textContent = streetAndNumber;
-                newAddressItem.appendChild(newAddressLabel);
-                menuAdress.querySelector('ul').appendChild(newAddressItem);
-
-                $("#address-dialog").dialog('close');
-            } else {
-                alert('Пожалуйста, заполните все поля перед сохранением адреса.');
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const savedAddress = getCookie('user-address');
-            if (savedAddress) {
-                const menuAdress = document.getElementById('menu-adress');
-                const newAddressItem = document.createElement('li');
-                const newAddressLabel = document.createElement('label');
-                newAddressLabel.textContent = formatAddress(savedAddress); // Форматируем адрес
-                newAddressItem.appendChild(newAddressLabel);
-                menuAdress.querySelector('ul').appendChild(newAddressItem);
-                const savedAddressesBtn = document.getElementById('savedAddressesBtn');
-                savedAddressesBtn.textContent = formatAddress(savedAddress);
-            }
-        });
-
-        function getCookie(cookieName) {
-            const name = cookieName + "=";
-            const decodedCookie = decodeURIComponent(document.cookie);
-            const cookieArray = decodedCookie.split(';');
-            for (let i = 0; i < cookieArray.length; i++) {
-                let cookie = cookieArray[i].trim();
-                if (cookie.indexOf(name) === 0) {
-                    return cookie.substring(name.length, cookie.length);
-                }
-            }
-            return null;
-        }
 
         function formatAddress(address) {
                 const firstCommaIndex = address.indexOf(',');

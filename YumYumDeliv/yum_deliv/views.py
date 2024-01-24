@@ -40,13 +40,6 @@ def signIn(request):
 
 def home(request):
     try:
-        uid = request.COOKIES.get('uid')
-        users = (
-            database.collection("client-data")
-            .where("uid", "==", uid)
-            .stream()
-        )
-        user = [us.to_dict() for us in users]
         rests = database.collection("restaurant").stream()
         type_rests = database.collection("type_rest").stream()
 
@@ -55,8 +48,22 @@ def home(request):
         context = {
             "restaurants": restaurants,
             "type_rests": types,
-            "user": user,
         }
+        uid = request.COOKIES.get('uid')
+        if uid is None:
+            context['user'] = None
+            return render(request, "Homepage.html", context)
+        users = (
+            database.collection("client-data")
+            .where("uid", "==", uid)
+            .stream()
+        )
+        users_data = [us.to_dict() for us in users]
+        if users_data:
+            context['user'] = users_data
+        adress = database.collection("user_adress").stream()
+        adrs = [ad.to_dict() for ad in adress]
+        context['adress'] = adrs
         return render(request, "Homepage.html", context)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -647,3 +654,26 @@ def orders(request, uid):
     }
 
     return render(request, 'UserOrders.html', context)
+
+
+def user_adress(request, uid):
+    entrance = request.POST.get('entrance', '')
+    flat = request.POST.get('flat', '')
+    floor = request.POST.get('floor', '')
+    intercom = request.POST.get('intercom', '')
+    streetAndNumber = request.POST.get('adress', '')
+
+    print(flat)
+
+    data = {
+        "entrance": entrance,
+        "flat": flat,
+        "floor": floor,
+        "intercom": intercom,
+        "streetAndNumber": streetAndNumber,
+        "uid": uid,
+    }
+
+    database.collection("user_adress").add(data)
+
+    return redirect('/')
