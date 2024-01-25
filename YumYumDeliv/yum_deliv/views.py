@@ -2,6 +2,8 @@ import logging
 import os
 import json
 import datetime
+import random
+import string
 
 from django.http import JsonResponse, HttpResponseServerError
 from requests.exceptions import HTTPError
@@ -40,37 +42,40 @@ def signIn(request):
 
 def home(request):
     try:
-        rests = database.collection("restaurant").stream()
-        type_rests = database.collection("type_rest").stream()
-
-        types = [type_rest.to_dict() for type_rest in type_rests]
-        restaurants = [res.to_dict() for res in rests]
-        context = {
-            "restaurants": restaurants,
-            "type_rests": types,
-        }
-        uid = request.COOKIES.get('uid')
-        if uid is None:
-            context['user'] = None
-            return render(request, "Homepage.html", context)
-        users = (
-            database.collection("client-data")
-            .where("uid", "==", uid)
-            .stream()
-        )
-        users_data = [us.to_dict() for us in users]
-        if users_data:
-            context['user'] = users_data
-        adress = database.collection("user_adress").stream()
-        adrs = [ad.to_dict() for ad in adress]
-        context['adress'] = adrs
+        context = homepage_context(request)
         return render(request, "Homepage.html", context)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         return HttpResponseServerError("Internal Server Error", content_type="text/plain")
 
 
-# TODO Добавить cookie при авторизации
+def homepage_context(request):
+    rests = database.collection("restaurant").stream()
+    type_rests = database.collection("type_rest").stream()
+
+    types = [type_rest.to_dict() for type_rest in type_rests]
+    restaurants = [res.to_dict() for res in rests]
+    context = {
+        "restaurants": restaurants,
+        "type_rests": types,
+    }
+    uid = request.COOKIES.get('uid')
+    if uid is None:
+        context['user'] = None
+        return render(request, "Homepage.html", context)
+    users = (
+        database.collection("client-data")
+        .where("uid", "==", uid)
+        .stream()
+    )
+    users_data = [us.to_dict() for us in users]
+    if users_data:
+        context['user'] = users_data
+    address = database.collection("user_address").stream()
+    adrs = [ad.to_dict() for ad in address]
+    context['address'] = adrs
+    return context
+
 def postsignIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -197,7 +202,7 @@ def rest_context(slug):
     type_data_rests = [type.to_dict() for type in type_rests]
     rest_current = (
         database.collection("restaurant")
-        .where('url_adress', '==', slug)
+        .where('url_address', '==', slug)
         .stream()
     )
     rest = [res.to_dict() for res in rest_current]
@@ -292,7 +297,7 @@ def add_dish(request, rest_slug):
 def restaurant(request, url_rest):
     rest_id = (
         database.collection("restaurant")
-        .where("url_adress", "==", url_rest)
+        .where("url_address", "==", url_rest)
         .stream()
     )
     restaurant_id = [rest.to_dict()['id'] for rest in rest_id]
@@ -431,20 +436,20 @@ def republuc(request, rest_slug):
         type_rest = int(request.POST.get('type-rest'))
         representative = request.POST.get('representative')
         avg_time_cook = request.POST.get('avg_time_cook')
-        url = request.POST.get('url_adress')
+        url = request.POST.get('url_address')
         start_time = request.POST.get('start-work')
         end_time = request.POST.get('end-work')
-        adress = request.POST.get('adress_rest')
+        address = request.POST.get('address_rest')
 
         new_data_rest = {
-            'adress': adress,
+            'address': address,
             'avg_time_cook': int(avg_time_cook),
             'end_work': end_time,
             'start_work': start_time,
             'name': name_rest,
             'representative': representative,
             'type': type_rest,
-            'url_adress': url
+            'url_address': url
         }
 
         # Получение фото
@@ -457,7 +462,8 @@ def republuc(request, rest_slug):
             file_path = f"{dict_path}%5C{photo.name}"
 
             if check_file_exists(file_path):
-                new_data_rest['image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
+                new_data_rest[
+                    'image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
             else:
                 upload = storage.child(file_name).put(photo)
                 photo_url = upload.get("downloadTokens")
@@ -467,7 +473,7 @@ def republuc(request, rest_slug):
         # Получение id ресторана
         restaurant_request = (
             database.collection("restaurant")
-            .where("url_adress", "==", rest_slug)
+            .where("url_address", "==", rest_slug)
         )
         docs = restaurant_request.stream()
         for doc in docs:
@@ -481,7 +487,7 @@ def republuc(request, rest_slug):
 
 
 def condition(doc_data, slug):
-    return 'id' in doc_data and doc_data['url_adress'] == slug
+    return 'id' in doc_data and doc_data['url_address'] == slug
 
 
 def delete_dish(request, rest, dish_id):
@@ -643,6 +649,11 @@ def update_user_data(request, uid):
 
 
 def orders(request, uid):
+    context = take_orders(uid)
+    return render(request, 'UserOrders.html', context)
+
+
+def take_orders(uid):
     orders_request = (
         database.collection("orders")
         .where("user", "==", uid)
@@ -650,22 +661,22 @@ def orders(request, uid):
     )
     orders_user = [orders.to_dict() for orders in orders_request]
     context = {
-        "orders": orders_user
+        "orders": orders_user,
+        "uid": uid,
     }
+    return context
 
-    return render(request, 'UserOrders.html', context)
 
-
-def user_adress(request, uid):
-    entrance = request.POST.get('entrance', '')
-    flat = request.POST.get('flat', '')
-    floor = request.POST.get('floor', '')
-    intercom = request.POST.get('intercom', '')
-    streetAndNumber = request.POST.get('adress', '')
-
-    print(flat)
+def user_address(request, uid):
+    id = random_alphanumeric_string(10)
+    entrance = request.POST.get('entrance')
+    flat = request.POST.get('flat')
+    floor = request.POST.get('floor')
+    intercom = request.POST.get('intercom')
+    streetAndNumber = request.POST.get('address')
 
     data = {
+        "id": id,
         "entrance": entrance,
         "flat": flat,
         "floor": floor,
@@ -674,6 +685,87 @@ def user_adress(request, uid):
         "uid": uid,
     }
 
-    database.collection("user_adress").add(data)
+    database.collection("user_address").add(data)
 
     return redirect('/')
+
+
+def delete_address(request, addressID):
+    address_request = (
+        database.collection("user_address")
+        .where("id", "==", addressID)
+    )
+
+    address_docs = address_request.stream()
+
+    for doc in address_docs:
+        document_id = doc.id
+        database.collection("user_address").document(document_id).delete()
+
+    context = homepage_context(request)
+    return render(request, "Homepage.html", context)
+
+
+def createsupport(request, uid):
+    if request.method == 'POST':
+        # Получение данных из формы
+        order_id = request.POST.get('orderId')
+        email = request.POST.get('email')
+        reason = request.POST.get('reason')
+        comment = request.POST.get('comment')
+        uploaded_files = request.FILES.getlist('attachment')
+
+        # Данные для сохранения в Firestore
+        data = {
+            'order_id': order_id,
+            'email': email,
+            'reason': reason,
+            'comment': comment,
+        }
+
+        # Проверка, если есть загруженные файлы
+        if uploaded_files:
+            # Папка для сохранения файлов user_feedback
+            folder_path = 'user_feedback'
+            photo_urls = []
+
+            for file in uploaded_files:
+                file_name = os.path.join(folder_path, file.name)
+                file_path = f"{folder_path}%5C{file.name}"
+
+                # Check if the file already exists
+                if check_file_exists(file_path):
+                    # Use the existing file URL instead of uploading a new one
+                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file_name}?alt=media"
+
+                else:
+                    # Upload the file to Firebase Storage
+                    upload = storage.child(file_name).put(file)
+                    photo_url = upload.get("downloadTokens")
+                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file.name}?alt=media&token={photo_url}"
+                photo_urls.append(download_url)
+            else:
+                # No new photo uploaded, check if preview image exists
+                preview_image_id = f'feedback_{order_id}'
+                if request.POST.get(preview_image_id):
+                    # Use the existing photo URL
+                    download_url = request.POST.get(preview_image_id)
+            if download_url:
+                # Добавление URL фотографий в параметр "photo" через точку с запятой
+                data['photo'] = ';'.join(photo_urls)
+        print(photo_urls)
+
+        # Сохранение данных в Firestore
+        db.collection('user_feedback').add(data)
+
+        context = take_orders(uid)
+        return render(request, 'UserOrders.html', context)
+
+
+def random_alphanumeric_string(length):
+    return ''.join(
+        random.choices(
+            string.ascii_letters + string.digits,
+            k=length
+        )
+    )

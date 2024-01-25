@@ -220,11 +220,11 @@
                         <div class="col address-container" style="max-width: 250px">
                             <div class="dropdown">
                                 <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
-                                <div class="menu" id="menu-adress">
+                                <div class="menu" id="menu-address">
                                     <ul>
-                                        <li><p id="add-adress">Добавить адрес</p></li>
-                                        {% for adr in adress %}
-                                            <li><p class="dropdown-item">{{ adr.streetAndNumber }}</p></li>
+                                        <li><p id="add-address">Добавить адрес</p></li>
+                                        {% for adr in address %}
+                                            <li><p class="dropdown-item" data-type="user-address">{{ adr.streetAndNumber }}</p></li>
                                         {% endfor %}
                                     </ul>
                                 </div>
@@ -245,7 +245,7 @@
                                     <ul>
                                         <li><label class="dropdown-item" id="my-data-btn">Мои данные</label></li>
                                         <li><a class="dropdown-item" href="/orders/{{ user.0.uid }}">Мои заказы</a></li>
-                                        <li><label class="dropdown-item" id="my-adress-btn">Мой адреса</label></li>
+                                        <li><label class="dropdown-item" id="my-address-btn">Мой адреса</label></li>
                                         <li><a class="dropdown-item" id="logout-btn">Выйти</a></li>
                                     </ul>
                                 </div>
@@ -289,7 +289,7 @@
             {% for restaurant in restaurants %}
             <div class="restaurant-item" data-type="{{ restaurant.type }}">
                 <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
-                <h2 onclick="location.href='/restaurant/{{ restaurant.url_adress }}'">{{ restaurant.name }}</h2>
+                <h2 onclick="location.href='/restaurant/{{ restaurant.url_address }}'">{{ restaurant.name }}</h2>
             </div>
             {% endfor %}
         </div>
@@ -297,9 +297,9 @@
     <div id="address-dialog">
         {% if user != None %}
             {% for us in user %}
-                <form id="user_add_adress" method="post" action="/user_add_adress/{{ us.uid }}">
+                <form id="user_add_address" method="post" action="/user_add_address/{{ us.uid }}">
                     {% csrf_token %}
-                    <input required id="typedataSuggestions" name="adress" class="adress-input" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес">
+                    <input required id="typedataSuggestions" name="address" class="address-input" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес">
                     <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
 
                     <div class="address-input-group">
@@ -340,16 +340,20 @@
         </div>
     </div>
 
-    <div class="menu" id="dialog-all-adress">
-
+    <div class="menu" id="dialog-all-address">
+        {% for adr in address%}
+            <p class="dropdown-item" data-type="user-address">{{ adr.streetAndNumber }}</p>
+            <button onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес</button>
+        {% endfor %}
     </div>
     <script>
          $(document).ready(function () {
-                const newAddressInput = document.querySelector('.adress-input');
+                const newAddressInput = document.querySelector('.address-input');
 
-                $('#add-adress').click(function () {
+                $('#add-address').click(function () {
                     const dialog = $("#address-dialog");
                     dialog.show();
+                    $('#map-dialog').show();
 
                     if (!dialog.dialog('instance')) {
                         dialog.dialog({
@@ -463,7 +467,7 @@
             }
 
             const uid = getCookie('uid');
-            $("#user_add_adress").attr("action", "/user_add_adress/" + uid);
+            $("#user_add_address").attr("action", "/user_add_address/" + uid);
             if (uid) {
                 const userDataForm = document.getElementById('user-data-form');
                 if (userDataForm) {
@@ -549,9 +553,9 @@
             }
 
         });
-        $("#my-adress-btn").on("click", function() {
+        $("#my-address-btn").on("click", function() {
             // Создаем диалоговое окно с заданным текстом
-            $("#dialog-all-adress").dialog({
+            $("#dialog-all-address").dialog({
               title: "Сохранённые адреса",
               modal: true,
               buttons: {
@@ -560,8 +564,7 @@
                 }
               },
               close: function() {
-                const dialog = $("#dialog-all-adress");
-                dialog.dialog('close');
+
               }
             })
           });
@@ -603,12 +606,12 @@
         }
 
         document.addEventListener('click', function (event) {
-            if (event.target !== document.getElementById('savedAddressesBtn') && event.target !== document.getElementById('menu-adress')) {
-                hideMenu('menu-adress');
+            if (event.target !== document.getElementById('savedAddressesBtn') && event.target !== document.getElementById('menu-address')) {
+                hideMenu('menu-address');
             }
         });
         document.getElementById('savedAddressesBtn').addEventListener('click', function () {
-                    toggleMenuDisplay('menu-adress');
+                    toggleMenuDisplay('menu-address');
                 });
         function toggleMenuDisplay(menuId) {
             var menu = document.getElementById(menuId);
@@ -696,13 +699,113 @@
                 return address.trim();
             }
 
-            document.getElementById('menu-adress').addEventListener('click', function (event) {
+            document.getElementById('menu-address').addEventListener('click', function (event) {
                 const target = event.target;
                 if (target.tagName === 'LABEL' && !target.classList.contains('add-address')) {
                     const selectedAddress = target.textContent;
                     document.getElementById('savedAddressesBtn').textContent = selectedAddress;
                 }
             });
+            document.addEventListener('DOMContentLoaded', function () {
+                // Выбранный адрес из cookie
+                var selectedAddress = getCookie("selectedAddress");
+
+                // При загрузке страницы установить выбранный адрес
+                if (selectedAddress) {
+                    // Проверка наличия выбранного адреса в списке
+                    var addressInList = document.querySelectorAll('.dropdown-item[data-type="user-address"]');
+                    var addressInListArray = Array.from(addressInList).map(function (item) {
+                        return item.innerText;
+                    });
+
+                    if (!addressInListArray.includes(selectedAddress)) {
+                        // Удаление адреса из cookie, так как его нет в списке
+                        setCookie("selectedAddress", "", -1); // Устанавливаем срок действия cookie в прошлое
+                    } else {
+                        // Установить адрес в кнопку
+                        document.getElementById("savedAddressesBtn").innerText = selectedAddress;
+                    }
+                }
+
+                // Обработчик события для выбора адреса
+                function selectAddress(address) {
+                    // Сохранить выбранный адрес в cookie
+                    setCookie("selectedAddress", address, 30); // 30 days expiration (adjust as needed)
+
+                    // Изменить текст кнопки
+                    document.getElementById("savedAddressesBtn").innerText = address;
+                }
+                // Функция для установки cookie
+                function setCookie(name, value, days) {
+                    var expires = "";
+                    if (days) {
+                        var date = new Date();
+                        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                        expires = "; expires=" + date.toUTCString();
+                    }
+                    document.cookie = name + "=" + value + expires + "; path=/";
+                }
+
+                // Обработчик события для выбора адреса
+                document.addEventListener('click', function (event) {
+                    var target = event.target;
+                    if (target.getAttribute('data-type') === 'user-address') {
+                        var address = target.innerText;
+                        selectAddress(address);
+                    }
+                });
+
+                // Обработчик события для кнопки удаления адреса
+                document.addEventListener('click', function (event) {
+                    var target = event.target;
+                    if (target.classList.contains('delete-address-btn')) {
+                        var addressId = target.getAttribute('data-address-id');
+                        var address = target.getAttribute('data-address');
+                        deleteAddress(addressId, address);
+                    }
+                });
+            });
+
+            function deleteAddress(addressId, address) {
+                const csrftoken = getCookie('csrftoken');
+
+                fetch(`/delete_address/${addressId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            const deletedItem = document.querySelector(`[data-address-id="${addressId}"]`);
+                            if (deletedItem) {
+                                deletedItem.remove();
+                            }
+
+                            // Проверка, соответствует ли текущий текст кнопки удаленному адресу
+                            const savedAddressBtn = document.getElementById("savedAddressesBtn");
+                            if (savedAddressBtn.innerText === address) {
+                                // Заменить текст на другой, например, текст по умолчанию
+                                savedAddressBtn.innerText = "Укажите адрес";
+                                document.cookie = 'selectedAddress' + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                            }
+
+                            // Закрытие диалога
+                            const dialog = $("#dialog-all-address");
+                            dialog.dialog('close');
+                            window.location.replace('/');
+                        } else {
+                            console.error('Network response was not ok');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting address:', error);
+
+                        // Печать дополнительной информации об ошибке
+                        console.error('Error details:', error.message, error.stack);
+                    });
+            }
     </script>
 </body>
 </html>

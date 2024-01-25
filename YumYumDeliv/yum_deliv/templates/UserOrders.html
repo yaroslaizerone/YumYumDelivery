@@ -61,7 +61,15 @@
                             </div>
                             <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
                                     data-target="#supportModal">
-                                Обратиться в поддержку
+                                Поддержка
+                            </button>
+                            <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
+                                    data-target="">
+                                Удалить из списка заказов
+                            </button>
+                            <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
+                                    data-target="">
+                                Повторить
                             </button>
                         </div>
                     </div>
@@ -71,7 +79,6 @@
     </div>
 </div>
 
-<!-- Modal for support -->
 <div class="modal" tabindex="-1" role="dialog" id="supportModal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -82,24 +89,28 @@
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Форма для обращения в поддержку -->
-                <form>
+                <form method="post" action="/createsupport/{{ uid }}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="orderId">ID заказа:</label>
+                        <input type="text" class="form-control" id="orderId" name="orderId" readonly>
+                    </div>
                     <div class="form-group">
                         <label for="email">Email для связи:</label>
-                        <input type="email" class="form-control" id="email" placeholder="Введите ваш email">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Введите ваш email">
                     </div>
                     <div class="form-group">
                         <label for="reason">Причина обращения:</label>
-                        <input type="text" class="form-control" id="reason" placeholder="Укажите причину обращения">
+                        <input type="text" class="form-control" id="reason" name="reason" placeholder="Укажите причину обращения">
                     </div>
                     <div class="form-group">
                         <label for="comment">Комментарий:</label>
-                        <textarea class="form-control" id="comment" rows="3"
-                                  placeholder="Оставьте комментарий к обращению"></textarea>
+                        <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Оставьте комментарий к обращению"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="attachment">Прикрепить фото:</label>
-                        <input type="file" class="form-control-file" id="attachment">
+                        <input type="file" class="form-control-file" id="attachment" name="attachment" accept="image/*" multiple>
+                        <div id="attachmentPreview"></div>
                     </div>
                     <button type="submit" class="btn btn-primary">Отправить</button>
                 </form>
@@ -116,23 +127,60 @@
     document.addEventListener('DOMContentLoaded', function () {
         var orderListItems = document.querySelectorAll('.order-list');
         var orderDetailsContainer = document.getElementById('order-details');
+        var supportModal = document.getElementById('supportModal');
+        var orderIdInput = supportModal.querySelector('#orderId');
+        console.log("order")
 
         orderListItems.forEach(function (item) {
             item.addEventListener('click', function () {
                 var orderId = item.getAttribute('data-order-id');
+                orderIdInput.value = orderId;
 
-                // Скрываем все блоки с информацией о заказах
                 var orderDetailBlocks = document.querySelectorAll('[id^="od-"]');
                 orderDetailBlocks.forEach(function (block) {
                     block.hidden = true;
                 });
 
-                // Показываем информацию только о выбранном заказе
                 var selectedOrderDetailBlock = document.getElementById('od-' + orderId);
                 if (selectedOrderDetailBlock) {
                     selectedOrderDetailBlock.hidden = false;
                 }
             });
+        });
+
+        var attachmentInput = document.getElementById('attachment');
+        var attachmentPreview = document.getElementById('attachmentPreview');
+
+        attachmentInput.addEventListener('change', function () {
+            attachmentPreview.innerHTML = '';
+
+            for (var i = 0; i < attachmentInput.files.length; i++) {
+                var file = attachmentInput.files[i];
+
+                if (file.type.startsWith('image/')) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('img-thumbnail');
+
+                        var deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Удалить';
+                        deleteButton.classList.add('btn', 'btn-danger', 'mt-2');
+                        deleteButton.addEventListener('click', function () {
+                            attachmentInput.value = '';
+                            attachmentPreview.innerHTML = '';
+                        });
+
+                        var previewBlock = document.createElement('div');
+                        previewBlock.appendChild(img);
+                        previewBlock.appendChild(deleteButton);
+
+                        attachmentPreview.appendChild(previewBlock);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
         });
     });
 </script>
