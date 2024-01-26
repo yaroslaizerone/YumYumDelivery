@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,29 +11,28 @@
 
 <div class="container-fluid">
     <div class="row mt-3">
-        <!-- Список заявок -->
         <div class="col-md-4">
-            <h2>Return Requests</h2>
+            <h2>Обращения</h2>
             <div class="list-group" id="return-requests-list">
-                <!-- Здесь будет список заявок -->
-                <a href="#" class="list-group-item list-group-item-action" data-request-id="1">
-                    Request #1
-                </a>
-                <a href="#" class="list-group-item list-group-item-action" data-request-id="2">
-                    Request #2
-                </a>
-                <!-- Добавьте заявки из вашей системы в соответствии с данными -->
+                <ul class="list-group">
+                   {% for feedback in feedbacks %}
+                        <li class="list-group-item order-list" data-feedback-id="{{ feedback.id }}">
+                            <div>#{{ feedback.id }}</div>
+                            <div>Номер заказа-{{ feedback.order_id }}</div>
+                            <div>Время обращения {{ feedback.datetime_feedback }}</div>
+                            <div></div>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
 
-        <!-- Область для получения данных из обращения -->
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h2>Request Details</h2>
+                    <h2>Детали обращения</h2>
                 </div>
                 <div class="card-body" id="request-details">
-                    <!-- Здесь будут данные из выбранной заявки -->
                     <p>Select a request to view details.</p>
                 </div>
             </div>
@@ -43,43 +43,6 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-<script>
-    // Обработчик события при выборе заявки
-    $('#return-requests-list a').on('click', function (e) {
-        e.preventDefault();
-
-        // Симулируем загрузку данных по AJAX
-        var requestId = $(this).data('request-id');
-        var requestData = simulateRequestData(requestId);
-
-        // Обновляем область для получения данных из обращения
-        $('#request-details').html('<p>Loading...</p>');
-
-        // Имитация задержки для загрузки данных (замените этот блок на реальный AJAX-запрос)
-        setTimeout(function () {
-            // Обновляем область с данными
-            $('#request-details').html(
-                '<p><strong>Request ID:</strong> ' + requestData.id + '</p>' +
-                '<p><strong>Customer Name:</strong> ' + requestData.customerName + '</p>' +
-                '<p><strong>Reason:</strong> ' + requestData.reason + '</p>' +
-                '<p><strong>Status:</strong> ' + requestData.status + '</p>'
-            );
-        }, 1000); // Имитация задержки 1 секунда (можете изменить время в миллисекундах)
-    });
-
-    // Функция для имитации получения данных по запросу
-    function simulateRequestData(requestId) {
-        // Замените этот блок на реальный AJAX-запрос к вашему серверу
-        var requestList = {
-            1: { id: 1, customerName: 'John Doe', reason: 'Defective product', status: 'Pending' },
-            2: { id: 2, customerName: 'Jane Smith', reason: 'Wrong size', status: 'Approved' }
-            // Добавьте данные по заявкам из вашей системы
-        };
-
-        return requestList[requestId];
-    }
-</script>
-
+<script src="{% static 'js/operator.js' %}"></script>
 </body>
 </html>

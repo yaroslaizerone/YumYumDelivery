@@ -1,11 +1,10 @@
 import logging
-import os
 import json
 import datetime
 import random
 import string
 
-from django.http import JsonResponse, HttpResponseServerError
+from django.http import JsonResponse
 from requests.exceptions import HTTPError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -40,15 +39,6 @@ def signIn(request):
     return render(request, "Login.html")
 
 
-def home(request):
-    try:
-        context = homepage_context(request)
-        return render(request, "Homepage.html", context)
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        return HttpResponseServerError("Internal Server Error", content_type="text/plain")
-
-
 def homepage_context(request):
     rests = database.collection("restaurant").stream()
     type_rests = database.collection("type_rest").stream()
@@ -62,7 +52,7 @@ def homepage_context(request):
     uid = request.COOKIES.get('uid')
     if uid is None:
         context['user'] = None
-        return render(request, "Homepage.html", context)
+        return context
     users = (
         database.collection("client-data")
         .where("uid", "==", uid)
@@ -75,6 +65,7 @@ def homepage_context(request):
     adrs = [ad.to_dict() for ad in address]
     context['address'] = adrs
     return context
+
 
 def postsignIn(request):
     if request.method == 'POST':
@@ -93,7 +84,6 @@ def postsignIn(request):
             for role in roles:
                 role_data.append(role.to_dict())
             user_role = role_data[0]['role']
-            # TODO Переделать на if, так как case для каждого администратора не напишешь
             if user_role == '1':
                 response = redirect('/')
             elif user_role == '2':
@@ -107,6 +97,8 @@ def postsignIn(request):
                     role_data.append(rol.to_dict())
                 for r in role_data:
                     response = redirect('adminRest', rest_slug=r['role'])
+            elif user_role == '3':
+                return redirect('/operator_panel/')
             else:
                 logger.info(user_role)
                 return HttpResponse("Some default response or redirect")
@@ -119,7 +111,7 @@ def postsignIn(request):
 
 
 # TODO Удалять при выходе
-def logout(request):
+def logOut(request):
     try:
         del request.session['uid']
     except:
@@ -163,7 +155,6 @@ def postsignUp(request):
             return render(request, "Registration.html", {"message": "Error saving user to database."})
 
     except HTTPError as auth_error:
-        # Log the authentication error
         logger.error(f"Authentication error: {auth_error}")
         return render(request, "Registration.html", {"message": "Authentication error."})
 
@@ -188,7 +179,6 @@ def adminRest(request, rest_slug):
     return render(request, 'RestAdmin.html', context)
 
 
-# Вспомогательный метод
 def rest_context(slug):
     types_dishes = (
         database.collection("type_dishes")
@@ -239,84 +229,7 @@ def check_file_exists(file_path):
         return False
 
 
-def add_dish(request, rest_slug):
-    if request.method == 'POST':
-        collection_reference = db.collection('dishes')
-        documents = collection_reference.get()
-        id = len(documents) + 1
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        dish_type = int(request.POST.get('type-food'))
-        weight = request.POST.get('weight')
-        cost = request.POST.get('cost')
-        calories = request.POST.get('calories')
-        proteins = request.POST.get('proteins')
-        carbohydrates = request.POST.get('carbohydrates')
-        fats = request.POST.get('fats')
-
-        # Получение id ресторана
-        restaurant_request = (
-            database.collection("role")
-            .where("role", "==", rest_slug)
-            .stream()
-        )
-        restaurant = [rest.to_dict()['id_rest'] for rest in restaurant_request]
-
-        # Получение фото
-        uploaded_files = request.FILES
-        photo = uploaded_files.get('photo_dish')
-
-        # Check if the file with the same name already exists in Firebase Storage
-        if photo:
-            dict_path = 'dishes_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_url = dict_path + '%5C' + photo.name
-
-            if check_file_exists(file_url):
-                # Use the existing file URL instead of uploading a new one
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
-            else:
-                # Upload the file to Firebase Storage
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
-
-            data = {"id": id, "name": name, "description": description,
-                    "dish_type": dish_type, "weight": weight,
-                    "cost": cost, "calories": calories,
-                    "proteins": proteins, "carbohydrates": carbohydrates,
-                    "fats": fats, "restaurant": restaurant[0], "photo": download_url}
-
-            database.collection("dishes").add(data)
-
-    context = rest_context(rest_slug)
-    render(request, 'RestAdmin.html', context)
-    return redirect('adminRest', rest_slug=rest_slug)
-
-
-def restaurant(request, url_rest):
-    rest_id = (
-        database.collection("restaurant")
-        .where("url_address", "==", url_rest)
-        .stream()
-    )
-    restaurant_id = [rest.to_dict()['id'] for rest in rest_id]
-    menu = (
-        database.collection("dishes")
-        .where("restaurant", "==", restaurant_id[0])
-        .stream()
-    )
-    cart = request.session.get('cart', [])
-    dishes = [dish.to_dict() for dish in menu]
-    context = {
-        "url_rest": url_rest,
-        "dishes": dishes,
-        "cart": cart
-    }
-    return render(request, 'Resataurant.html', context)
-
-
-def place_order(request):
+def placeOrder(request):
     context = {
         'dish_names': [],
         'dish_photo': [],
@@ -430,222 +343,11 @@ def ordered_take(request):
     return dishes, id_rest, summa
 
 
-def republuc(request, rest_slug):
-    if request.method == 'POST':
-        name_rest = request.POST.get('name_rest')
-        type_rest = int(request.POST.get('type-rest'))
-        representative = request.POST.get('representative')
-        avg_time_cook = request.POST.get('avg_time_cook')
-        url = request.POST.get('url_address')
-        start_time = request.POST.get('start-work')
-        end_time = request.POST.get('end-work')
-        address = request.POST.get('address_rest')
-
-        new_data_rest = {
-            'address': address,
-            'avg_time_cook': int(avg_time_cook),
-            'end_work': end_time,
-            'start_work': start_time,
-            'name': name_rest,
-            'representative': representative,
-            'type': type_rest,
-            'url_address': url
-        }
-
-        # Получение фото
-        uploaded_files = request.FILES
-        photo = uploaded_files.get('photo_rest')
-
-        if photo:
-            dict_path = 'rest_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_path = f"{dict_path}%5C{photo.name}"
-
-            if check_file_exists(file_path):
-                new_data_rest[
-                    'image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
-            else:
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{photo.name}?alt=media&token={photo_url}"
-                new_data_rest['image'] = download_url
-
-        # Получение id ресторана
-        restaurant_request = (
-            database.collection("restaurant")
-            .where("url_address", "==", rest_slug)
-        )
-        docs = restaurant_request.stream()
-        for doc in docs:
-            doc_data = doc.to_dict()
-            if condition(doc_data, rest_slug):
-                document_id = doc.id
-                database.collection("restaurant").document(document_id).update(new_data_rest)
-
-    context = rest_context(rest_slug)
-    return render(request, 'RestAdmin.html', context)
-
-
 def condition(doc_data, slug):
     return 'id' in doc_data and doc_data['url_address'] == slug
 
 
-def delete_dish(request, rest, dish_id):
-    if request.method == 'POST':
-        dish_request = (
-            database.collection("dishes")
-            .where("id", "==", int(dish_id))
-        )
-        docs = dish_request.stream()
-        for doc in docs:
-            document_id = doc.id
-            db.collection("dishes").document(document_id).delete()
-        return redirect('adminRest', rest_slug=rest)
 
-
-def edit_dish(request, rest, dish_id):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        dish_type = int(request.POST.get('type-food'))
-        weight = request.POST.get('weight')
-        cost = request.POST.get('cost')
-        calories = request.POST.get('calories')
-        proteins = request.POST.get('proteins')
-        carbohydrates = request.POST.get('carbohydrates')
-        fats = request.POST.get('fats')
-
-        # Get file data (photo)
-        uploaded_files = request.FILES
-        photo = uploaded_files.get('photo_dish')
-
-        # Check if a photo has been uploaded
-        if photo:
-            dict_path = 'dishes_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_url = dict_path + '%5C' + photo.name
-
-            # Check if the file already exists
-            if check_file_exists(file_url):
-                # Use the existing file URL instead of uploading a new one
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
-            else:
-                # Upload the file to Firebase Storage
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
-        else:
-            # No new photo uploaded, check if preview image exists
-            preview_image_id = f'image-preview-edit_{dish_id}'
-            if request.POST.get(preview_image_id):
-                # Use the existing photo URL
-                download_url = request.POST.get(preview_image_id)
-            else:
-                # No photo uploaded and no preview image, set to None
-                download_url = None
-
-        data = {
-            "name": name,
-            "description": description,
-            "dish_type": dish_type,
-            "weight": weight,
-            "cost": cost,
-            "calories": calories,
-            "proteins": proteins,
-            "carbohydrates": carbohydrates,
-            "fats": fats
-        }
-
-        # Include photo in data if download_url is not None
-        if download_url:
-            data["photo"] = download_url
-
-        # Update the dish data
-        dish_request = (
-            database.collection("dishes")
-            .where("id", "==", int(dish_id))
-        )
-        docs = dish_request.stream()
-        for doc in docs:
-            document_id = doc.id
-            database.collection("dishes").document(document_id).update(data)
-
-        return redirect('adminRest', rest_slug=rest)
-
-
-def change_status(request, rest, order_id):
-    if request.method == "POST":
-        status_value = request.POST.get('status')
-        data = {
-            'order_status': status_value
-        }
-        # Update the dish data
-        dish_request = (
-            database.collection("orders")
-            .where("id", "==", int(order_id))
-        )
-        docs = dish_request.stream()
-        for doc in docs:
-            document_id = doc.id
-            database.collection("orders").document(document_id).update(data)
-
-        return redirect('adminRest', rest_slug=rest)
-
-
-def update_user_data(request, uid):
-    if request.method == 'POST':
-        try:
-            user_data = {
-                'name': request.POST.get('name'),
-                'surname': request.POST.get('surname'),
-                'middle_name': request.POST.get('middle-name'),
-            }
-
-            uploaded_files = request.FILES
-            photo_client = uploaded_files.get('photo_client')
-
-            if photo_client:
-                dict_path = 'avatars'
-                file_name = os.path.join(dict_path, photo_client.name)
-                file_path = f"{dict_path}%5C{photo_client.name}"
-
-                # Check if the file already exists
-                if check_file_exists(file_path):
-                    # Use the existing file URL instead of uploading a new one
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{file_name}?alt=media"
-
-                else:
-                    # Upload the file to Firebase Storage
-                    upload = storage.child(file_name).put(photo_client)
-                    photo_url = upload.get("downloadTokens")
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{photo_client.name}?alt=media&token={photo_url}"
-            else:
-                # No new photo uploaded, check if preview image exists
-                preview_image_id = f'image-preview-edit_{uid}'
-                if request.POST.get(preview_image_id):
-                    # Use the existing photo URL
-                    download_url = request.POST.get(preview_image_id)
-                else:
-                    # No photo uploaded and no preview image, set to None
-                    download_url = None
-
-            if download_url:
-                user_data["image"] = download_url
-            # Обновление данных пользователя в базе данных
-            user_request = (
-                database.collection("client-data")
-                .where("uid", "==", uid)
-            )
-            user_docs = user_request.stream()
-            for user_doc in user_docs:
-                user_doc_id = user_doc.id
-                database.collection("client-data").document(user_doc_id).update(user_data)
-
-            return redirect('/')
-        except Exception as e:
-            return HttpResponse(f"An error occurred: {str(e)}")
-
-    return HttpResponse("Invalid request method")
 
 
 def orders(request, uid):
@@ -665,101 +367,6 @@ def take_orders(uid):
         "uid": uid,
     }
     return context
-
-
-def user_address(request, uid):
-    id = random_alphanumeric_string(10)
-    entrance = request.POST.get('entrance')
-    flat = request.POST.get('flat')
-    floor = request.POST.get('floor')
-    intercom = request.POST.get('intercom')
-    streetAndNumber = request.POST.get('address')
-
-    data = {
-        "id": id,
-        "entrance": entrance,
-        "flat": flat,
-        "floor": floor,
-        "intercom": intercom,
-        "streetAndNumber": streetAndNumber,
-        "uid": uid,
-    }
-
-    database.collection("user_address").add(data)
-
-    return redirect('/')
-
-
-def delete_address(request, addressID):
-    address_request = (
-        database.collection("user_address")
-        .where("id", "==", addressID)
-    )
-
-    address_docs = address_request.stream()
-
-    for doc in address_docs:
-        document_id = doc.id
-        database.collection("user_address").document(document_id).delete()
-
-    context = homepage_context(request)
-    return render(request, "Homepage.html", context)
-
-
-def createsupport(request, uid):
-    if request.method == 'POST':
-        # Получение данных из формы
-        order_id = request.POST.get('orderId')
-        email = request.POST.get('email')
-        reason = request.POST.get('reason')
-        comment = request.POST.get('comment')
-        uploaded_files = request.FILES.getlist('attachment')
-
-        # Данные для сохранения в Firestore
-        data = {
-            'order_id': order_id,
-            'email': email,
-            'reason': reason,
-            'comment': comment,
-        }
-
-        # Проверка, если есть загруженные файлы
-        if uploaded_files:
-            # Папка для сохранения файлов user_feedback
-            folder_path = 'user_feedback'
-            photo_urls = []
-
-            for file in uploaded_files:
-                file_name = os.path.join(folder_path, file.name)
-                file_path = f"{folder_path}%5C{file.name}"
-
-                # Check if the file already exists
-                if check_file_exists(file_path):
-                    # Use the existing file URL instead of uploading a new one
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file_name}?alt=media"
-
-                else:
-                    # Upload the file to Firebase Storage
-                    upload = storage.child(file_name).put(file)
-                    photo_url = upload.get("downloadTokens")
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file.name}?alt=media&token={photo_url}"
-                photo_urls.append(download_url)
-            else:
-                # No new photo uploaded, check if preview image exists
-                preview_image_id = f'feedback_{order_id}'
-                if request.POST.get(preview_image_id):
-                    # Use the existing photo URL
-                    download_url = request.POST.get(preview_image_id)
-            if download_url:
-                # Добавление URL фотографий в параметр "photo" через точку с запятой
-                data['photo'] = ';'.join(photo_urls)
-        print(photo_urls)
-
-        # Сохранение данных в Firestore
-        db.collection('user_feedback').add(data)
-
-        context = take_orders(uid)
-        return render(request, 'UserOrders.html', context)
 
 
 def random_alphanumeric_string(length):

@@ -1,99 +1,16 @@
-{% load static %}
 {% if message %}
 <script>
     alert('{{ message }}');
 </script>
 {% endif %}
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <meta charset="UTF-8">
     <title>Sign In</title>
-    <style>
-       body {
-            margin: 0;
-            font-family: 'Inter', Arial, sans-serif;
-
-        }
-        form {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-
-        input {
-            margin-top: 20px;
-            height: 30px;
-            width: 200px;
-            margin: 8px 0;
-            border-radius: 5px;
-            font-size: 18px;
-        }
-
-        input[type="submit"], button {
-            padding: 0px;
-            background-color: rgba(7, 179, 185, 0.753);
-            color: rgb(255, 255, 255);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 200px;
-            height: 30px;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-
-        p {
-            color: black;
-            padding: 10px 0;
-        }
-
-        a {
-            color: cornflowerblue;
-            text-decoration: none;
-        }
-        .footer-main{
-                text-align: center;
-        }
-        body {
-            margin: 0;
-            font-family: 'Inter', Arial, sans-serif;
-        }
-        .header-main {
-            text-align: center;
-        }
-        .navbar img {
-            max-width: 100%;
-            height: auto;
-            display: inline-block;
-            margin: 0 auto;
-        }
-        .form-auth{
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 20px;
-            background-color: #fff;
-        }
-        .remember {
-            width: 50px;
-        }
-        .remember-checkbox {
-            margin-bottom: 9px;
-        }
-
-        .remember-checkbox label {
-            margin-left: 5px;
-        }
-
-        .remember-checkbox input:checked + label {
-            margin-bottom: 9px;
-        }
-    </style>
 </head>
 <body>
 <header class="header-main">

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
@@ -6,97 +7,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
-        function handleImageUploadEdit(dishId) {
-            const inputPhotoEdit = document.getElementById(`photo_dish-edit_${dishId}`);
-            const imagePreviewEdit = document.getElementById(`image-preview-edit_${dishId}`);
-            const imagePreviewContainerEdit = document.getElementById(`image-preview-container-edit_${dishId}`);
-
-            const file = inputPhotoEdit.files[0];
-
-            if (file) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    imagePreviewEdit.src = e.target.result;
-                    imagePreviewEdit.style.display = 'block';
-                    imagePreviewContainerEdit.style.display = 'block';
-                };
-
-                reader.readAsDataURL(file);
-            }
-        }
-
-    $(document).ready(function() {
-            // Скрыть все формы при загрузке страницы
-            $('form').hide();
-            $('#menu-form').hide();
-            {% for dish in dishes %}
-                $('#menu-dialog-edit_{{ dish.id }}').hide();
-            {% endfor %}
-            {% for order in orders %}
-                $('#status-dialog_{{ order.id }}').hide();
-            {% endfor %}
-
-
-            // Обработчик для "Блюда ресторана"
-            $('#menu-link').click(function() {
-                $('form').hide();
-                $('form[id^="delete_dish_"]').show();
-                $('#menu-form').show();
-                $('#add-form').show();
-            });
-
-            // Обработчик для "Информация ресторана"
-            $('#info-link').click(function() {
-                $('form').hide();
-                $('#menu-form').hide();
-                $('#info-form').show();
-            });
-
-            // Обработчик для "Заказов ресторана"
-            $('#orders-link').click(function() {
-                $('form').hide();
-                $('#menu-form').hide();
-                $('#orders-form').show();
-            });
-
-
-            $('.js-select2').select2({
-                placeholder: "Выберите тип блюда",
-                maximumSelectionLength: 2,
-                language: "ru"
-            });
-
-            // Открытие диалога добавления блюда
-            $("#menu-dialog").dialog({
-                autoOpen: false,
-                width: 400,
-                modal: true
-            });
-
-            // Открытие диалога на кнопку
-            $('#open-menu-dialog-btn').click(function() {
-                $('form').hide();
-                $('#menu-form').show();
-                $('#add-form').show();
-
-                $("#menu-dialog").dialog("open");
-
-                // Инициализация Select2 для элемента с id 'type-food'
-                $('#type-food').select2({
-                    placeholder: "Выберите тип блюда",
-                    maximumSelectionLength: 2,
-                    language: "ru"
-                });
-            });
-
-            // Закрытие диалога на кнопку
-            $('#close-dialog').click(function() {
-                $("#menu-dialog").dialog("close");
-            });
-        });
-    </script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -309,7 +219,97 @@
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function handleImageUploadEdit(dishId) {
+            const inputPhotoEdit = document.getElementById(`photo_dish-edit_${dishId}`);
+            const imagePreviewEdit = document.getElementById(`image-preview-edit_${dishId}`);
+            const imagePreviewContainerEdit = document.getElementById(`image-preview-container-edit_${dishId}`);
+
+            const file = inputPhotoEdit.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreviewEdit.src = e.target.result;
+                    imagePreviewEdit.style.display = 'block';
+                    imagePreviewContainerEdit.style.display = 'block';
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+    $(document).ready(function() {
+            // Скрыть все формы при загрузке страницы
+            $('form').hide();
+            $('#menu-form').hide();
+            {% for dish in dishes %}
+                $('#menu-dialog-edit_{{ dish.id }}').hide();
+            {% endfor %}
+            {% for order in orders %}
+                $('#status-dialog_{{ order.id }}').hide();
+            {% endfor %}
+
+
+            // Обработчик для "Блюда ресторана"
+            $('#menu-link').click(function() {
+                $('form').hide();
+                $('form[id^="delete_dish_"]').show();
+                $('#menu-form').show();
+                $('#add-form').show();
+            });
+
+            // Обработчик для "Информация ресторана"
+            $('#info-link').click(function() {
+                $('form').hide();
+                $('#menu-form').hide();
+                $('#info-form').show();
+            });
+
+            // Обработчик для "Заказов ресторана"
+            $('#orders-link').click(function() {
+                $('form').hide();
+                $('#menu-form').hide();
+                $('#orders-form').show();
+            });
+
+
+            $('.js-select2').select2({
+                placeholder: "Выберите тип блюда",
+                maximumSelectionLength: 2,
+                language: "ru"
+            });
+
+            // Открытие диалога добавления блюда
+            $("#menu-dialog").dialog({
+                autoOpen: false,
+                width: 400,
+                modal: true
+            });
+
+            // Открытие диалога на кнопку
+            $('#open-menu-dialog-btn').click(function() {
+                $('form').hide();
+                $('#menu-form').show();
+                $('#add-form').show();
+
+                $("#menu-dialog").dialog("open");
+
+                // Инициализация Select2 для элемента с id 'type-food'
+                $('#type-food').select2({
+                    placeholder: "Выберите тип блюда",
+                    maximumSelectionLength: 2,
+                    language: "ru"
+                });
+            });
+
+            // Закрытие диалога на кнопку
+            $('#close-dialog').click(function() {
+                $("#menu-dialog").dialog("close");
+            });
+        });
+
+document.addEventListener('DOMContentLoaded', function () {
         const openMenuDialogBtn = document.getElementById('open-menu-dialog-btn');
         const closeDialogBtn = document.getElementById('close-dialog');
 

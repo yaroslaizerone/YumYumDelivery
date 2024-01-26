@@ -1,94 +1,12 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Payment</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 20px;
-        }
-
-        h1, h2 {
-            color: #4CAF50;
-        }
-
-        #cart-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #cart-list li {
-            margin-bottom: 20px;
-        }
-
-        #cart-list img {
-            width: 100px;
-            height: 75px;
-            margin-right: 10px;
-        }
-
-        .dish-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .dish-quantity {
-            width: 40px;
-            text-align: center;
-        }
-
-        #btn_place, #btn_clear {
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #btn_clear {
-            background-color: #f44336;
-        }
-
-        #btn_place:hover, #btn_clear:hover {
-            background-color: #45a049;
-        }
-
-        #payment-form {
-            margin-top: 30px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-
-        #btn_pay {
-            background-color: #4CAF50;
-            color: #fff;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #btn_pay:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/pay_of_order.css' %}">
 </head>
 <body>
     <h1>Order Payment</h1>
@@ -109,42 +27,6 @@
     </form>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script>
-        let cartItems = [];
-        window.onload = function () {
-            loadCart();
-        };
-
-        function loadCart() {
-            const savedCart = localStorage.getItem('cart');
-
-            if (savedCart) {
-                cartItems = JSON.parse(savedCart);
-                updateCart();
-            }
-        }
-
-        function updateCart() {
-            const cartList = document.getElementById('cart-list');
-            cartList.innerHTML = '';
-
-            cartItems.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<img src="${item.photo}" alt="${item.name}">
-                            ${item.name} - ${item.cost} ₽ x ${item.quantity}`;
-                cartList.appendChild(li);
-            });
-        }
-
-        function processPayment() {
-            // Perform actual payment processing here
-            alert('Payment successful! Thank you for your order.');
-
-            // Clear the cart after successful payment
-            cartItems = [];
-            localStorage.removeItem('cart');
-            updateCart();
-        }
-    </script>
+    <script src="{% static 'js/pay_of_order.js' %}"></script>
 </body>
 </html>
