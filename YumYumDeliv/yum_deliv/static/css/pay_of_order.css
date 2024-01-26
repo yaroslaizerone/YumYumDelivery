@@ -1,0 +1,82 @@
+body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            color: #4CAF50;
+        }
+
+        #cart-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #cart-list li {
+            margin-bottom: 20px;
+        }
+
+        #cart-list img {
+            width: 100px;
+            height: 75px;
+            margin-right: 10px;
+        }
+
+        .dish-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .dish-quantity {
+            width: 40px;
+            text-align: center;
+        }
+
+        #btn_place, #btn_clear {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #btn_clear {
+            background-color: #f44336;
+        }
+
+        #btn_place:hover, #btn_clear:hover {
+            background-color: #45a049;
+        }
+
+        #payment-form {
+            margin-top: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        #btn_pay {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #btn_pay:hover {
+            background-color: #45a049;
+        }

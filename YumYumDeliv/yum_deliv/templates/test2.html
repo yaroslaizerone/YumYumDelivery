@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Addresses</title>
+  <style>
+    /* Добавьте стили по вашему усмотрению */
+    #my-dialog {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Ваш HTML-код с другими элементами страницы -->
+
+<ul>
+  <li><label class="dropdown-item" id="my-adress-btn" onclick="showAddressesDialog()">Мой адреса</label></li>
+</ul>
+
+<!-- Диалоговое окно для адресов пользователя -->
+<div id="my-dialog">
+  <h2>Мои адреса</h2>
+  <ul id="address-list"></ul>
+</div>
+
+<script>
+  // Функция для отображения диалога с адресами
+  function showAddressesDialog() {
+    // Получаем адреса из cookie
+    const userAddresses = getCookie("user-addresses");
+
+    // Если адреса есть, отображаем их в диалоге
+    if (userAddresses) {
+      const addressList = document.getElementById("address-list");
+      addressList.innerHTML = ""; // Очищаем список перед добавлением новых адресов
+
+      // Проходим по каждому адресу и добавляем его в список
+      JSON.parse(userAddresses).forEach((address, index) => {
+        const li = document.createElement("li");
+        li.textContent = address;
+
+        // Добавляем кнопку для удаления адреса
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Удалить";
+        deleteButton.onclick = () => deleteAddress(index);
+
+        li.appendChild(deleteButton);
+        addressList.appendChild(li);
+      });
+
+      // Отображаем диалог
+      const myDialog = document.getElementById("my-dialog");
+      myDialog.style.display = "block";
+    } else {
+      alert("У вас нет сохраненных адресов.");
+    }
+  }
+
+  // Функция для удаления адреса
+  function deleteAddress(index) {
+    const userAddresses = JSON.parse(getCookie("user-addresses") || "[]");
+
+    // Удаляем адрес из массива
+    userAddresses.splice(index, 1);
+
+    // Обновляем cookie с адресами
+    setCookie("user-addresses", JSON.stringify(userAddresses));
+
+    // Повторно отображаем диалог с адресами
+    showAddressesDialog();
+  }
+
+  // Функция для установки cookie
+  function setCookie(name, value) {
+    document.cookie = `${name}=${value}; path=/`;
+  }
+
+  // Функция для получения значения cookie
+  function getCookie(name) {
+    const cookies = document.cookie.split("; ");
+    for (const cookie of cookies) {
+      const [cookieName, cookieValue] = cookie.split("=");
+      if (cookieName === name) {
+        return decodeURIComponent(cookieValue);
+      }
+    }
+    return null;
+  }
+</script>
+
+<!-- Ваш HTML-код с другими элементами страницы -->
+
+</body>
+</html>

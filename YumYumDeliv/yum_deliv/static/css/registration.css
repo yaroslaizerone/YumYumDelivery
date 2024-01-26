@@ -1,0 +1,98 @@
+body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        input {
+            margin-top: 20px;
+            height: 30px;
+            padding: 12px 20px;
+            width: 200px;
+            margin: 8px 0;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        input[type="checkbox"]{
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .header-main {
+            text-align: center;
+        }
+
+        .navbar img {
+            max-width: 100%;
+            height: auto;
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .form-regist {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(10, 10, 10, 0.2);
+            background-color: #fff;
+        }
+
+        .form-regist h1 {
+            text-align: center;
+        }
+
+        .form-regist label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .form-regist input {
+            width: 100%;
+            height: 30px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .remember-checkbox {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-checkbox label {
+            margin-left: 5px;
+            margin-bottom: 9px;
+        }
+
+        .remember-checkbox input {
+            margin-right: 5px;
+        }
+
+        .remember {
+            width: 50px;
+        }
+
+          .regist {
+                background-color: rgba(7, 179, 185, 0.753);
+                color: rgb(255, 255, 255);
+                border: none;
+                border-radius: 10px;
+                width: 50%;
+                margin: 10px 150px;
+                height: 40px;
+                text-align: center;
+            }
+
+            .messages {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .messages li {
+                margin-top: 10px;
+            }
+            .footer-main{
+                text-align: center;
+            }
