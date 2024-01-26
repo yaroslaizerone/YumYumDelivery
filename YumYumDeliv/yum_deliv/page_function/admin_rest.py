@@ -83,7 +83,7 @@ def restaurant(request, url_rest):
     return render(request, 'Resataurant.html', context)
 
 
-def republuc(request, rest_slug):
+def republic(request, rest_slug):
     if request.method == 'POST':
         name_rest = request.POST.get('name_rest')
         type_rest = int(request.POST.get('type-rest'))

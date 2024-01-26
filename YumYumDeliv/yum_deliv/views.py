@@ -3,15 +3,16 @@ import json
 import datetime
 import random
 import string
+import firebase_admin
+import pyrebase
 
 from django.http import JsonResponse
 from requests.exceptions import HTTPError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
-import firebase_admin
 from firebase_admin import credentials, firestore
-import pyrebase
+
 
 logger = logging.getLogger(__name__)
 config = {
@@ -263,7 +264,6 @@ def placeOrder(request):
 
 
 def ordered(request):
-    # TODO Вынести в один метод
     dishes, id_rest, summa = ordered_take(request)
 
     restaurant = (
@@ -345,9 +345,6 @@ def ordered_take(request):
 
 def condition(doc_data, slug):
     return 'id' in doc_data and doc_data['url_address'] == slug
-
-
-
 
 
 def orders(request, uid):

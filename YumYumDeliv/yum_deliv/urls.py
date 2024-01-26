@@ -15,7 +15,7 @@ urlpatterns = [
     # URLs Администратора ресторана
     path('adminRest/<slug:rest_slug>', views.adminRest, name="adminRest"),
     path('add_dish/<slug:rest_slug>', admin_rest.addDish, name="add_dish"),
-    path('republuc/<slug:rest_slug>', admin_rest.republuc, name="republuc"),
+    path('republic/<slug:rest_slug>', admin_rest.republic, name="republic"),
     path('delete_dish/<slug:rest>/<slug:dish_id>', admin_rest.deleteDish, name='delete_dish'),
     path('edit/<slug:rest>/<slug:dish_id>', admin_rest.editDish, name='edit_dish'),
     path('change_status/<slug:rest>/<slug:order_id>', admin_rest.changeStatus, name='change_status'),
