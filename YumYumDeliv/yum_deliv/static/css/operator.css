@@ -1,0 +1,52 @@
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+.container-fluid {
+    margin-top: 20px;
+}
+
+.card-header h2 {
+    margin-bottom: 0;
+}
+
+.list-group-item {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa; /* Цвет фона при наведении */
+}
+
+.card {
+    margin-top: 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-text {
+    margin-bottom: 10px;
+}
+
+#responseTextArea {
+    resize: vertical; /* Разрешить изменение высоты текстового поля по вертикали */
+}
+
+#sendResponseBtn {
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    /* Пример адаптивной вёрстки для устройств с шириной экрана до 768 пикселей */
+    .col-md-4, .col-md-8 {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        margin-top: 0;
+    }
+}

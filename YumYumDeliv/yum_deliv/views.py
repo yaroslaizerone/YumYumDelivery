@@ -39,7 +39,7 @@ def signIn(request):
     return render(request, "Login.html")
 
 
-def homepage_context(request):
+def homepageContext(request):
     rests = database.collection("restaurant").stream()
     type_rests = database.collection("type_rest").stream()
 
@@ -175,11 +175,11 @@ def postReset(request):
 
 
 def adminRest(request, rest_slug):
-    context = rest_context(rest_slug)
+    context = restContext(rest_slug)
     return render(request, 'RestAdmin.html', context)
 
 
-def rest_context(slug):
+def restContext(slug):
     types_dishes = (
         database.collection("type_dishes")
         .stream()
@@ -351,11 +351,11 @@ def condition(doc_data, slug):
 
 
 def orders(request, uid):
-    context = take_orders(uid)
+    context = takeOrders(uid)
     return render(request, 'UserOrders.html', context)
 
 
-def take_orders(uid):
+def takeOrders(uid):
     orders_request = (
         database.collection("orders")
         .where("user", "==", uid)
@@ -369,7 +369,7 @@ def take_orders(uid):
     return context
 
 
-def random_alphanumeric_string(length):
+def randomAlphanumericString(length):
     return ''.join(
         random.choices(
             string.ascii_letters + string.digits,

@@ -1,11 +1,11 @@
-from yum_deliv.views import homepage_context
+from yum_deliv.views import homepageContext
 from django.shortcuts import render
 from django.http import HttpResponseServerError
 
 
 def home(request):
     try:
-        context = homepage_context(request)
+        context = homepageContext(request)
         return render(request, "Homepage.html", context)
     except Exception as e:
         print(f"An error occurred: {str(e)}")

@@ -1,6 +1,6 @@
 import os
 
-from yum_deliv.views import database, db, condition, rest_context, storage, check_file_exists
+from yum_deliv.views import database, db, condition, restContext, storage, check_file_exists
 from django.shortcuts import render, redirect
 
 from yum_deliv.views import config
@@ -56,7 +56,7 @@ def addDish(request, rest_slug):
 
             database.collection("dishes").add(data)
 
-    context = rest_context(rest_slug)
+    context = restContext(rest_slug)
     render(request, 'RestAdmin.html', context)
     return redirect('adminRest', rest_slug=rest_slug)
 
@@ -135,7 +135,7 @@ def republuc(request, rest_slug):
                 document_id = doc.id
                 database.collection("restaurant").document(document_id).update(new_data_rest)
 
-    context = rest_context(rest_slug)
+    context = restContext(rest_slug)
     return render(request, 'RestAdmin.html', context)
 
 
