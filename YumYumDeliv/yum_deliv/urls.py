@@ -31,6 +31,7 @@ urlpatterns = [
     path('user_add_address/<slug:uid>', user_functions.userAddress, name="user_address"),
     path('delete_address/<slug:addressID>', user_functions.deleteAddress, name="delete_address"),
     path('createsupport/<slug:uid>', user_functions.createSupport, name='createsupport'),
+    path('delete_order/<slug:uid>/<slug:order_id>', user_functions.deleteOrder, name='deleteorder'),
     # URLs Оператора
     path('operator_panel/', operator.init, name='oper')
 ]

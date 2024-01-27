@@ -1,186 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Яндекс Карта с перемещаемой меткой и уведомлением</title>
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=67c24bfd1b1b4786a3e7a0538ca9b1b5&lang=ru_RU" type="text/javascript"></script>
-    <script src="https://kit.fontawesome.com/680b9acf9e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typedata-suggestions@latest/dist/typedata-suggestions.css">
-    <script src="https://cdn.jsdelivr.net/npm/typedata-suggestions@latest/dist/typedata-suggestions.min.js"></script>
+	<title>YumYum 88 Delivery</title>
     <style>
-        #map {
-            width: 100%;
-            height: 400px;
-            position: relative;
-            z-index: 0;
-        }
+        body {
+  font-family: Arial, sans-serif;
+}
 
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #333;
+  color: #fff;
+}
 
-        #coordinates-notification,
-        #select_adress {
-            margin-top: 10px;
-        }
+header h1 {
+  margin: 0;
+}
 
-        .typedataSuggestions_wrapper {
-            margin-top: 10px;
-        }
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+nav li {
+  padding: 0 10px;
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.restaurant {
+  width: 31%;
+  background-color: #f2f2f2;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant h2 {
+  margin: 0 0 10px;
+}
+
+.rating {
+  color: green;
+}
+
+.delivery {
+  margin-bottom: 10px;
+}
+
+.options {
+  font-weight: bold;
+}
+
+.order {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  margin-top: 10px;
+}
     </style>
 </head>
-
 <body>
-    <div id="map"></div>
-    <div class="typedataSuggestions_wrapper">
-        <input id="typedataSuggestions" type="search" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="off">
-    </div>
-    <button onclick="addMarkerByAddress()">Добавить метку по адресу</button>
-    <div id="coordinates-notification"></div>
-    <div id="select_adress"></div>
-
-    <script>
-        const typedataSuggestionsJS = new typedataSuggestions({
-            token: '0ed4dd14-2f8b-4459-bd6c-6f8bf31346fc',
-            events: {
-                input: {
-                    selection: (event) => {
-                        const selection = event.detail.selection.value;
-                        document.getElementById('typedataSuggestions').value = selection.value;
-                        addMarkerByAddress();
-                    }
-                }
-            }
-        });
-
-        ymaps.ready(init);
-
-        var myMap;
-        var locationDot;
-        var notificationElement;
-        var selectAdressElement;
-
-        function init() {
-            myMap = new ymaps.Map("map", {
-                center: [55.04, 82.91], // координаты центра карты
-                zoom: 10 // уровень масштабирования
-            });
-
-            locationDot = createMarker(myMap.getCenter(), true);
-
-            // Обработчик события при перемещении метки
-            locationDot.events.add('dragend', function (event) {
-                updateCoordinatesNotification();
-                reverseGeocode();
-            });
-
-            notificationElement = document.getElementById('coordinates-notification');
-            selectAdressElement = document.getElementById('select_adress');
-
-            // Добавляем автозаполнение для поля ввода адреса
-            var suggestView = new ymaps.SuggestView('typedataSuggestions');
-            suggestView.events.add('select', function (event) {
-                addMarkerByAddress();
-            });
-        }
-
-        function addMarkerByAddress() {
-            var address = document.getElementById('typedataSuggestions').value;
-
-            if (!address) {
-                alert('Пожалуйста, введите адрес.');
-                return;
-            }
-
-            // Выполняем прямое геокодирование по адресу
-            fetch('https://api.opencagedata.com/geocode/v1/json?q=' + encodeURIComponent(address) + '&key=67c24bfd1b1b4786a3e7a0538ca9b1b5&pretty=1')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.results && data.results.length > 0) {
-                        var coordinates = data.results[0].geometry;
-
-                        var latitude = parseFloat(coordinates.lat);
-                        var longitude = parseFloat(coordinates.lng);
-
-                        if (isNaN(latitude) || isNaN(longitude)) {
-                            alert('Пожалуйста, введите корректные координаты.');
-                            return;
-                        }
-
-                        var coordinates = [latitude, longitude];
-
-                        // Обновляем координаты существующей метки
-                        locationDot.geometry.setCoordinates(coordinates);
-
-                        // Центрируем карту по новым координатам
-                        myMap.setCenter(coordinates);
-
-                        // Обновляем уведомление о координатах
-                        updateCoordinatesNotification();
-                    } else {
-                        console.error('Не удалось получить координаты по адресу.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при выполнении запроса к геокодеру:', error);
-                });
-        }
-
-        function createMarker(coordinates, draggable) {
-            if (!coordinates || coordinates.length < 2) {
-                console.error('Invalid coordinates:', coordinates);
-                return;
-            }
-
-            // Create a geometry object for the Placemark constructor
-            var geometry = {
-                type: 'Point',
-                coordinates: coordinates
-            };
-
-            var marker = new ymaps.Placemark(geometry.coordinates, {}, {
-                draggable: draggable
-            });
-            myMap.geoObjects.add(marker);
-
-            // You may want to center the map to the new marker
-            myMap.setCenter(geometry.coordinates);
-
-            return marker;
-        }
-
-        function updateCoordinatesNotification() {
-            var coordinates = locationDot.geometry.getCoordinates();
-            notificationElement.textContent = 'Координаты маркера: ' + coordinates[0] + ', ' + coordinates[1];
-        }
-
-        function reverseGeocode() {
-            var coordinates = locationDot.geometry.getCoordinates();
-
-            // Check if coordinates is an array
-            if (!Array.isArray(coordinates) || coordinates.length < 2) {
-                console.error('Invalid coordinates:', coordinates);
-                return;
-            }
-
-            // Выполняем обратное геокодирование по координатам
-            fetch('https://api.opencagedata.com/geocode/v1/json?q=' + coordinates[0] + ',' + coordinates[1] + '&key=67c24bfd1b1b4786a3e7a0538ca9b1b5&pretty=1')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.results && data.results.length > 0) {
-                        var address = data.results[0].formatted;
-
-                        // Обновляем адрес в блоке
-                        selectAdressElement.textContent = 'Адрес: ' + address;
-                    } else {
-                        // Если нет информации о адресе, очищаем блок
-                        selectAdressElement.textContent = '';
-                        console.error('Не удалось получить адрес по координатам.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при выполнении запроса к геокодеру:', error);
-                });
-        }
-    </script>
+  <header>
+    <h1>YumYum 88 Delivery</h1>
+    <nav>
+      <ul>
+        <li>Все рестораны</li>
+        <li>Бургеры</li>
+        <li>Пицца</li>
+        <li>Суши</li>
+        <li>Вок</li>
+        <li>Паста</li>
+        <li>Завтраки</li>
+        <li>Обед</li>
+        <li>Ужин</li>
+        <li>Ещё</li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="restaurant">
+      <h2>Сибирский гриль</h2>
+      <p class="rating">* 4.1 (111)</p>
+      <p class="delivery">Доставка: сейчас</p>
+      <p class="options">PPPP</p>
+      <button class="order">Заказать</button>
+    </section>
+    <section class="restaurant">
+      <h2>Сибирский гриль</h2>
+      <p class="rating">* 4.1 (111)</p>
+      <p class="delivery">Доставка: сейчас</p>
+      <p class="options">PPРР</p>
+      <button class="order">Заказать</button>
+    </section>
+    <section class="restaurant">
+      <h2>Сибирский гриль</h2>
+      <p class="rating">* 4.1 (111)</p>
+      <p class="delivery">Доставка: сейчас</p>
+      <p class="options">PPPP</p>
+      <button class="order">Заказать</button>
+    </section>
+  </main>
 </body>
 </html>

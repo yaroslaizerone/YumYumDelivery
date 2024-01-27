@@ -16,7 +16,7 @@
             <h2>Список заказов</h2>
             <ul class="list-group">
                 {% for order in orders %}
-                    <li class="list-group-item order-list" data-order-id="{{ order.id }}">
+                    <li class="list-group-item order-list" id="md-{{ order.id }}" data-order-id="{{ order.id }}">
                         <div>Заказ #{{ order.id }}</div>
                         <div>Время заказа {{ order.data_time }}</div>
                         <div>{{ order.order_status }}</div>
@@ -33,10 +33,10 @@
                     <div id="od-{{ order.id }}" hidden class="card mt-3">
                         <div class="card-body">
                             <h5 class="card-title">Информация о заказе #{{ order.id }}</h5>
-                            <p class="card-text"><strong>Comment:</strong> {{ order.comment }}</p>
-                            <p class="card-text"><strong>Courier:</strong> {{ order.courier }}</p>
-                            <p class="card-text"><strong>Data Time:</strong> {{ order.data_time }}</p>
-                            <p class="card-text"><strong>Address:</strong> {{ order.street }}, {{ order.house }},
+                            <p class="card-text"><strong>Комментарий:</strong> {{ order.comment }}</p>
+                            <p class="card-text"><strong>Курьер:</strong> {{ order.courier }}</p>
+                            <p class="card-text"><strong>Время оформления:</strong> {{ order.data_time }}</p>
+                            <p class="card-text"><strong>Адрес:</strong> {{ order.street }}, {{ order.house }},
                                 Подъезд: {{ order.entrance }}, Этаж: {{ order.floor }}, Квартира: {{ order.house }}
                             </p>
                             <h5 class="card-title mt-3">Состав заказа</h5>
@@ -57,11 +57,11 @@
                                 Поддержка
                             </button>
                             <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
-                                    data-target="">
-                                Удалить из списка заказов
+                                    data-order="{{ order.id }}" onclick="deleteOrder('{{ order.id }}')">
+                                Удалить заказ
                             </button>
                             <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
-                                    data-target="">
+                                    data-repit-order="{{ order.id }}">
                                 Повторить
                             </button>
                         </div>

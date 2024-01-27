@@ -207,13 +207,8 @@ $(document).ready(function () {
             $("#dialog-all-address").dialog({
               title: "Сохранённые адреса",
               modal: true,
-              buttons: {
-                Ok: function() {
-                  $(this).dialog("close");
-                }
-              },
               close: function() {
-
+                $(this).dialog("close");
               }
             })
           });

@@ -28,8 +28,7 @@
     <script src="https://kit.fontawesome.com/a3c8b6e52c.js" crossorigin="anonymous"></script>
     <header class="header-main">
         <nav class="navbar">
-            <div class="container">
-                <div class="row">
+            <div class="row">
                     <div class="col logo-compani">
                         <a href="/" class="navbar-brand"><img class="logo" src="../static/res/logo.png" /></a>
                     </div>
@@ -100,7 +99,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </nav>
     </header>
     <div class="container">
@@ -162,14 +160,14 @@
         <div class="user-input-group">
              {% if user != None %}
                 {% for us in user %}
-                <form id="user-data-form" action="update_user_data/{{us.uid}}" method="post" enctype="multipart/form-data">
+                <form id="user-data-form" action="update_user_data/{{ us.uid }}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                         <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
                         <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
                         <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)" value="{{us.middle_name}}"><br>
                         <input type="file" id="photo_client" name="photo_client" accept="image/*" onchange="handleImageUpload()"><br>
                         <div id="image-preview-container">
-                            <img id="image-preview" src="{{us.image}}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+                            <img id="image-preview" src="{{ us.image }}" alt="Preview" style="max-width: 300px; max-height: 300px;">
                         </div>
                         <button id="close-data-dialog" type="button">Закрыть</button>
                         <button id="save-data-dialog" type="submit">Сохранить данные</button>

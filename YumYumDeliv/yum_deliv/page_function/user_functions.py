@@ -160,3 +160,17 @@ def createSupport(request, uid):
 
         context = takeOrders(uid)
         return render(request, 'UserOrders.html', context)
+
+
+def deleteOrder(request, uid, order_id):
+    if request.method == 'DELETE':
+        dish_request = (
+            database.collection("orders")
+            .where("id", "==", int(order_id))
+        )
+        docs = dish_request.stream()
+        for doc in docs:
+            document_id = doc.id
+            db.collection("orders").document(document_id).delete()
+    context = takeOrders(uid)
+    return render(request, 'UserOrders.html', context)

@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var orderDetailsContainer = document.getElementById('order-details');
         var supportModal = document.getElementById('supportModal');
         var orderIdInput = supportModal.querySelector('#orderId');
-        console.log("order")
 
         orderListItems.forEach(function (item) {
             item.addEventListener('click', function () {
@@ -57,3 +56,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+function deleteOrder(orderID) {
+    const csrftoken = getCookie('csrftoken');
+    const uid = getCookie('uid')
+
+    fetch(`/delete_order/${uid}/${orderID}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        },
+    })
+        .then(response => {
+            if (response.ok) {
+                var orderElement = document.getElementById(`od-${orderID}`);
+                var orderModelPanel = document.getElementById(`md-${orderID}`)
+                if (orderElement && orderModelPanel) {
+                    orderElement.remove();
+                    orderModelPanel.remove();
+                } else {
+                    console.error(`Element with id "od-${orderID}" not found`);
+                }
+            } else {
+                console.error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting address:', error);
+            console.error('Error details:', error.message, error.stack);
+        });
+}
+
+function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
