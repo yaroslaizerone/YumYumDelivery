@@ -1,6 +1,6 @@
 import os
 
-from yum_deliv.views import database, db, condition, restContext, storage, check_file_exists
+from yum_deliv.views import database, db, condition, restContext, storage, checkFileExists
 from django.shortcuts import render, redirect
 
 from yum_deliv.views import config
@@ -39,7 +39,7 @@ def addDish(request, rest_slug):
             file_name = os.path.join(dict_path, photo.name)
             file_url = dict_path + '%5C' + photo.name
 
-            if check_file_exists(file_url):
+            if checkFileExists(file_url):
                 # Use the existing file URL instead of uploading a new one
                 download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
             else:
@@ -114,7 +114,7 @@ def republic(request, rest_slug):
             file_name = os.path.join(dict_path, photo.name)
             file_path = f"{dict_path}%5C{photo.name}"
 
-            if check_file_exists(file_path):
+            if checkFileExists(file_path):
                 new_data_rest[
                     'image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
             else:
@@ -175,7 +175,7 @@ def editDish(request, rest, dish_id):
             file_url = dict_path + '%5C' + photo.name
 
             # Check if the file already exists
-            if check_file_exists(file_url):
+            if checkFileExists(file_url):
                 # Use the existing file URL instead of uploading a new one
                 download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
             else:

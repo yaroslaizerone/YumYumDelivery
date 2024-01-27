@@ -1,7 +1,7 @@
 import os
 import datetime
 
-from yum_deliv.views import check_file_exists
+from yum_deliv.views import checkFileExists
 from yum_deliv.views import storage
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -26,7 +26,7 @@ def updateUserData(request, uid):
                 file_path = f"{dict_path}%5C{photo_client.name}"
 
                 # Check if the file already exists
-                if check_file_exists(file_path):
+                if checkFileExists(file_path):
                     # Use the existing file URL instead of uploading a new one
                     download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{file_name}?alt=media"
 
@@ -135,7 +135,7 @@ def createSupport(request, uid):
                 file_path = f"{folder_path}%5C{file.name}"
 
                 # Check if the file already exists
-                if check_file_exists(file_path):
+                if checkFileExists(file_path):
                     # Use the existing file URL instead of uploading a new one
                     download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file_name}?alt=media"
 

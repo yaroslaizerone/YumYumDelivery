@@ -55,6 +55,20 @@
                                 </div>
                             </div>
                         </div>
+                    <div class="col cart-container">
+                        <button class="dropbtn" id="cart-btn">{{ cost_cart }} ₽</button>
+                        <div class="cart" id="cart">
+                            {% for item in cart %}
+                                {% for dish in item %}
+                                    <p data-dish-id="{{ dish.id }}">
+                                        {{ dish.name }} - {{ dish.quantity }} - {{ dish.cost }}
+                                        <button class="delete-btn" onclick="removeItem('{{ dish.id }}')">Удалить</button>
+                                    </p>
+                                {% endfor %}
+                            {% endfor %}
+                            <p data-total-cost>Total Cost: {{ cost_cart }}</p>
+                        </div>
+                    </div>
                     <div class="col avatar-user">
                         <div class="avatar-container">
                             {% if user != None %}

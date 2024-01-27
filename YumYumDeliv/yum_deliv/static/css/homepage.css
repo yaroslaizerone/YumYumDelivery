@@ -1,12 +1,16 @@
-@media only screen and (max-width: 1900px) {
+/* Responsive Styles */
+        @media only screen and (max-width: 1900px) {
             .logo {
-                content: url('../res/logo-mini.png');
+                content: url('/static/res/logo-mini.png');
                 background-size: contain;
                 width: 60px;
                 height: 60px;
             }
         }
-        #address-dialog{
+
+        /* Dialog Styles */
+        #address-dialog,
+        #user-data-dialog {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -14,80 +18,81 @@
         }
 
         #user-data-dialog {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 20px;
             background-color: #fff;
             border: 1px solid #ccc;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px; /* Задайте максимальную ширину вашего диалогового окна */
-            margin: auto; /* Центрирование диалогового окна по горизонтали */
+            max-width: 400px;
+            margin: auto;
         }
-        .avatar{
-          width: 60px;
-          height: 60px;
-          max-height: 60px;
-          border-radius: 50%;
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            max-height: 60px;
+            border-radius: 50%;
         }
-        .col .address-container{
+
+        .col .address-container {
             align-items: center;
             display: inline-block;
         }
-        .row{
+
+        .row {
+            width: 100%;
             align-items: center;
         }
 
-        .address-input-group {
+        .address-input-group,
+        .user-input-group {
             display: flex;
             align-items: center;
-            gap: 10px; /* Small gap between input elements within the group */
+            gap: 10px;
         }
 
-        input[type="search"], input[type="text"] {
+        input[type="search"],
+        input[type="text"] {
             width: 100%;
-            padding: 8px; /* Adjust as needed */
+            padding: 8px;
             box-sizing: border-box;
         }
 
         button {
-            padding: 10px; /* Adjust as needed */
+            padding: 10px;
         }
 
         #map {
-                width: 1000px;
-                height: 300px;
-                position: relative;
-                z-index: 0;
-            }
+            width: 1000px;
+            height: 300px;
+            position: relative;
+            z-index: 0;
+        }
+
         .user-round.dropdown .dropdown-toggle {
-            background-color: transparent; /* Прозрачный фон кнопки */
-            border: none; /* Убираем границу кнопки */
-            padding: 0; /* Убираем внутренний отступ кнопки */
-            box-shadow: none; /* Убираем тень кнопки */
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            box-shadow: none;
         }
 
         .user-round.dropdown .dropdown-toggle:focus {
-            outline: none; /* Убираем рамку фокуса при клике */
+            outline: none;
         }
 
-        .user-round.dropdown .dropdown-menu {
-            border-radius: 20px; /* Радиус закругления углов выпадающего меню */
-        }
-
+        .user-round.dropdown .dropdown-menu,
         .user-round.dropdown .dropdown-item {
-            border-radius: 20px; /* Радиус закругления углов элементов меню */
+            border-radius: 20px;
         }
 
         .user-round.dropdown .dropdown-divider {
-            margin: 0; /* Убираем отступ у разделителя */
+            margin: 0;
         }
+
         .avatar-container {
             position: relative;
         }
 
-        .avatar-user{
+        .avatar-user {
             max-width: 60px;
         }
 
@@ -122,12 +127,6 @@
 
         .menu a:hover {
             background-color: #f0f0f0;
-        }
-
-        .user-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         #user-data-form {
@@ -166,4 +165,47 @@
         #close-data-dialog:hover,
         #save-data-dialog:hover {
             background-color: #45a049;
+        }
+
+        /* Cart Styles */
+        .cart-container {
+            max-width: 250px;
+        }
+
+        #cart-btn {
+            background-color: #28a745;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .cart {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .cart p {
+            margin-bottom: 10px;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: #ffffff;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
         }

@@ -455,3 +455,100 @@ $(document).ready(function () {
                         console.error('Error details:', error.message, error.stack);
                     });
             }
+           function toggleCartDisplay() {
+                var cartElement = document.getElementById('cart');
+                if (cartElement.style.display === 'block') {
+                    hideCart();
+                } else {
+                    showCart();
+                }
+            }
+
+            function showCart() {
+                var cartElement = document.getElementById('cart');
+                if (cartElement) {
+                    cartElement.style.display = 'block';
+                }
+            }
+
+            function hideCart() {
+                var cartElement = document.getElementById('cart');
+                if (cartElement) {
+                    cartElement.style.display = 'none';
+                }
+            }
+
+            document.getElementById('cart-btn').addEventListener('click', function () {
+                toggleCartDisplay();
+            });
+            function removeItem(dishId) {
+                // Remove the item from the cart displayed on the page
+                var itemElement = document.querySelector('.cart p[data-dish-id="' + dishId + '"]');
+                if (itemElement) {
+                    itemElement.remove();
+                }
+
+                // Remove the item from the cart data in memory
+                var updatedCart = [];
+                for (var i = 0; i < cart.length; i++) {
+                    if (cart[i][0].id !== dishId) {
+                        updatedCart.push(cart[i]);
+                    }
+                }
+                cart = updatedCart;
+
+                // Update the orderedDishes cookie
+                updateOrderedDishesCookie(dishId);
+
+                // Update the total cost
+                updateTotalCost();
+            }
+
+            function updateOrderedDishesCookie(dishId) {
+                var orderedDishes = getCookieMassiv('orderedDishes');
+
+                orderedDishes = orderedDishes.filter(function (dish) {
+                    return dish.id !== dishId;
+                });
+
+                document.cookie = 'orderedDishes=' + JSON.stringify(orderedDishes) + '; path=/';
+            }
+
+            function getCookieMassiv(name) {
+                var cookies = document.cookie.split(';');
+
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+
+                    if (cookie.startsWith(name + '=')) {
+                        var cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+
+                        try {
+                            return JSON.parse(cookieValue);
+                        } catch (error) {
+                            console.error('Error parsing JSON from cookie:', error);
+                            return null;
+                        }
+                    }
+                }
+
+                return null;
+            }
+
+            function updateTotalCost() {
+                // Update the total cost displayed on the page
+                var totalCostElement = document.querySelector('.cart p[data-total-cost]');
+                if (totalCostElement) {
+                    var totalCost = calculateTotalCost();
+                    totalCostElement.innerHTML = 'Total Cost: ' + totalCost;
+                }
+            }
+
+            function calculateTotalCost() {
+                // Calculate the total cost based on the updated cart data
+                var totalCost = 0;
+                for (var i = 0; i < cart.length; i++) {
+                    totalCost += cart[i][0].quantity * parseFloat(cart[i][0].cost);
+                }
+                return totalCost;
+            }

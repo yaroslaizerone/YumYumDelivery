@@ -252,15 +252,9 @@ body {
 }
 
 .cart-container {
-    position: fixed;
     top: 0;
-    right: -300px;
-    /* начальная позиция справа за пределами экрана */
     width: 300px;
     height: 100%;
-    background-color: #fff;
-    box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease-in-out;
 }
 
 .cart-header {

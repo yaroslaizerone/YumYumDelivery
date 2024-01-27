@@ -65,6 +65,24 @@ def homepageContext(request):
     address = database.collection("user_address").stream()
     adrs = [ad.to_dict() for ad in address]
     context['address'] = adrs
+    ordered_dishes = request.COOKIES.get('orderedDishes')
+    if ordered_dishes:
+        ordered_dishes_data = json.loads(ordered_dishes)
+        cart = []
+        cost_cart = 0
+        for order in ordered_dishes_data:
+            dish_db = (
+                database.collection("dishes")
+                .where("id", "==", int(order["id"]))
+                .stream()
+            )
+            select_dish = [dish.to_dict() for dish in dish_db]
+            if select_dish:
+                cart.append(select_dish)
+                cost_cart += order['quantity'] * float(select_dish[0]["cost"])
+                select_dish[0]['quantity'] = order['quantity']
+        context['cart'] = cart
+        context['cost_cart'] = cost_cart
     return context
 
 
@@ -220,7 +238,7 @@ def restContext(slug):
     return context
 
 
-def check_file_exists(file_path):
+def checkFileExists(file_path):
     try:
         # Check if the file exists in Firebase Storage
         storage.child(file_path).get_metadata()
@@ -264,7 +282,7 @@ def placeOrder(request):
 
 
 def ordered(request):
-    dishes, id_rest, summa = ordered_take(request)
+    dishes, id_rest, summa = orderedTake(request)
 
     restaurant = (
         database.collection("restaurant")
@@ -292,7 +310,7 @@ def payOfOrder(request):
 
         if user_cookie:
             user = user_cookie
-            dishes, id_rest, summa = ordered_take(request)
+            dishes, id_rest, summa = orderedTake(request)
             house = request.POST.get('houseNumber')
             street = request.POST.get('street')
             entrance = request.POST.get('entrance')
@@ -316,7 +334,7 @@ def payOfOrder(request):
     return render(request, 'PayOfOrder.html', context)
 
 
-def ordered_take(request):
+def orderedTake(request):
     dishes = []
     summa = 0
     ordered_dishes_cookie = request.COOKIES.get('orderedDishes')
