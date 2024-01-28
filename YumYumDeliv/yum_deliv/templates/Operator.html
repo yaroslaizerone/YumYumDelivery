@@ -39,26 +39,28 @@
                             <div class="card mt-3" id="od-{{ feedback.id }}" hidden>
                                 <div class="card-body">
                                     <h5 class="card-title">#{{ feedback.id }}</h5>
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="card-text"><strong>Comment:</strong> {{ feedback.comment }}</p>
-                                            <p class="card-text"><strong>Date and Time:</strong> {{ feedback.datetime_feedback }}</p>
-                                            <p class="card-text"><strong>Email:</strong> {{ feedback.email }}</p>
-                                            <p class="card-text"><strong>ID:</strong> {{ feedback.id }}</p>
-                                            <p class="card-text"><strong>Order ID:</strong> {{ feedback.order_id }}</p>
-                                            <p class="card-text"><strong>Reason:</strong> {{ feedback.reason }}</p>
+                                    <form action="/sendResponse/{{ feedback.id }}" method="post">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="card-text"><strong>Comment:</strong> {{ feedback.comment }}</p>
+                                                <p class="card-text"><strong>Date and Time:</strong> {{ feedback.datetime_feedback }}</p>
+                                                <p class="card-text" id="email" name="email"><strong>Email:</strong> {{ feedback.email }}</p>
+                                                <input type="hidden" name="email" value="{{ feedback.email }}">
+                                                <p class="card-text"><strong>ID:</strong> {{ feedback.id }}</p>
+                                                <p class="card-text"><strong>Order ID:</strong> {{ feedback.order_id }}</p>
+                                                <p class="card-text"><strong>Reason:</strong> {{ feedback.reason }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <img src="{{ feedback.photo }}" class="img-fluid" alt="Feedback Photo" style="max-width: 400px; max-height: 500px">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="responseTextArea">Ответ:</label>
+                                                <textarea class="form-control" id="responseTextArea" name="responseTextArea"></textarea>
+                                                <button class="btn btn-primary" type="submit" id="sendResponseBtn">Отправить ответ</button>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <img src="{{ feedback.photo }}" class="img-fluid" alt="Feedback Photo">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="responseTextArea">Ответ:</label>
-                                            <textarea class="form-control" id="responseTextArea" rows="3"></textarea>
-                                            <button class="btn btn-primary" id="sendResponseBtn">Отправить ответ</button>
-                                        </div>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                         {% endfor %}

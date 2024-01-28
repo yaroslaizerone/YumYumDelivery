@@ -101,6 +101,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Settings Email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'kolpackov.yarosl@gmail.com'
+EMAIL_HOST_PASSWORD = 'qqpomvxxylcauhdh'
+EMAIL_PORT = 587
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

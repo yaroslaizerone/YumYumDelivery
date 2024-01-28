@@ -33,5 +33,6 @@ urlpatterns = [
     path('createsupport/<slug:uid>', user_functions.createSupport, name='createsupport'),
     path('delete_order/<slug:uid>/<slug:order_id>', user_functions.deleteOrder, name='deleteorder'),
     # URLs Оператора
-    path('operator_panel/', operator.init, name='oper')
+    path('operator_panel/', operator.init, name='oper'),
+    path('sendResponse/<slug:feedback>', operator.sendResponse, name='sendResponse'),
 ]
