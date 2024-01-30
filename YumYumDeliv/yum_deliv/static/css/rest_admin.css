@@ -1,0 +1,273 @@
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.col {
+    display: flex;
+    align-items: center;
+}
+
+.navbar {
+    background-color: #38A9CC;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.navbar img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+.admin-panel {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.admin-panel h1 {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.admin-panel h1:hover {
+    background-color: #f0f0f0;
+}
+
+.admin-panel .active {
+    background-color: #38A9CC;
+    color: #fff;
+}
+
+/* Style for hidden blocks */
+#info-form,
+#orders-block,
+#menu-form {
+    display: none;
+    margin-top: 20px;
+}
+
+/* Add this to highlight the selected tab */
+#info-link.active,
+#orders-link.active,
+#menu-link.active {
+    background-color: #38A9CC;
+    color: #fff;
+}
+
+li {
+    display: flex;
+    align-items: center; /* Optional: Align items vertically in the center */
+}
+
+.dish-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px; /* Optional: Add some space between the image and dish-info */
+}
+
+.dish-info > div {
+    margin-bottom: 5px; /* Optional: Add some space between the inner div elements */
+}
+
+#dishes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#dishes-table th,
+#dishes-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#dishes-table th {
+    background-color: #f2f2f2;
+}
+
+#dishes-table img {
+    max-width: 200px; /* Увеличьте этот размер по необходимости */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+    #dishes-table th,
+    #dishes-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #dishes-table td:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    #dishes-table img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        margin-bottom: 10px;
+    }
+}
+
+.dish-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dish-actions button {
+    padding: 5px 10px;
+}
+
+.dish-separator {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.sort-indicator {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 10px;
+}
+
+.sort-indicator.asc::after {
+    content: '▲';
+}
+
+.sort-indicator.desc::after {
+    content: '▼';
+}
+
+#info-form {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.container {
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.form-control,
+.js-select2 {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    display: inline-block;
+}
+
+.js-select2 {
+    width: 100%;
+}
+
+#photo_rest {
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+#image-preview-rest {
+    max-width: 100%;
+    max-height: 200px;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+#image-preview-container-rest {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#orders-block {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.orders-list {
+    max-width: 200px;
+    padding: 10px;
+    border-right: 1px solid #ccc;
+}
+
+.order-item {
+    cursor: pointer;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.order-details {
+    max-width: 400px;
+    padding: 10px;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.order-details p {
+    margin: 5px 0;
+}
+
+.js-select2 {
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}

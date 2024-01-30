@@ -5,6 +5,7 @@ import random
 import string
 import firebase_admin
 import pyrebase
+import locale
 
 from django.http import JsonResponse
 from requests.exceptions import HTTPError
@@ -12,7 +13,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from firebase_admin import credentials, firestore
-
 
 logger = logging.getLogger(__name__)
 config = {
@@ -90,22 +90,23 @@ def postsignIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         pasw = request.POST.get('pass')
-        try:
-            user = authe.sign_in_with_email_and_password(email, pasw)
-            uid = user['localId']
+        # try:
+        user = authe.sign_in_with_email_and_password(email, pasw)
+        uid = user['localId']
 
-            roles = (
-                database.collection("authentication")
-                .where("uid", "==", uid)
-                .stream()
-            )
-            role_data = []
-            for role in roles:
-                role_data.append(role.to_dict())
-            user_role = role_data[0]['role']
-            if user_role == '1':
-                response = redirect('/')
-            elif user_role == '2':
+        roles = (
+            database.collection("authentication")
+            .where("uid", "==", uid)
+            .stream()
+        )
+        role_data = []
+        for role in roles:
+            role_data.append(role.to_dict())
+        user_role = role_data[0]['role']
+        if user_role == '1':
+            response = redirect('/')
+            response.set_cookie('uid', uid)
+        elif user_role == '2':
                 role = (
                     database.collection("role")
                     .where("id", "==", 2)
@@ -115,18 +116,18 @@ def postsignIn(request):
                 for rol in role:
                     role_data.append(rol.to_dict())
                 for r in role_data:
-                    response = redirect('adminRest', rest_slug=r['role'])
-            elif user_role == '3':
-                return redirect('/operator_panel/')
-            else:
-                logger.info(user_role)
-                return HttpResponse("Some default response or redirect")
+                   return redirect('adminRest', rest_slug=r['role'])
+        elif user_role == '3':
+            return redirect('/operator_panel/')
+        else:
+            logger.info(user_role)
+            return HttpResponse("Some default response or redirect")
 
             response.set_cookie('uid', uid)
-            return response
-        except Exception as e:
-            message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
-            return render(request, "Login.html", {"message": message})
+        return response
+        # except Exception as e:
+        #     message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
+        #     return render(request, "Login.html", {"message": message})
 
 
 # TODO Удалять при выходе
@@ -311,17 +312,19 @@ def payOfOrder(request):
         if user_cookie:
             user = user_cookie
             dishes, id_rest, summa = orderedTake(request)
-            house = request.POST.get('houseNumber')
+            flat = request.POST.get('flatNumber')
             street = request.POST.get('street')
             entrance = request.POST.get('entrance')
             intercom = request.POST.get('intercom')
             floor = request.POST.get('floor')
             comment = request.POST.get('comments')
-            data_time = datetime.datetime.now()
+            current_datetime = datetime.datetime.now()
+            formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            data_time = formatted_datetime
 
         new_order = {'id': id, 'user': user, 'dishes': dishes,
                      'restaurant': id_rest, 'order_status': "Заказ оформлен",
-                     'summa': summa, 'courier': 1, "house": house,
+                     'summa': summa, 'courier': 1, "flat": flat,
                      "street": street, "entrance": entrance,
                      "intercom": intercom, "data_time": data_time,
                      "floor": floor, "comment": comment

@@ -1,49 +1,185 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+{% load static %}
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформление заказа</title>
     <link rel="stylesheet" href="{% static 'css/place_order.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-main {
+            background-color: #38A9CC;
+            padding: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center; /* Центрирование элементов по горизонтали */
+            align-items: center;
+            text-align: center;
+        }
+
+        .navbar img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .logo-compani {
+            margin-left: 20px; /* Добавлено: отступ слева от логотипа */
+        }
+
+        .back-button {
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+
+        .column {
+            display: inline-block;
+            vertical-align: top;
+            width: 45%;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #orderItems {
+            list-style-type: none;
+            padding: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #orderItemsHeading {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #orderItems li {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .dish-img {
+            max-width: 150px;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        #total-cost {
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        #total-cost-with-delivery {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        form {
+            margin-top: 25px;
+        }
+
+        .back-button i {
+            margin-right: 5px;
+        }
+
+        .container-fluid {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        ul#orderItems {
+            list-style-type: none;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        #orderForm {
+            margin-left: 50px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Оформление заказа из ресторана {{ rest_name.0.name }}</h1>
+<header class="header-main">
+    <i class="fa-solid fa-arrow-left back-button" onclick="goBack()"></i>
+    <div class="logo-compani">
+        <a href="/" class="navbar-brand"><img class="logo" src="{% static 'res/logo.png' %}" alt="Логотип"></a>
+    </div>
+</header>
 
-    <form id="orderForm" action="/payOfOrder/" method="post">
-    {% csrf_token %}
-        <label>Адрес доставки</label>
+<div class="container-fluid">
+    <div class="column">
+        <form id="orderForm" action="/payOfOrder/" method="post">
+            {% csrf_token %}
+            <label style="text-align: center;">Подробности доставки</label>
 
-        <label for="street">Улица:</label>
-        <input type="text" id="street" name="street" required>
+            <label for="street">Улица:</label>
+            <input type="text" id="street" name="street" placeholder="Улица, Номер улицы" required>
 
-        <label for="houseNumber">Дом:</label>
-        <input type="text" id="houseNumber" name="houseNumber">
+            <label for="flatNumber">Квартира:</label>
+            <input type="text" id="flatNumber" name="flatNumber" placeholder="Номер Квартиры">
 
-        <label for="entrance">Подъезд:</label>
-        <input type="text" id="entrance" name="entrance">
+            <label for="entrance">Подъезд:</label>
+            <input type="text" id="entrance" name="entrance" placeholder="Номер подъезда">
 
-        <label for="intercom">Домофон:</label>
-        <input type="text" id="intercom" name="intercom">
+            <label for="intercom">Домофон:</label>
+            <input type="text" id="intercom" name="intercom" placeholder="Домофон">
 
-        <label for="floor">Этаж:</label>
-        <input type="text" id="floor" name="floor">
+            <label for="floor">Этаж:</label>
+            <input type="text" id="floor" name="floor" placeholder="Этаж">
 
-        <label for="comments">Комментарий для курьера:</label>
-        <textarea id="comments" name="comments"></textarea>
+            <label for="comments">Комментарий для курьера:</label>
+            <textarea id="comments" name="comments"></textarea>
 
-        <label for="orderItems">Список заказанных блюд:</label>
+            <button type="submit">Оплатить</button>
+        </form>
+    </div>
+    <div class="column">
         <ul id="orderItems">
+            <li id="orderItemsHeading">
+                <label class="text-structur">Состав заказа</label>
+            </li>
             {% for dish in dishes %}
-            <li>
-                <img src="{{ dish.photo }}" alt="{{ dish.name }}" style="width: 100%; max-width: 400px; height: auto;">
-                {{ dish.name }} - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
+            <li id="dish_{{ dish.id }}" data-cost="{{ dish.cost }}" data-quantity="{{ dish.quantity }}" style="align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <img class="dish-img" src="{{ dish.photo }}" alt="{{ dish.name }}">
+                    <div>
+                        {{ dish.name }} - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
+                    </div>
+                </div>
+                <button class="delete-btn" onclick="removeDish('{{ dish.id }}', '{{ dish.cost }}')" style="max-height: 50px; margin-left: 10px;">Удалить</button>
             </li>
             {% endfor %}
+            <li id="total-cost">
+                <label id="totalCostValue"></label>
+            </li>
+            <li>
+                <label>Доставка: 20 ₽</label>
+            </li>
+            <li id="total-cost-with-delivery">
+                <label id="totalCostWithDeliveryValue"></label>
+            </li>
         </ul>
+    </div>
+</div>
 
-        <button type="submit">Оплатить</button>
-    </form>
-    <script src="{% static 'js/place_order.js' %}"></script>
+<script src="{% static 'js/place_order.js' %}"></script>
+<script src="https://kit.fontawesome.com/680b9acf9e.js" crossorigin="anonymous"></script>
 </body>
 </html>

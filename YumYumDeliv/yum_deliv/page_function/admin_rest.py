@@ -1,9 +1,7 @@
 import os
 
-from yum_deliv.views import database, db, condition, restContext, storage, checkFileExists
+from yum_deliv.views import database, db, condition, restContext, storage, checkFileExists, config, homepageContext
 from django.shortcuts import render, redirect
-
-from yum_deliv.views import config
 
 
 def addDish(request, rest_slug):
@@ -35,18 +33,16 @@ def addDish(request, rest_slug):
 
         # Check if the file with the same name already exists in Firebase Storage
         if photo:
-            dict_path = 'dishes_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_url = dict_path + '%5C' + photo.name
+            file_name = photo.name
 
-            if checkFileExists(file_url):
+            if checkFileExists(file_name):
                 # Use the existing file URL instead of uploading a new one
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
+                print("error")
             else:
                 # Upload the file to Firebase Storage
                 upload = storage.child(file_name).put(photo)
                 photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
+                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_name}?alt=media&token={photo_url}"
 
             data = {"id": id, "name": name, "description": description,
                     "dish_type": dish_type, "weight": weight,
@@ -62,24 +58,45 @@ def addDish(request, rest_slug):
 
 
 def restaurant(request, url_rest):
+    # Получать типы блюд, которые есть в ресторане.
     rest_id = (
         database.collection("restaurant")
         .where("url_address", "==", url_rest)
         .stream()
     )
-    restaurant_id = [rest.to_dict()['id'] for rest in rest_id]
+    restaurant = [rest.to_dict() for rest in rest_id]
     menu = (
         database.collection("dishes")
-        .where("restaurant", "==", restaurant_id[0])
+        .where("restaurant", "==", restaurant[0]['id'])
         .stream()
     )
     cart = request.session.get('cart', [])
     dishes = [dish.to_dict() for dish in menu]
+    type_dish = []
+    for dish in dishes:
+        if dish['dish_type'] in type_dish:
+            continue
+        else:
+            type_dish.append(dish['dish_type'])
+    list_type_dishes = []
+    for type in type_dish:
+        type_dish_db = (
+            database.collection("type_dishes")
+            .where("id", "==", type)
+            .stream()
+        )
+        list_type = [type_d.to_dict() for type_d in type_dish_db]
+        list_type_dishes.append({"name": list_type[0]['type'], "id": list_type[0]['id']})
+
+    user_context = homepageContext(request)
     context = {
+        "type_dishes": list_type_dishes,
+        "restaurant": restaurant,
         "url_rest": url_rest,
         "dishes": dishes,
         "cart": cart
     }
+    context.update(user_context)
     return render(request, 'Resataurant.html', context)
 
 

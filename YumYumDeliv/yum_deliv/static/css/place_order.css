@@ -1,52 +1,52 @@
 /* Стили для формы заказа */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
 
-        h1 {
-            color: #4CAF50;
-        }
+h1 {
+    color: #4CAF50;
+}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
+label {
+    display: block;
+    margin-bottom: 8px;
+}
 
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 16px;
-            box-sizing: border-box;
-        }
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-        /* Адаптивные стили для уменьшения отступов и увеличения шрифта на мобильных устройствах */
-        @media screen and (max-width: 600px) {
-            body {
-                margin: 10px;
-            }
+/* Адаптивные стили для уменьшения отступов и увеличения шрифта на мобильных устройствах */
+@media screen and (max-width: 600px) {
+    body {
+        margin: 10px;
+    }
 
-            h1 {
-                font-size: 24px;
-            }
+    h1 {
+        font-size: 24px;
+    }
 
-            label, input, textarea {
-                font-size: 14px;
-                margin-bottom: 10px;
-            }
+    label, input, textarea {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
 
-            button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-        }
+    button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}

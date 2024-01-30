@@ -7,39 +7,81 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="{% static 'css/rest_admin.css' %}">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Dish</title>
 </head>
 <body>
+
+<header class="header-main">
+        <nav class="navbar">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <img src="{% static 'res/logo.png' %}" alt="Logo" onclick="window.location.replace('/');">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
 <div class="admin-panel">
     <h1 id="menu-link">Блюда ресторана</h1>
     <h1 id="info-link">Информация ресторана</h1>
     <h1 id="orders-link">Заказы</h1>
-    <h1>Статистика</h1>
 </div>
 
 <div id="menu-form" enctype="multipart/form-data">
-    <ul id="dishes-list">
-    {% for dish in dishes %}
-        <li>
-            <img src="{{ dish.photo }}" alt="{{ dish.name }}" style="width: 400px;  height: 300px">
-            <div class="dish-info">
-                <div>
-                    <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽
-                </div>
-                <div>
-                    <form id="delete_dish_{{ dish.id }}" method="post" action="/delete_dish/{{ rest_slug }}/{{ dish.id }}">
+   <table id="dishes-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Стоимость (₽)</th>
+            <th>Калории</th>
+            <th>Углеводы</th>
+            <th>Жиры</th>
+            <th>Белки</th>
+            <th>Вес</th>
+            <th>Описание</th>
+            <th>Тип блюда</th>
+            <th id="Photo">Изображение</th>
+            <th id="Actions">Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dish in dishes %}
+            <tr class="dish-separator">
+                <td>{{ dish.id }}</td>
+                <td>{{ dish.name }}</td>
+                <td>{{ dish.cost }}</td>
+                <td>{{ dish.calories }}</td>
+                <td>{{ dish.carbohydrates }}</td>
+                <td>{{ dish.fats }}</td>
+                <td>{{ dish.proteins }}</td>
+                <td>{{ dish.weight }}</td>
+                <td>{{ dish.description }}</td>
+                <td id="dish-type-{{ dish.id }}">
+                    {% for category in categories_dish %}
+                        {% if category.id == dish.dish_type %}
+                            {{ category.type }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td><img src="{{ dish.photo }}" alt="{{ dish.name }}"></td>
+                <td class="dish-actions">
+                    <form class="delete_dish" id="delete_dish_{{ dish.id }}" method="post" action="/delete_dish/{{ rest_slug }}/{{ dish.id }}">
                         {% csrf_token %}
                         <button type="submit">Удалить</button>
                     </form>
-                    <button id="open-menu-dialog-btn-edit_{{ dish.id }}">Редактировать</button>
-                </div>
-            </div>
-        </li>
-    {% endfor %}
-    </ul>
+                    <button id="open-menu-dialog-btn-edit_{{ dish.id }}">Изменить</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
     <button id="open-menu-dialog-btn">Добавить блюдо</button>
     <div id="menu-dialog">
         <form id="add-form" action="/add_dish/{{rest_slug}}" method="post" enctype="multipart/form-data">
@@ -162,7 +204,7 @@
         </div>
         <div class="mb-3">
             <label for="url_adress" class="form-label">Адрес URL:</label>
-            <input type="text" class="form-control" id="url_adress" name="url_adress" value="{{ rest.0.url_adress }}" required>
+            <input type="text" class="form-control" id="url_adress" name="url_adress" value="{{ rest.0.url_address }}" required>
         </div>
         <div class="mb-3">
             <label for="avg_time_cook" class="form-label">Cреднее время приготовления (в минутах):</label>
@@ -187,12 +229,23 @@
         <button type="submit" class="btn btn-primary">Сохранить изменения</button>
     </div>
 </form>
+
 <div id="orders-block">
-    <div class="container mt-5">
-        <h2>Заказы ресторана</h2>
-        {% for order in orders %}
-            <div class="order">
+    {% for order in orders %}
+    <div class="container mt-5 orders-list" id="el-{{ order.id }}">
+        <h2>Список заказов</h2>
+            <div class="order-item" data-order-id="{{ order.id }}">
                 <p><strong>ID заказа:</strong> {{ order.id }}</p>
+                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
+                <p><strong>Статус заказа:</strong> {{ order.status }}</p>
+            </div>
+    </div>
+    {% endfor %}
+    <div id="ord-{{ order.id }}" class="container mt-5 order-details" data-detal-id="{{ order.id }}" hidden="">
+        <h2>Детали заказа</h2>
+        {% for order in orders %}
+        <div id="order-details-container">
+            <p><strong>ID заказа:</strong>{{ order.id }}</p>
                 <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
                 <p><strong>Блюда:</strong>
                     {% for dish in order.dishes %}
@@ -207,7 +260,7 @@
             <div id="status-dialog_{{ order.id }}">
                 <form id="status-form_{{ order.id }}" method="post" action="/change_status/{{ rest_slug }}/{{ order.id }}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <label for="status-dish_{{ order.id }}">Статус заказа:</label>
+                    <label for="status-dish_{{ order.id }}">Статус заказа: {{order.order_status}}</label>
                     <select class="js-select2" id="status-dish_{{ order.id }}" name="status" style="width: 150px" required>
                         <option value="Заказ оформлен" selected>Заказ оформлен</option>
                         <option value="Сборка">Сборка</option>
@@ -215,6 +268,7 @@
                     </select><br>
                 </form>
             </div>
+        </div>
         {% endfor %}
     </div>
 </div>
@@ -243,6 +297,7 @@
             // Скрыть все формы при загрузке страницы
             $('form').hide();
             $('#menu-form').hide();
+            $('#orders-block').hide();
             {% for dish in dishes %}
                 $('#menu-dialog-edit_{{ dish.id }}').hide();
             {% endfor %}
@@ -253,24 +308,31 @@
 
             // Обработчик для "Блюда ресторана"
             $('#menu-link').click(function() {
+                $('.admin-panel h1').removeClass('active');
+                $(this).addClass('active');
                 $('form').hide();
-                $('form[id^="delete_dish_"]').show();
+                $('#orders-block').hide();
+                $('#info-form').hide();
+                $('.delete_dish').show();
                 $('#menu-form').show();
-                $('#add-form').show();
             });
 
-            // Обработчик для "Информация ресторана"
             $('#info-link').click(function() {
+                $('.admin-panel h1').removeClass('active');
+                $(this).addClass('active');
                 $('form').hide();
+                $('#orders-block').hide();
                 $('#menu-form').hide();
                 $('#info-form').show();
             });
 
-            // Обработчик для "Заказов ресторана"
             $('#orders-link').click(function() {
+                $('.admin-panel h1').removeClass('active');
+                $(this).addClass('active');
                 $('form').hide();
                 $('#menu-form').hide();
-                $('#orders-form').show();
+                $('#info-form').hide();
+                $('#orders-block').show();
             });
 
 
@@ -487,5 +549,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 </script>
+<script src="{% static 'js/rest_admin.js' %}"></script>
 </body>
 </html>
