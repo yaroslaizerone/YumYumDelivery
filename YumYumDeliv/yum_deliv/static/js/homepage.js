@@ -131,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
         link.addEventListener('click', function (event) {
             event.preventDefault();
             const selectedType = this.dataset.type.toLowerCase();
-            const searchQuery = searchInput.value.trim().toLowerCase();
+            const searchQuery = searchInput.value;
+
 
             typeLinks.forEach(typeLink => {
                 const typeLinkType = typeLink.dataset.type.toLowerCase();
@@ -144,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             restaurantItems.forEach(item => {
                 const restaurantName = item.querySelector('h2').textContent.trim().toLowerCase();
-                const itemType = item.dataset.type.toLowerCase();
+                const itemType = item.dataset.typeRest.toLowerCase();
 
                 // Check for selected type or if it's "Все"
                 if (selectedType === '0' || itemType === selectedType) {
@@ -183,16 +184,19 @@ document.addEventListener('DOMContentLoaded', function () {
     searchButton.addEventListener('click', function (event) {
         event.preventDefault();
         const searchQuery = searchInput.value.trim().toLowerCase();
-        const selectedType = document.querySelector('.div a.selected-type').dataset.type.toLowerCase();
+        const selectedTypeElement = document.querySelector('.div a.selected-type');
+
+        const selectedType = selectedTypeElement ? selectedTypeElement.dataset.type.toLowerCase() : '';
 
         restaurantItems.forEach(item => {
             const restaurantName = item.querySelector('h2').textContent.trim().toLowerCase();
-            const itemType = item.dataset.type.toLowerCase();
+            const itemType = item.dataset.typeRest.toLowerCase();
 
-            if ((itemType === '0' || itemType === selectedType) &&
+            if ((itemType === '0' || itemType === selectedType || selectedType == '') &&
                 (restaurantName.includes(searchQuery) || itemType === searchQuery)) {
                 item.style.display = 'block';
             } else {
+
                 item.style.display = 'none';
             }
         });

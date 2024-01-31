@@ -216,6 +216,7 @@ def restContext(slug):
         .stream()
     )
     rest = [res.to_dict() for res in rest_current]
+    print(rest)
     orders_retaraunt = (
         database.collection("orders")
         .where("restaurant", "==", rest[0]['id'])

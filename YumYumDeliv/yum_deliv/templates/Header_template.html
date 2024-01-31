@@ -1,0 +1,149 @@
+<div class="col logo-compani">
+    <a href="/" class="navbar-brand"><img class="logo" src="../static/res/logo.png"/></a>
+</div>
+<div class="col search-back">
+    <div class="text-field">
+        <div class="text-field__icon text-field__icon_search">
+            <input class="text-field__input" type="search" placeholder="Найти ресторан" width="38px">
+            <button type="button" class="btn btn-primary">Поиск</button>
+        </div>
+    </div>
+</div>
+<div class="col address-container" style="max-width: 250px">
+    <div class="dropdown-address">
+        <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
+        <div class="menu" id="menu-address">
+            <ul>
+                <li><p id="add-address">Добавить адрес</p></li>
+                {% for adr in address %}
+                <li><p class="dropdown-item"
+                       data-type="user-address"
+                       data-entrance="{{ adr.entrance }}"
+                       data-flat="{{ adr.flat }}"
+                       data-floor="{{ adr.floor }}"
+                       data-intercom="{{ adr.intercom }}"
+                >{{ adr.streetAndNumber }}</p></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="col cart-container">
+    <button class="dropbtn" id="cart-btn">{{ cost_cart }} ₽</button>
+    <table class="cart" id="cart">
+        <tr>
+            <th>#</th>
+            <th>Блюдо</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th>Действия</th>
+        </tr>
+        {% for item in cart %}
+        {% for dish in item %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ dish.name }}</td>
+            <td>{{ dish.quantity }}</td>
+            <td>{{ dish.cost }}</td>
+            <td>
+                <button class="delete-btn" onclick="removeItem('{{ dish.id }}')">Удалить</button>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        <tr>
+            <td colspan="5" class="total-cost">Итого: {{ cost_cart }} ₽</td>
+        </tr>
+        <tr>
+            <td colspan="5" class="checkout-cell">
+                <button class="checkout-btn" onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="col avatar-user">
+    <div class="avatar-container">
+        {% if user != None %}
+        {% for us in user %}
+        {% if us.image %}
+        <img src="{{ us.image }}" alt="User Avatar" class="avatar" id="avatar-custom">
+        {% else %}
+        <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
+             alt="Default Avatar" class="avatar" id="avatar">
+        {% endif %}
+        {% endfor %}
+        <div class="menu avatar_menu" id="menu">
+            <ul>
+                <li><label class="dropdown-item" id="my-data-btn">Мои данные</label></li>
+                <li><a class="dropdown-item" href="/orders/{{ user.0.uid }}">Мои заказы</a></li>
+                <li><label class="dropdown-item" id="my-address-btn">Мой адреса</label></li>
+                <li><a class="dropdown-item" id="logout-btn">Выйти</a></li>
+            </ul>
+        </div>
+        {% else %}
+        <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
+             alt="Default Avatar" class="avatar" id="avatar-anonim">
+        <div class="menu" id="menu-anonim">
+            <ul>
+                <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="address-dialog" title="Выберите адрес доставки передвигая маркер">
+    {% if user != None %}
+    {% for us in user %}
+    <form id="user_add_address" method="post" action="/user_add_address/{{ us.uid }}">
+        {% csrf_token %}
+        <input required id="typedataSuggestions" name="address" class="address-input" type="search" spellcheck="false"
+               autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" disabled>
+        <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
+
+        <div class="address-input-group">
+            <input id="flat" name="flat" type="number" placeholder="Квартира" required>
+            <input id="intercom" name="intercom" type="number" placeholder="Домофон" required>
+            <input id="entrance" name="entrance" type="number" placeholder="Подъезд" required>
+            <input id="floor" name="floor" type="number" placeholder="Этаж" required>
+        </div>
+        <div id="map-dialog" style="display: none;">
+            <div id="map" style="height: 300px;"/>
+        </div>
+        <button id="close-address-dialog" type="button">Закрыть</button>
+        <button id="save-address-dialog" type="submit">Сохранить адрес</button>
+    </form>
+    {% endfor %}
+    {% endif %}
+</div>
+</div>
+
+<div id="user-data-dialog" title="Данные пользователя">
+    <div class="user-input-group">
+        {% if user != None %}
+        {% for us in user %}
+        <form id="user-data-form" action="/update_user_data/{{ us.uid }}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
+            <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
+            <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)"
+                   value="{{us.middle_name}}"><br>
+            <input type="file" id="photo_client" name="photo_client" accept="image/*"
+                   onchange="handleImageUpload()"><br>
+            <div id="image-preview-container">
+                <img id="image-preview" src="{{ us.image }}" alt="Preview" style="max-width: 300px; max-height: 300px;">
+            </div>
+            <button id="close-data-dialog" type="button">Закрыть</button>
+            <button id="save-data-dialog" type="submit">Сохранить данные</button>
+        </form>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="menu" id="dialog-all-address" title="Сохранённые адреса">
+    {% for adr in address%}
+    <p class="dropdown-item" data-type="user-address">{{ adr.streetAndNumber }}</p>
+    <button onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес</button>
+    {% endfor %}
+</div>

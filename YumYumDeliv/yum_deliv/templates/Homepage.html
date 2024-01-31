@@ -55,9 +55,9 @@
     </div>
     <div class="restaurant-block">
         {% for restaurant in restaurants %}
-        <div class="restaurant-item" data-type="{{ restaurant.type }}" onclick="location.href='/restaurant/{{ restaurant.url_address }}'">
+        <div class="restaurant-item" data-type-rest="{{ restaurant.type }}" data-name="{{ restaurant.name }}" onclick="location.href='/restaurant/{{ restaurant.url_address }}'">
             <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
-            <h2 >{{ restaurant.name }}</h2>
+            <h2 id="title-rest-{{ restaurant.id }}">{{ restaurant.name }}</h2>
         </div>
         {% endfor %}
     </div>
