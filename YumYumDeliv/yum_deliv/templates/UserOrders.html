@@ -21,9 +21,9 @@
                 {% for order in orders %}
                 <li class="list-group-item order-list" id="md-{{ order.id }}" data-order-id="{{ order.id }}">
                     <div>Заказ #{{ order.id }}</div>
-                    <div>Время заказа {{ order.data_time }}</div>
-                    <div>{{ order.order_status }}</div>
-                    <div>Сумма заказа {{ order.summa }} ₽</div>
+                    <div>Время заказа: {{ order.data_time }}</div>
+                    <div>Статус заказа: {{ order.order_status }}</div>
+                    <div>Сумма заказа: {{ order.summa }} ₽</div>
                     <div></div>
                 </li>
                 {% endfor %}

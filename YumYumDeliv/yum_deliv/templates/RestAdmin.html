@@ -230,42 +230,43 @@
     </div>
 </form>
 
-<div id="orders-block">
-    {% for order in orders %}
-    <div class="container mt-5 orders-list" id="el-{{ order.id }}">
-        <h2>Список заказов</h2>
-            <div class="order-item" data-order-id="{{ order.id }}">
-                <p><strong>ID заказа:</strong> {{ order.id }}</p>
-                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
-                <p><strong>Статус заказа:</strong> {{ order.status }}</p>
-            </div>
-    </div>
-    {% endfor %}
-    <div id="ord-{{ order.id }}" class="container mt-5 order-details" data-detal-id="{{ order.id }}" hidden="">
-        <h2>Детали заказа</h2>
+    <div id="orders-block">
         {% for order in orders %}
-        <div id="order-details-container">
-            <p><strong>ID заказа:</strong>{{ order.id }}</p>
+        <div class="container mt-5 orders-list" id="el-{{ order.id }}">
+            <h2>Список заказов</h2>
+            <li class="order-list" id="md-{{ order.id }}" data-order-id="{{ order.id }}">
+                <p id="orderId" data-order-id="{{ order.id }}"><strong>ID заказа:</strong> {{ order.id }}</p>
                 <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
-                <p><strong>Блюда:</strong>
+                <p><strong>Статус заказа:</strong> {{ order.order_status }}</p>
+            </li>
+        </div>
+        <div id="od-{{ order.id }}" class="container mt-5 order-details with-box-shadow" data-detail-id="{{ order.id }}" hidden="">
+            <h2>Детали заказа</h2>
+            <div id="order-details-container">
+                <p><strong>ID заказа:</strong>{{ order.id }}</p>
+                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
+                <p><strong>Блюда</strong></p>
+                </p>
                     {% for dish in order.dishes %}
-                        <img src="{{ dish.photo }}" alt="{{ dish.name }}" style="height: 200px; width: 300px;">
-                        <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
+                    <img src="{{ dish.photo }}" alt="{{ dish.name }}" class="compact-image">
+                    <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
                     {% endfor %}
                 </p>
                 <p><strong>Сумма заказа:</strong> {{ order.summa }} ₽</p>
                 <p><strong>Курьер:</strong> <a href="{{ order.courier }}">{{ order.courier }}</a></p>
                 <button id="status_{{ order.id }}" type="button">Изменить статус заказа</button>
             </div>
-            <div id="status-dialog_{{ order.id }}">
+            <div id="status-dialog_{{ order.id }}" class="status-dialog">
                 <form id="status-form_{{ order.id }}" method="post" action="/change_status/{{ rest_slug }}/{{ order.id }}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <label for="status-dish_{{ order.id }}">Статус заказа: {{order.order_status}}</label>
-                    <select class="js-select2" id="status-dish_{{ order.id }}" name="status" style="width: 150px" required>
-                        <option value="Заказ оформлен" selected>Заказ оформлен</option>
-                        <option value="Сборка">Сборка</option>
-                        <option value="Передан курьеру">Передан курьеру</option>
-                    </select><br>
+                    <div class="custom-select-container">
+                        <select class="js-select2 custom-select" id="status-dish_{{ order.id }}" name="status" required>
+                            <option value="Заказ оформлен" selected>Заказ оформлен</option>
+                            <option value="Сборка">Сборка</option>
+                            <option value="Передан курьеру">Передан курьеру</option>
+                        </select>
+                    </div>
                 </form>
             </div>
         </div>
@@ -512,6 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     statusDialog.dialog({
                         autoOpen: false,
                         width: 400,
+                        height: 320,
                         modal: true,
                         buttons: {
                             'Submit': function() {

@@ -8,11 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 : v1.toString().localeCompare(v2)
     )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
 
-    $("#myElement").on("click", function () {
-        var dishId = $(this).attr("dish-id");
-        console.log("Нажат элемент с dish.id =", dishId);
-    });
-
     document.querySelectorAll("th:not(#Photo, #Actions)").forEach((th, index) =>
         th.addEventListener("click", () => {
             const table = th.closest("table");
@@ -36,4 +31,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 .forEach((tr) => table.querySelector("tbody").appendChild(tr));
         })
     );
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var orderListItems = document.querySelectorAll('.order-list');
+    var orderIdInput = document.getElementById('orderId');
+
+    orderListItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+            var orderId = item.getAttribute('data-order-id');
+            orderIdInput.value = orderId;
+
+            var orderDetailBlocks = document.querySelectorAll('[id^="od-"]');
+            orderDetailBlocks.forEach(function (block) {
+                block.hidden = true;
+            });
+
+            var selectedOrderDetailBlock = document.getElementById('od-' + orderId);
+            if (selectedOrderDetailBlock) {
+                selectedOrderDetailBlock.hidden = false;
+            }
+        });
+    });
 });

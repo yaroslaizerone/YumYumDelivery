@@ -271,3 +271,48 @@ h2 {
 .btn-primary:hover {
     background-color: #45a049;
 }
+
+.with-box-shadow {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Adjust shadow properties as needed */
+    padding: 20px; /* Adjust padding as needed */
+}
+
+.compact-image {
+    height: 100px; /* Set the desired height for compact images */
+    width: 150px; /* Set the desired width for compact images */
+    object-fit: cover; /* Maintain aspect ratio and cover container */
+    margin-right: 10px; /* Adjust margin between images if needed */
+}
+
+.status-dialog {
+    margin-top: 10px;
+}
+
+.custom-select-container {
+    position: relative;
+    width: 150px;
+}
+
+.custom-select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    appearance: none; /* Remove default arrow */
+    -webkit-appearance: none; /* Remove default arrow in Webkit browsers */
+    cursor: pointer;
+}
+
+.custom-select::after {
+    content: '\25BC'; /* Unicode character for down arrow */
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* Style the dropdown content */
+.custom-select option {
+    padding: 8px;
+}
