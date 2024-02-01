@@ -3,6 +3,8 @@ import os
 from yum_deliv.views import database, db, condition, restContext, storage, checkFileExists, config, homepageContext
 from django.shortcuts import render, redirect
 
+from yum_deliv.views import uploadPhoto
+
 
 def addDish(request, rest_slug):
     if request.method == 'POST':
@@ -31,26 +33,16 @@ def addDish(request, rest_slug):
         uploaded_files = request.FILES
         photo = uploaded_files.get('photo_dish')
 
-        # Check if the file with the same name already exists in Firebase Storage
+        data = {"id": id, "name": name, "description": description,
+                "dish_type": dish_type, "weight": weight,
+                "cost": cost, "calories": calories,
+                "proteins": proteins, "carbohydrates": carbohydrates,
+                "fats": fats, "restaurant": restaurant[0]}
+
         if photo:
-            file_name = photo.name
+            data['image'] = uploadPhoto(photo)
 
-            if checkFileExists(file_name):
-                # Use the existing file URL instead of uploading a new one
-                print("error")
-            else:
-                # Upload the file to Firebase Storage
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_name}?alt=media&token={photo_url}"
-
-            data = {"id": id, "name": name, "description": description,
-                    "dish_type": dish_type, "weight": weight,
-                    "cost": cost, "calories": calories,
-                    "proteins": proteins, "carbohydrates": carbohydrates,
-                    "fats": fats, "restaurant": restaurant[0], "photo": download_url}
-
-            database.collection("dishes").add(data)
+        database.collection("dishes").add(data)
 
     context = restContext(rest_slug)
     render(request, 'RestAdmin.html', context)
@@ -127,18 +119,7 @@ def republic(request, rest_slug):
         photo = uploaded_files.get('photo_rest')
 
         if photo:
-            dict_path = 'rest_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_path = f"{dict_path}%5C{photo.name}"
-
-            if checkFileExists(file_path):
-                new_data_rest[
-                    'image'] = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{file_name}?alt=media"
-            else:
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Frest_photo%5C{photo.name}?alt=media&token={photo_url}"
-                new_data_rest['image'] = download_url
+            new_data_rest['image'] = uploadPhoto(photo)
 
         # Получение id ресторана
         restaurant_request = (
@@ -187,28 +168,7 @@ def editDish(request, rest, dish_id):
 
         # Check if a photo has been uploaded
         if photo:
-            dict_path = 'dishes_photo'
-            file_name = os.path.join(dict_path, photo.name)
-            file_url = dict_path + '%5C' + photo.name
-
-            # Check if the file already exists
-            if checkFileExists(file_url):
-                # Use the existing file URL instead of uploading a new one
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media"
-            else:
-                # Upload the file to Firebase Storage
-                upload = storage.child(file_name).put(photo)
-                photo_url = upload.get("downloadTokens")
-                download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_url}?alt=media&token={photo_url}"
-        else:
-            # No new photo uploaded, check if preview image exists
-            preview_image_id = f'image-preview-edit_{dish_id}'
-            if request.POST.get(preview_image_id):
-                # Use the existing photo URL
-                download_url = request.POST.get(preview_image_id)
-            else:
-                # No photo uploaded and no preview image, set to None
-                download_url = None
+            download_url = uploadPhoto(photo)
 
         data = {
             "name": name,

@@ -39,17 +39,17 @@
             <th>Действия</th>
         </tr>
         {% for item in cart %}
-        {% for dish in item %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ dish.name }}</td>
-            <td>{{ dish.quantity }}</td>
-            <td>{{ dish.cost }}</td>
-            <td>
-                <button class="delete-btn" onclick="removeItem('{{ dish.id }}')">Удалить</button>
-            </td>
-        </tr>
-        {% endfor %}
+            {% for dish in item %}
+                <tr id="tr-{{ dish.id }}">
+                    <td>{{ forloop.parentloop.counter }}</td>
+                    <td>{{ dish.name }}</td>
+                    <td>{{ dish.quantity }}</td>
+                    <td>{{ dish.cost }} ₽</td>
+                    <td>
+                        <button class="delete-btn" onclick="removeItem({{ forloop.parentloop.counter }}, '{{ dish.id }}')">Удалить</button>
+                    </td>
+                </tr>
+            {% endfor %}
         {% endfor %}
         <tr>
             <td colspan="5" class="total-cost">Итого: {{ cost_cart }} ₽</td>

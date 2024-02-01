@@ -1,11 +1,11 @@
 import logging
 import json
 import datetime
+import os
 import random
 import string
 import firebase_admin
 import pyrebase
-import locale
 
 from django.http import JsonResponse
 from requests.exceptions import HTTPError
@@ -106,10 +106,10 @@ def postsignIn(request):
         if user_role == '1':
             response = redirect('/')
             response.set_cookie('uid', uid)
-        elif user_role == '2':
+        elif user_role == '2' or user_role == '5':
                 role = (
                     database.collection("role")
-                    .where("id", "==", 2)
+                    .where("id", "==", int(user_role))
                     .stream()
                 )
                 role_data = []
@@ -119,6 +119,8 @@ def postsignIn(request):
                    return redirect('adminRest', rest_slug=r['role'])
         elif user_role == '3':
             return redirect('/operator_panel/')
+        elif user_role == '4':
+            return redirect(f'/couriers_panel/{uid}')
         else:
             logger.info(user_role)
             return HttpResponse("Some default response or redirect")
@@ -395,3 +397,10 @@ def randomAlphanumericString(length):
             k=length
         )
     )
+
+
+def uploadPhoto(photo):
+        upload = storage.child(photo.name).put(photo)
+        photo_url = upload.get("downloadTokens")
+        download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{photo.name}?alt=media&token={photo_url}"
+        return download_url

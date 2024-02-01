@@ -4,6 +4,8 @@ window.onload = function () {
     loadCart();
 };
 
+var restURL = localStorage.getItem('url_rest');
+
 function addToCart(dishName, dishPhoto, dishID, dishCost, dishWeight) {
     const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
     const existingItemIndexOD = orderedDishes.findIndex(item => item.id === dishID);
@@ -73,14 +75,13 @@ function updateCart() {
         const li = document.createElement('li');
         li.className = 'cart-item';
 
-        // Вычисляем общую стоимость для текущего продукта
         const totalCostForItem = item.cost * item.quantity;
 
         li.innerHTML = `
             <img src="${item.photo}" alt="${item.name}">
             <div class="cart-item-details">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">${totalCostForItem} ₽</div> <!-- Обновлено отображение цены -->
+                <div class="cart-item-price">${totalCostForItem} ₽</div>
                 <div class="cart-item-weight">${item.weight} г</div>
             </div>
             <div class="cart-item-counter">
@@ -94,11 +95,6 @@ function updateCart() {
 
     // После обновления корзины вызываем функцию для обновления общей стоимости
     updateTotalCost();
-
-    const orderedDishesJSON = JSON.stringify(orderedDishes);
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 3);
-    document.cookie = `orderedDishes=${orderedDishesJSON}; expires=${expirationDate.toUTCString()}; path=/`;
 }
 
 
@@ -119,20 +115,55 @@ function clearCart() {
 }
 
 function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-    localStorage.setItem('orderedDishes', JSON.stringify(orderedDishes));
+    const uidCookie = getCookie('uid');
+    if (!uidCookie) {
+        // Если пользователь не авторизован, сохраняем в localStorage
+        localStorage.setItem(`cart-${restURL}`, JSON.stringify(cartItems));
+        localStorage.setItem(`orderedDishes-${restURL}`, JSON.stringify(orderedDishes));
+    } else {
+        const orderName = `orderDisher-${restURL}-${uidCookie}`;
+        const cartName = `cart-${restURL}-${uidCookie}`;
+        document.cookie = `${cartName}=${JSON.stringify(cartItems)}; path=/`;
+        document.cookie = `${orderName}=${JSON.stringify(orderedDishes)}; path=/`;
+    }
 }
 
 function loadCart() {
-    const savedCart = localStorage.getItem('cart');
-    const savedOD = localStorage.getItem('orderedDishes');
+    const uidCookie = getCookie('uid');
+    const orderedDishesName = `orderDisher-${restURL}-${uidCookie}`;
+    const cartName = `cart-${restURL}-${uidCookie}`;
 
-    if (savedCart) {
-        cartItems = JSON.parse(savedCart);
-        orderedDishes = JSON.parse(savedOD);
-        updateCart();
-        updateTotalCost();
+    if (!uidCookie) {
+        // Если пользователь не авторизован, загружаем из localStorage
+        const orderedDishesLocalStorage = localStorage.getItem(`orderedDishes-${restURL}`);
+        orderedDishes = orderedDishesLocalStorage ? JSON.parse(orderedDishesLocalStorage) : [];
+        // Загружаем данные из localStorage для корзины (это может быть аналогично для куки)
+        const cartLocalStorage = localStorage.getItem(`cart-${restURL}`);
+        cartItems = cartLocalStorage ? JSON.parse(cartLocalStorage) : [];
+    } else {
+        // Если пользователь авторизован, загружаем из куки
+        const orderedDishesCookie = getCookie(orderedDishesName);
+        orderedDishes = orderedDishesCookie ? JSON.parse(decodeURIComponent(orderedDishesCookie)) : [];
+        const cartCookie = getCookie(cartName);
+        cartItems = cartCookie ? JSON.parse(decodeURIComponent(cartCookie)) : [];
     }
+    console.log(orderedDishes);
+    console.log(cartItems);
+    updateCart();
+    updateTotalCost();
+}
+
+function getCookie(cookieName) {
+    const name = cookieName + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
+    for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i].trim();
+        if (cookie.indexOf(name) === 0) {
+            return cookie.substring(name.length, cookie.length);
+        }
+    }
+    return null;
 }
 
 document.addEventListener('click', function (event) {
@@ -148,3 +179,4 @@ document.addEventListener('click', function (event) {
             }
         }
     });
+// TODO Сделать Корзину для каждого ресторана

@@ -522,27 +522,23 @@ document.getElementById('cart-btn').addEventListener('click', function () {
     toggleCartDisplay();
 });
 
-function removeItem(dishId) {
-    // Remove the item from the cart displayed on the page
-    var itemElement = document.querySelector('.cart p[data-dish-id="' + dishId + '"]');
-    if (itemElement) {
-        itemElement.remove();
-    }
-
-    // Remove the item from the cart data in memory
+function removeItem(parentIndex, dishId) {
     var updatedCart = [];
     for (var i = 0; i < cart.length; i++) {
-        if (cart[i][0].id !== dishId) {
+        if (i !== parentIndex || cart[i][0].id !== dishId) {
             updatedCart.push(cart[i]);
         }
     }
     cart = updatedCart;
 
-    // Update the orderedDishes cookie
     updateOrderedDishesCookie(dishId);
 
-    // Update the total cost
     updateTotalCost();
+
+    var trElement = document.getElementById('tr-' + dishId);
+    if (trElement) {
+        trElement.remove();
+    }
 }
 
 function updateOrderedDishesCookie(dishId) {

@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .page_function import homepage, user_functions, admin_rest, operator
+from .page_function import homepage, user_functions, admin_rest, operator, couriers
 
 urlpatterns = [
     path('', homepage.home, name='home'),
@@ -35,4 +35,7 @@ urlpatterns = [
     # URLs Оператора
     path('operator_panel/', operator.init, name='oper'),
     path('sendResponse/<slug:feedback>', operator.sendResponse, name='sendResponse'),
+    #URLs Курьера
+    path('couriers_panel/<slug:uid>', couriers.init, name='couriers'),
+    path('get_order/<slug:uid>/<slug:order_id>', couriers.getOrder, name='getOrder'),
 ]

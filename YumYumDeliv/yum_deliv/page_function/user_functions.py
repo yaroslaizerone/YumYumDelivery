@@ -5,7 +5,8 @@ from yum_deliv.views import checkFileExists
 from yum_deliv.views import storage
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from yum_deliv.views import database, config, db, takeOrders, randomAlphanumericString, homepageContext
+from yum_deliv.views import database, config, db, takeOrders,\
+    randomAlphanumericString, homepageContext, uploadPhoto
 
 
 def updateUserData(request, uid):
@@ -21,29 +22,7 @@ def updateUserData(request, uid):
             photo_client = uploaded_files.get('photo_client')
 
             if photo_client:
-                dict_path = 'avatars'
-                file_name = os.path.join(dict_path, photo_client.name)
-                file_path = f"{dict_path}%5C{photo_client.name}"
-
-                # Check if the file already exists
-                if checkFileExists(file_path):
-                    # Use the existing file URL instead of uploading a new one
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{file_name}?alt=media"
-
-                else:
-                    # Upload the file to Firebase Storage
-                    upload = storage.child(file_name).put(photo_client)
-                    photo_url = upload.get("downloadTokens")
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Favatars%5C{photo_client.name}?alt=media&token={photo_url}"
-            else:
-                # No new photo uploaded, check if preview image exists
-                preview_image_id = f'image-preview-edit_{uid}'
-                if request.POST.get(preview_image_id):
-                    # Use the existing photo URL
-                    download_url = request.POST.get(preview_image_id)
-                else:
-                    # No photo uploaded and no preview image, set to None
-                    download_url = None
+                download_url = uploadPhoto(photo_client)
 
             if download_url:
                 user_data["image"] = download_url
@@ -127,23 +106,10 @@ def createSupport(request, uid):
         # Проверка, если есть загруженные файлы
         if uploaded_files:
             # Папка для сохранения файлов user_feedback
-            folder_path = 'user_feedback'
             photo_urls = []
 
             for file in uploaded_files:
-                file_name = os.path.join(folder_path, file.name)
-                file_path = f"{folder_path}%5C{file.name}"
-
-                # Check if the file already exists
-                if checkFileExists(file_path):
-                    # Use the existing file URL instead of uploading a new one
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file_name}?alt=media"
-
-                else:
-                    # Upload the file to Firebase Storage
-                    upload = storage.child(file_name).put(file)
-                    photo_url = upload.get("downloadTokens")
-                    download_url = f"https://firebasestorage.googleapis.com/v0/b/{config['storageBucket']}/o/{file_path}%2Fuser_feedback%5C{file.name}?alt=media&token={photo_url}"
+                download_url = uploadPhoto(file)
                 photo_urls.append(download_url)
             else:
                 # No new photo uploaded, check if preview image exists
