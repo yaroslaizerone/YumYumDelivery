@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .flex-container {
+            display: flex;
+        }
+
+        #order-list {
+            width: 300px;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .order-summary {
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: inline-block;
+            width: 280px;
+        }
+
+        .order-summary:hover {
+            background-color: #f2f2f2;
+        }
+
+        .order-details {
+            flex: 1;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+        .order-details.visible {
+            display: block;
+        }
+
+        .dish-container{
+            display: flex;
+        }
+
+        .dish-photo{
+            width: 200px;
+            height: 150px;
+        }
+
+        .dish-item{
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="flex-container">
+    <div id="order-list">
+        {% for order in orders %}
+        <div class="order-summary" onclick="showOrderDetails('{{ order.id }}')">
+            <p><strong>Ресторан:</strong> {{ order.restaurant }}</p>
+            <p><strong>Дата:</strong> {{ order.data_time }}</p>
+            <p><strong>Статус:</strong> {{ order.order_status }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% for order in orders %}
+        <div class="order-details" data-type-order="{{ order.id }}">
+            <h2>Детали заказа</h2>
+            <p><strong>Ресторан: {{ order.restaurant }}</strong> <span class="restaurant-name"></span></p>
+            <p><strong>Дата: {{ order.data_time }}</strong> <span class="order-date"></span></p>
+            <p><strong>Статус: {{ order.order_status }}</strong> <span class="order-status"></span></p>
+            <p><strong>Адрес: {{ order.street }}, подъезд - {{ order.entrance }}, домофон - {{ order.intercom }}, этаж - {{ order.floor }}, квартира - {{ order.flat }}</strong> <span class="order-status"></span></p>
+            <p><strong>Сумма заказа: {{ order.summa }} ₽</strong> <span class="order-status"></span></p>
+            <p><strong>Вес заказа: {{ order.total_weight }} кг</strong> <span class="order-status"></span></p>
+
+            <h3>Блюда заказа:</h3>
+            <div class="dish-container">
+                {% for dish in order.dishes %}
+                    <div class="dish-item">
+                        <img src="{{ dish.photo }}" alt="{{ dish.name }} image" class="dish-photo">
+                        <p>{{ dish.name }} - {{ dish.quantity }} шт. - {{ dish.weight }} г</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="get_order-dtn" onclick="getOrder({{ order.id }}, '{{ uid }}')">Взять заказ</button>
+        </div>
+        {% if forloop.counter|divisibleby:2 %}
+            <div style="clear: both;"></div>
+
+        {% endif %}
+    {% endfor %}
+</div>
+
+
+<script>
+    function showOrderDetails(orderId) {
+        var orderDetails = document.querySelectorAll('.order-details');
+        orderDetails.forEach(function (orderDetail) {
+            orderDetail.classList.remove('visible');
+        });
+
+        var selectedOrderDetail = document.querySelector('.order-details[data-type-order="' + orderId + '"]');
+        if (selectedOrderDetail) {
+            selectedOrderDetail.classList.add('visible');
+        }
+    }
+
+</script>
+<script src="{% static 'js/couriers.js' %}"></script>
+</body>
+</html>
