@@ -25,7 +25,6 @@ function addToCart(dishName, dishPhoto, dishID, dishCost, dishWeight) {
             'cost': dishCost,
             'quantity': 1,
             'weight': dishWeight,
-            // 'rest': rest
         };
         const orderedDish = {'id': dishID, 'quantity': 1};
 

@@ -23,7 +23,7 @@ urlpatterns = [
     path('restaurant/<slug:url_rest>', admin_rest.restaurant, name="restaurant"),
     # URLs Оплаты
     path('place_order/', views.placeOrder, name='place_order'),
-    path('cart/', views.ordered, name='ordered'),
+    path('ordered/<slug:url_rest>', views.ordered, name='ordered'),
     path('payOfOrder/', views.payOfOrder, name='payOfOrder'),
     # URLs Пользователя
     path('orders/<slug:uid>', views.orders, name="orders"),

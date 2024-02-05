@@ -167,6 +167,9 @@
         margin-top: 20px;
         cursor: pointer;
     }
+    #btn_place{
+        cursor: pointer;
+    }
 </style>
 
 <div class="col logo-compani">
@@ -219,7 +222,7 @@
         </div>
         <div class="d-flex justify-content-between">
             <button class="btn btn-secondary" onclick="closeNav()">Закрыть корзину</button>
-            <button class="btn btn-primary" id="btn_place" onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
+            <button class="btn btn-primary" id="btn_place">Оформить заказ</button>
         </div>
     </div>
 
@@ -417,40 +420,57 @@
         return null;
     }
 
-    function increaseQuantity(dishID) {
-        const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
-        const existingItemIndexOD = orderedDishes.findIndex(item => item.id === dishID);
-
-        if (existingItemIndexCart !== -1 && existingItemIndexOD !== -1) {
-            cartItems[existingItemIndexCart].quantity += 1;
-            orderedDishes[existingItemIndexOD].quantity += 1;
-        }
-    }
-
-    function decreaseQuantity(dishID) {
-        const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
-        const existingItemIndexOD = orderedDishes.findIndex(item => item.id === dishID);
-
-        if (existingItemIndexCart !== -1 && existingItemIndexOD !== -1) {
-            if (cartItems[existingItemIndexCart].quantity > 1) {
-                cartItems[existingItemIndexCart].quantity -= 1;
-                orderedDishes[existingItemIndexOD].quantity -= 1;
-            } else {
-                // Remove the item if quantity is 0
-                cartItems.splice(existingItemIndexCart, 1);
-                orderedDishes.splice(existingItemIndexOD, 1);
-            }
-        }
-    }
-
     function saveLastSelectedRestaurant(restaurantId) {
         localStorage.setItem('lastSelectedRestaurant', restaurantId);
     }
 
-    $(document).ready(function () {
+    // Функция для увеличения количества блюда в корзине
+    function increaseQuantity(itemId, rest) {
+        updateCartItemQuantity(itemId, 1, rest);
+    }
+
+    // Функция для уменьшения количества блюда в корзине
+    function decreaseQuantity(itemId, rest) {
+        updateCartItemQuantity(itemId, -1, rest);
+    }
+
+    // Функция для обновления количества блюда в корзине
+    function updateCartItemQuantity(itemId, change, rest) {
+        let partialName = `cart-"${rest}"-{{ user.0.uid }}`;
+        let foundCookie = getCookieByPartialName(partialName);
+
+        if (foundCookie) {
+            let cartItems = JSON.parse(foundCookie);
+
+            // Находим блюдо в корзине по его ID
+            const index = cartItems.findIndex(item => item.id === itemId);
+
+            if (index !== -1) {
+                // Увеличиваем или уменьшаем количество
+                cartItems[index].quantity += change;
+
+                // Если количество стало 0, удаляем блюдо из корзины
+                if (cartItems[index].quantity <= 0) {
+                    cartItems.splice(index, 1);
+                }
+
+                // Обновляем cookie с обновленной корзиной
+                document.cookie = `${partialName}=${JSON.stringify(cartItems)}; path=/;`;
+
+                // Обновляем отображение корзины
+                updateCartView();
+            }
+        }
+    }
+
+    function updateCartView() {
+        let cartList = document.getElementById('cart-list');
+        cartList.innerHTML = '';
+        let RestTitle = document.getElementById(`restaurantPanel`);
+        RestTitle.innerText = '';
+
         let partialName = '';
         let foundCookie = '';
-        let cartItem = [];
 
         {% for rest in restaurants %}
         partialName = 'cart-"{{ rest.url_address }}"-{{ user.0.uid }}';
@@ -482,23 +502,12 @@
                             <div class="cart-item-weight">${item.weight} г</div>
                         </div>
                         <div class="cart-item-counter">
-                            <button type="button" onclick="decreaseQuantity('${item.id}')">-</button>
+                            <button type="button" onclick="decreaseQuantity('${item.id}', '{{ rest.url_address }}')">-</button>
                             <input type="text" class="dish-quantity" value="${item.quantity}" readonly>
-                            <button type="button" onclick="increaseQuantity('${item.id}')">+</button>
+                            <button type="button" onclick="increaseQuantity('${item.id}', '{{ rest.url_address }}')">+</button>
                         </div>`;
 
                     ListCartRest.appendChild(li);
-                    const dish = {
-                        'id': item.id,
-                        'name': item.name,
-                        'photo': item.photo,
-                        'cost': totalCostForItem,
-                        'quantity': item.quantity,
-                        'weight': item.weight,
-                        // 'rest': item.rest
-                    };
-
-                    cartItem.push(dish);
                 });
                 const p = document.createElement('p');
                 p.className = 'restaurant';
@@ -513,6 +522,9 @@
                     p.classList.add('selected');
                     $('#cartClearBtn').click( function () {
                         clearRestCart('{{ rest.url_address }}')
+                    });
+                    $('#btn_place').click( function () {
+                        location.href='/ordered/{{ rest.url_address }}';
                     });
                 }
 
@@ -535,6 +547,9 @@
                         $('#cartClearBtn').click(function () {
                             clearRestCart(firstRestaurantId);
                         });
+                        $('#btn_place').click( function () {
+                            location.href='/ordered/{{ rest.url_address }}';
+                        });
                     }
                 }
 
@@ -544,6 +559,10 @@
             console.log('Cookie с указанной частью названия не найдена.');
         }
         {% endfor %}
+    }
+
+    $(document).ready(function () {
+        updateCartView()
     });
 
 </script>

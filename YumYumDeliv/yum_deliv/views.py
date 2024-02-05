@@ -296,7 +296,7 @@ def placeOrder(request):
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
-def ordered(request):
+def ordered(request, url_rest):
     dishes, id_rest, summa = orderedTake(request)
 
     restaurant = (
