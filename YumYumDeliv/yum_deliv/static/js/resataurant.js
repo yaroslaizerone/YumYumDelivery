@@ -3,8 +3,12 @@ let cartItems = [];
 window.onload = function () {
     loadCart();
 };
-
-var restURL = localStorage.getItem('url_rest');
+let uidCookie = getCookie('uid');
+let restURL = localStorage.getItem('url_rest');
+let orderedDishesName = `orderDishes-${restURL}-${uidCookie}`;
+let cartName = `cart-${restURL}-${uidCookie}`;
+let orderedDishesNameLS = `orderedDishes-${restURL}`;
+let cartNameLS = `cart-${restURL}`;
 
 function addToCart(dishName, dishPhoto, dishID, dishCost, dishWeight) {
     const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
@@ -20,7 +24,8 @@ function addToCart(dishName, dishPhoto, dishID, dishCost, dishWeight) {
             'photo': dishPhoto,
             'cost': dishCost,
             'quantity': 1,
-            'weight': dishWeight
+            'weight': dishWeight,
+            // 'rest': rest
         };
         const orderedDish = {'id': dishID, 'quantity': 1};
 
@@ -68,7 +73,7 @@ function decreaseQuantity(dishID) {
 }
 
 function updateCart() {
-    const cartList = document.getElementById('cart-list');
+    const cartList = document.getElementById('cart-list-col');
     cartList.innerHTML = '';
 
     cartItems.forEach(item => {
@@ -103,54 +108,119 @@ function updateTotalCost() {
 
     const placeOrderButton = document.getElementById('btn_place');
     placeOrderButton.textContent = `Оформить заказ (${totalCost}₽)`;
-    document.getElementById('cart-btn').innerText = totalCost + ' ₽';
 }
 
 function clearCart() {
     cartItems = [];
     orderedDishes = [];
+
     updateCart();
     updateTotalCost();
     saveCart();
 }
 
 function saveCart() {
-    const uidCookie = getCookie('uid');
     if (!uidCookie) {
-        // Если пользователь не авторизован, сохраняем в localStorage
-        localStorage.setItem(`cart-${restURL}`, JSON.stringify(cartItems));
-        localStorage.setItem(`orderedDishes-${restURL}`, JSON.stringify(orderedDishes));
+        if (Array.isArray(cartItems) && cartItems.length > 0) {
+            document.cookie = `${cartNameLS}=${JSON.stringify(cartItems)}; path=/`;
+            document.cookie = `${orderedDishesNameLS}=${JSON.stringify(orderedDishes)}; path=/`;
+        } else {
+            // Если cartItems пуст или не является массивом
+            document.cookie = `${cartNameLS}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            document.cookie = `${orderedDishesNameLS}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
     } else {
-        const orderName = `orderDisher-${restURL}-${uidCookie}`;
-        const cartName = `cart-${restURL}-${uidCookie}`;
-        document.cookie = `${cartName}=${JSON.stringify(cartItems)}; path=/`;
-        document.cookie = `${orderName}=${JSON.stringify(orderedDishes)}; path=/`;
+        // Если пользователь авторизован, сохраняем в cookie
+        if (Array.isArray(cartItems) && cartItems.length > 0) {
+            document.cookie = `${cartName}=${JSON.stringify(cartItems)}; path=/`;
+            document.cookie = `${orderedDishesName}=${JSON.stringify(orderedDishes)}; path=/`;
+        } else {
+            // Если cartItems пуст или не является массивом
+            document.cookie = `${cartName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            document.cookie = `${orderedDishesName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        }
     }
 }
 
 function loadCart() {
-    const uidCookie = getCookie('uid');
-    const orderedDishesName = `orderDisher-${restURL}-${uidCookie}`;
-    const cartName = `cart-${restURL}-${uidCookie}`;
-
     if (!uidCookie) {
-        // Если пользователь не авторизован, загружаем из localStorage
-        const orderedDishesLocalStorage = localStorage.getItem(`orderedDishes-${restURL}`);
+        // Если пользователь не авторизирован, загружаем данные из localStorage
+        const orderedDishesLocalStorage = getCookie(orderedDishesNameLS);
         orderedDishes = orderedDishesLocalStorage ? JSON.parse(orderedDishesLocalStorage) : [];
-        // Загружаем данные из localStorage для корзины (это может быть аналогично для куки)
-        const cartLocalStorage = localStorage.getItem(`cart-${restURL}`);
+        const cartLocalStorage = getCookie(cartNameLS);
         cartItems = cartLocalStorage ? JSON.parse(cartLocalStorage) : [];
     } else {
-        // Если пользователь авторизован, загружаем из куки
+        if (!isCookieEmpty(orderedDishesNameLS) || !isCookieEmpty(cartNameLS)) {
+            const userDecision = confirm('Хотите перенести выбранные блюда на корзину вашего аккаунта?');
+            if (userDecision) {
+                const orderedDishesLocalStorage = getCookie(`orderedDishes-${restURL}`);
+                const cartLocalStorage = getCookie(`cart-${restURL}`);
+
+                const orderedDishesFromLocalStorage = orderedDishesLocalStorage ? JSON.parse(orderedDishesLocalStorage) : [];
+                const cartItemsFromLocalStorage = cartLocalStorage ? JSON.parse(cartLocalStorage) : [];
+                // Если пользователь решит перенести элементы из локального хранилища в файлы cookies, при этом cookies пустые
+                if (isCookieEmpty(orderedDishesName) || isCookieEmpty(cartName)) {
+                    document.cookie = `${cartName}=${JSON.stringify(cartItemsFromLocalStorage)}; path=/`;
+                    document.cookie = `${orderedDishesName}=${JSON.stringify(orderedDishesFromLocalStorage)}; path=/`;
+
+                    document.cookie = `orderedDishes-${restURL}` + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = `cart-${restURL}` + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+                } else {
+                    // Если пользователь решит перенести элементы из локального хранилища в файлы cookies, при этом cookies Не пустые
+                    const orderedDishesCookie = getCookie(orderedDishesName);
+                    const cartCookie = getCookie(cartName);
+
+                    let mergedCart, mergedOrderedDishes;
+                    mergedCart = mergeItems(JSON.parse(cartLocalStorage), JSON.parse(cartCookie));
+                    mergedOrderedDishes = mergeItems(JSON.parse(orderedDishesLocalStorage), JSON.parse(orderedDishesCookie))
+
+                    document.cookie = `${cartName}=${JSON.stringify(mergedCart)}; path=/`;
+                    document.cookie = `${orderedDishesName}=${JSON.stringify(mergedOrderedDishes)}; path=/`;
+
+                    document.cookie = `orderedDishes-${restURL}` + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = `cart-${restURL}` + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                }
+            }
+        }
         const orderedDishesCookie = getCookie(orderedDishesName);
         orderedDishes = orderedDishesCookie ? JSON.parse(decodeURIComponent(orderedDishesCookie)) : [];
         const cartCookie = getCookie(cartName);
         cartItems = cartCookie ? JSON.parse(decodeURIComponent(cartCookie)) : [];
     }
-    console.log(orderedDishes);
     console.log(cartItems);
     updateCart();
     updateTotalCost();
+}
+
+function mergeItems(LocalStorage, Cookie) {
+
+// Создаем Map для уникальных элементов, где ключ - id
+    const uniqueItemsMapCart = new Map();
+
+// Добавляем элементы из cart1 с приоритетом
+    LocalStorage.forEach(item => {
+        const key = item.id;
+        if (!uniqueItemsMapCart.has(key)) {
+            uniqueItemsMapCart.set(key, item);
+        }
+    });
+
+// Добавляем элементы из cart2 с приоритетом, перезаписывая, если элемент уже есть
+    Cookie.forEach(item => {
+        const key = item.id;
+        uniqueItemsMapCart.set(key, item);
+    });
+
+// Преобразуем Map обратно в массив
+    const mergedArray = Array.from(uniqueItemsMapCart.values());
+
+    return mergedArray;
+}
+
+function isCookieEmpty(cookieName) {
+    const cookieValue = getCookie(cookieName);
+    return !cookieValue || cookieValue.trim() === '';
 }
 
 function getCookie(cookieName) {
@@ -167,16 +237,19 @@ function getCookie(cookieName) {
 }
 
 document.addEventListener('click', function (event) {
-        if (event.target.tagName === 'A') {
-            var targetId = event.target.getAttribute('href').substring(1);
+    if (event.target.tagName === 'A') {
+        var targetId = event.target.getAttribute('href').substring(1);
 
-            var targetElement = document.getElementById(targetId);
+        var targetElement = document.getElementById(targetId);
 
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth' // Добавляет плавный скроллинг
-                });
-            }
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth' // Добавляет плавный скроллинг
+            });
         }
+    }
+});
+
+$(document).ready(function() {
+        $('.col.cart-container').hide();
     });
-// TODO Сделать Корзину для каждого ресторана

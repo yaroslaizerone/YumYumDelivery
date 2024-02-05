@@ -1,3 +1,174 @@
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    #container {
+        transition: margin-left 0.5s;
+    }
+
+    #sidebar {
+        width: 0;
+        height: 100%;
+        background-color: #3498db;
+        position: fixed;
+        top: 0;
+        right: 0;
+        overflow-x: hidden;
+        padding-top: 60px;
+        transition: 0.5s;
+        color: white;
+        z-index: 1;
+    }
+
+    #sidebar a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 18px;
+        color: white;
+        display: block;
+        transition: 0.3s;
+    }
+
+    #sidebar a:hover {
+        color: #f1f1f1;
+    }
+
+    #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        z-index: 0;
+    }
+
+    #cartContent {
+        margin: 10px;
+        padding: 20px;
+        color: black; /* Используем черный текст для лучшей видимости */
+        background-color: white; /* Белый фон */
+        border-radius: 10px; /* Закругление краев */
+    }
+
+    .cartItem {
+        margin-bottom: 10px;
+    }
+
+    .restPanel {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .restaurant {
+        cursor: pointer;
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .restaurant.selected {
+        background-color: #aaf;
+    }
+
+    #cart-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .cart-item img {
+        width: 50px;
+        height: 50px;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .cart-item-details {
+        display: flex;
+        flex-direction: column; /* Изменено на вертикальное расположение элементов */
+        align-items: center;
+    }
+
+    .cart-item-name {
+        font-weight: bold;
+        margin-bottom: 10px; /* Добавлен отступ между именем и счетчиком */
+    }
+
+    .cart-item-counter {
+        display: flex;
+        align-items: center;
+        flex-direction: row; /* Изменено на горизонтальное расположение элементов */
+    }
+
+    .cart-item-counter button {
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .cart-item-counter input {
+        margin: 0 5px;
+        padding: 5px;
+        text-align: center;
+        width: 30px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-width: 40px; /* Оптимизированная максимальная ширина */
+    }
+
+    #cart-list li {
+        margin-bottom: 20px;
+    }
+
+    #cart-list img {
+        width: 50px; /* Размер изображения блюда */
+        height: 50px;
+        margin-right: 10px;
+        border-radius: 8px; /* Закругление углов изображения в корзине */
+    }
+
+    .cart-item-price {
+        font-size: 14px;
+        color: #4CAF50; /* Зеленый цвет для цены */
+    }
+
+    .cart-item-weight {
+        font-size: 12px;
+        color: #555; /* Серый цвет для веса */
+    }
+    .cart-h2{
+        margin: 10px;
+    }
+    .title-cart{
+        display: flex;
+        justify-content: space-around;
+    }
+    .clearbtn{
+        margin-top: 20px;
+        cursor: pointer;
+    }
+</style>
+
 <div class="col logo-compani">
     <a href="/" class="navbar-brand"><img class="logo" src="../static/res/logo.png"/></a>
 </div>
@@ -12,7 +183,7 @@
 <div class="col address-container" style="max-width: 250px">
     <div class="dropdown-address">
         <button class="dropbtn" id="savedAddressesBtn">Указать адрес</button>
-        <div class="menu" id="menu-address">
+        <div class="menu menu_top" id="menu-address">
             <ul>
                 <li><p id="add-address">Добавить адрес</p></li>
                 {% for adr in address %}
@@ -29,37 +200,30 @@
     </div>
 </div>
 <div class="col cart-container">
-    <button class="dropbtn" id="cart-btn">{{ cost_cart }} ₽</button>
-    <table class="cart" id="cart">
-        <tr>
-            <th>#</th>
-            <th>Блюдо</th>
-            <th>Количество</th>
-            <th>Цена</th>
-            <th>Действия</th>
-        </tr>
-        {% for item in cart %}
-            {% for dish in item %}
-                <tr id="tr-{{ dish.id }}">
-                    <td>{{ forloop.parentloop.counter }}</td>
-                    <td>{{ dish.name }}</td>
-                    <td>{{ dish.quantity }}</td>
-                    <td>{{ dish.cost }} ₽</td>
-                    <td>
-                        <button class="delete-btn" onclick="removeItem({{ forloop.parentloop.counter }}, '{{ dish.id }}')">Удалить</button>
-                    </td>
-                </tr>
-            {% endfor %}
-        {% endfor %}
-        <tr>
-            <td colspan="5" class="total-cost">Итого: {{ cost_cart }} ₽</td>
-        </tr>
-        <tr>
-            <td colspan="5" class="checkout-cell">
-                <button class="checkout-btn" onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
-            </td>
-        </tr>
-    </table>
+    <button class="dropbtn" id="cart-btn" onClick="openNav()"><i class="fa fa-shopping-basket" aria-hidden="true"></i></button>
+
+    <div id="sidebar">
+        <div class="title-cart">
+            <h2 class="cart-h2">Корзина</h2>
+            <div class="clearbtn" id="cartClearBtn">Очистить корзину</div>
+        </div>
+        <div id="cartContent">
+            <div class="d-flex justify-content-center align-items-center">
+                <div id="restaurantSelection">
+                    <div class="restPanel" id="restaurantPanel"></div>
+                </div>
+            </div>
+            <div class="cartItem" id="container-cart-rest">
+                <ul id="cart-list"></ul>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-secondary" onclick="closeNav()">Закрыть корзину</button>
+            <button class="btn btn-primary" id="btn_place" onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
+        </div>
+    </div>
+
+    <div id="overlay" onclick="closeNav()"></div>
 </div>
 <div class="col avatar-user">
     <div class="avatar-container">
@@ -91,50 +255,78 @@
         {% endif %}
     </div>
 </div>
+</div>
 
 <div id="address-dialog" title="Выберите адрес доставки передвигая маркер">
     {% if user != None %}
     {% for us in user %}
-    <form id="user_add_address" method="post" action="/user_add_address/{{ us.uid }}">
+    <form id="user_add_address" method="post" action="/user_add_address/{{ us.uid }}" class="needs-validation"
+          novalidate>
         {% csrf_token %}
-        <input required id="typedataSuggestions" name="address" class="address-input" type="search" spellcheck="false"
-               autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" disabled>
-        <i id="map-marker" class="fa-regular fa-map" onclick="$('#map-dialog').show();"></i>
 
-        <div class="address-input-group">
-            <input id="flat" name="flat" type="number" placeholder="Квартира" required>
-            <input id="intercom" name="intercom" type="number" placeholder="Домофон" required>
-            <input id="entrance" name="entrance" type="number" placeholder="Подъезд" required>
-            <input id="floor" name="floor" type="number" placeholder="Этаж" required>
+        <div class="mb-3">
+            <input required id="typedataSuggestions" name="address" class="form-control address-input" type="search"
+                   spellcheck="false"
+                   autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" disabled>
         </div>
+
+        <div class="mb-3">
+            <div class="address-input-group">
+                <input id="flat" name="flat" type="number" class="form-control" placeholder="Квартира" required>
+                <input id="intercom" name="intercom" type="number" class="form-control" placeholder="Домофон" required>
+                <input id="entrance" name="entrance" type="number" class="form-control" placeholder="Подъезд" required>
+                <input id="floor" name="floor" type="number" class="form-control" placeholder="Этаж" required>
+            </div>
+        </div>
+
         <div id="map-dialog" style="display: none;">
-            <div id="map" style="height: 300px;"/>
+            <div id="map" style="height: 300px;"></div>
         </div>
-        <button id="close-address-dialog" type="button">Закрыть</button>
-        <button id="save-address-dialog" type="submit">Сохранить адрес</button>
+
+        <div class="mb-3" style="margin-top: 20px">
+            <button id="close-address-dialog" type="button" class="button-dialog btn btn-secondary">Закрыть</button>
+            <button id="save-address-dialog" type="submit" class="btn btn-primary">Сохранить адрес</button>
+        </div>
     </form>
     {% endfor %}
     {% endif %}
-</div>
 </div>
 
 <div id="user-data-dialog" title="Данные пользователя">
     <div class="user-input-group">
         {% if user != None %}
         {% for us in user %}
-        <form id="user-data-form" action="/update_user_data/{{ us.uid }}" method="post" enctype="multipart/form-data">
+        <form id="user-data-form" action="/update_user_data/{{ us.uid }}" method="post" enctype="multipart/form-data"
+              class="needs-validation" novalidate>
             {% csrf_token %}
-            <input id="name" type="text" name="name" placeholder="Имя" value="{{us.name}}"><br>
-            <input id="surname" type="text" name="surname" placeholder="Фамилия" value="{{us.surname}}"><br>
-            <input id="middle-name" type="text" name="middle-name" placeholder="Отчетсво(При наличии)"
-                   value="{{us.middle_name}}"><br>
-            <input type="file" id="photo_client" name="photo_client" accept="image/*"
-                   onchange="handleImageUpload()"><br>
-            <div id="image-preview-container">
-                <img id="image-preview" src="{{ us.image }}" alt="Preview" style="max-width: 300px; max-height: 300px;">
+            <div class="mb-3">
+                <label for="name" class="form-label">Имя</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Имя" value="{{us.name}}"
+                       required>
             </div>
-            <button id="close-data-dialog" type="button">Закрыть</button>
-            <button id="save-data-dialog" type="submit">Сохранить данные</button>
+            <div class="mb-3">
+                <label for="surname" class="form-label">Фамилия</label>
+                <input type="text" class="form-control" id="surname" name="surname" placeholder="Фамилия"
+                       value="{{us.surname}}" required>
+            </div>
+            <div class="mb-3">
+                <label for="middle-name" class="form-label">Отчетсво(При наличии)</label>
+                <input type="text" class="form-control" id="middle-name" name="middle-name"
+                       placeholder="Отчетсво(При наличии)" value="{{us.middle_name}}">
+            </div>
+            <div class="mb-3">
+                <label for="photo_client" class="form-label">Выберите фото</label>
+                <input type="file" class="form-control" id="photo_client" name="photo_client" accept="image/*"
+                       onchange="handleImageUpload()">
+            </div>
+            <div id="image-preview-container" class="mb-3">
+                <img id="image-preview" src="{{ us.image }}" alt="Preview" class="img-fluid"
+                     style="max-width: 300px; max-height: 300px;">
+            </div>
+            <div class="mb-3">
+                <button id="close-data-dialog" type="button" class="btn btn-secondary">Закрыть</button>
+                <button id="save-data-dialog" type="submit" class="btn btn-primary">Сохранить данные</button>
+            </div>
         </form>
         {% endfor %}
         {% endif %}
@@ -142,8 +334,216 @@
 </div>
 
 <div class="menu" id="dialog-all-address" title="Сохранённые адреса">
-    {% for adr in address%}
-    <p class="dropdown-item" data-type="user-address">{{ adr.streetAndNumber }}</p>
-    <button onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес</button>
+    {% for adr in address %}
+    <li>
+        <a class="dropdown-item"
+           href="#"
+           data-type="user-address"
+           data-entrance="{{ adr.entrance }}"
+           data-flat="{{ adr.flat }}"
+           data-floor="{{ adr.floor }}"
+           data-intercom="{{ adr.intercom }}">
+            {{ adr.streetAndNumber }}
+        </a>
+        <button class="btn btn-danger" onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить
+            адрес
+        </button>
+    </li>
     {% endfor %}
 </div>
+<script>
+    function openNav() {
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("sidebar").style.width = "500px";
+    }
+
+    function closeNav() {
+        document.getElementById("overlay").style.display = "none";
+        document.getElementById("sidebar").style.width = "0";
+    }
+
+    function selectRestaurant(element, restaurantId) {
+        // Снимаем подсветку со всех ресторанов
+        var restaurants = document.querySelectorAll('.restaurant');
+        restaurants.forEach(function (restaurant) {
+            restaurant.classList.remove('selected');
+        });
+
+        // Подсвечиваем выбранный ресторан
+        element.classList.add('selected');
+
+        // Скрываем все блюда
+        hidingCart(restaurantId);
+
+        // Сохраняем выбранный ресторан
+        saveLastSelectedRestaurant(restaurantId);
+    }
+
+    function hidingCart(restaurantId){
+        var dishes = document.querySelectorAll('.cart-item');
+        dishes.forEach(function (dish) {
+            if (dish.dataset.restaurant === restaurantId) {
+                dish.style.display = 'flex';
+            } else {
+                dish.style.display = 'none';
+            }
+        });
+    }
+
+    function getCookieByPartialName(partialName) {
+        const cookies = document.cookie.split('; ');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            if (cookie.includes(partialName)) {
+                const [name, value] = cookie.split('=');
+                return getCookie(name);
+            }
+        }
+
+        return null;
+    }
+
+    function NameByPartial(partialName) {
+        const cookies = document.cookie.split('; ');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            if (cookie.includes(partialName)) {
+                const [name, value] = cookie.split('=');
+                return name;
+            }
+        }
+        return null;
+    }
+
+    function increaseQuantity(dishID) {
+        const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
+        const existingItemIndexOD = orderedDishes.findIndex(item => item.id === dishID);
+
+        if (existingItemIndexCart !== -1 && existingItemIndexOD !== -1) {
+            cartItems[existingItemIndexCart].quantity += 1;
+            orderedDishes[existingItemIndexOD].quantity += 1;
+        }
+    }
+
+    function decreaseQuantity(dishID) {
+        const existingItemIndexCart = cartItems.findIndex(item => item.id === dishID);
+        const existingItemIndexOD = orderedDishes.findIndex(item => item.id === dishID);
+
+        if (existingItemIndexCart !== -1 && existingItemIndexOD !== -1) {
+            if (cartItems[existingItemIndexCart].quantity > 1) {
+                cartItems[existingItemIndexCart].quantity -= 1;
+                orderedDishes[existingItemIndexOD].quantity -= 1;
+            } else {
+                // Remove the item if quantity is 0
+                cartItems.splice(existingItemIndexCart, 1);
+                orderedDishes.splice(existingItemIndexOD, 1);
+            }
+        }
+    }
+
+    function saveLastSelectedRestaurant(restaurantId) {
+        localStorage.setItem('lastSelectedRestaurant', restaurantId);
+    }
+
+    $(document).ready(function () {
+        let partialName = '';
+        let foundCookie = '';
+        let cartItem = [];
+
+        {% for rest in restaurants %}
+        partialName = 'cart-"{{ rest.url_address }}"-{{ user.0.uid }}';
+        foundCookie = getCookieByPartialName(partialName);
+
+        if (foundCookie) {
+            let restId = '';
+            let ListCartRest = document.getElementById(`cart-list`);
+            let RestTitle = document.getElementById(`restaurantPanel`);
+
+            if (ListCartRest) {
+                const cartItems = foundCookie ? JSON.parse(foundCookie) : [];
+                console.log(cartItems);
+                cartItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'cart-item';
+                    li.id = '{{ rest.id }}';
+                    li.dataset.restaurant = '{{ rest.id }}';
+
+                    const totalCostForItem = item.cost * item.quantity;
+
+                    restId = "${item.restaurant}";
+
+                    li.innerHTML = `
+                        <img src="${item.photo}" alt="${item.name}">
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">${totalCostForItem} ₽</div>
+                            <div class="cart-item-weight">${item.weight} г</div>
+                        </div>
+                        <div class="cart-item-counter">
+                            <button type="button" onclick="decreaseQuantity('${item.id}')">-</button>
+                            <input type="text" class="dish-quantity" value="${item.quantity}" readonly>
+                            <button type="button" onclick="increaseQuantity('${item.id}')">+</button>
+                        </div>`;
+
+                    ListCartRest.appendChild(li);
+                    const dish = {
+                        'id': item.id,
+                        'name': item.name,
+                        'photo': item.photo,
+                        'cost': totalCostForItem,
+                        'quantity': item.quantity,
+                        'weight': item.weight,
+                        // 'rest': item.rest
+                    };
+
+                    cartItem.push(dish);
+                });
+                const p = document.createElement('p');
+                p.className = 'restaurant';
+                p.id = '{{ rest.id }}';
+                p.onclick = function () { selectRestaurant(this, '{{ rest.id }}'); };
+                p.innerHTML = '{{ rest.name }}';
+
+                // Проверяем, был ли выбран ресторан ранее, и восстанавливаем его
+                const lastSelectedRestaurant = localStorage.getItem('lastSelectedRestaurant');
+                hidingCart(lastSelectedRestaurant);
+                if (lastSelectedRestaurant === '{{ rest.id }}') {
+                    p.classList.add('selected');
+                    $('#cartClearBtn').click( function () {
+                        clearRestCart('{{ rest.url_address }}')
+                    });
+                }
+
+                function clearRestCart(Rest){
+                    let deleteRestCart = NameByPartial(Rest);
+                    document.cookie = deleteRestCart + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    let titleRestCart = document.getElementById("{{ rest.id }}");
+                    let parentElement = titleRestCart.parentNode;
+                    parentElement.removeChild(titleRestCart);
+
+                    // Если ресторан не существует (был удален), выбираем первый доступный ресторан
+                    const firstRestaurant = document.querySelector('.restaurant');
+
+                    if (firstRestaurant) {
+                        firstRestaurant.classList.add('selected');
+                        const firstRestaurantId = firstRestaurant.id;
+                        localStorage.setItem('lastSelectedRestaurant', firstRestaurantId);
+                        hidingCart(firstRestaurantId);
+
+                        $('#cartClearBtn').click(function () {
+                            clearRestCart(firstRestaurantId);
+                        });
+                    }
+                }
+
+                RestTitle.appendChild(p);
+            }
+        } else {
+            console.log('Cookie с указанной частью названия не найдена.');
+        }
+        {% endfor %}
+    });
+
+</script>

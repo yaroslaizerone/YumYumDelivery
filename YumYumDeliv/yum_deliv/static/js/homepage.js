@@ -234,6 +234,8 @@ $("#my-address-btn").on("click", function () {
     $("#dialog-all-address").dialog({
         title: "Сохранённые адреса",
         modal: true,
+        height: "auto",
+        width: "auto",
         close: function () {
             $(this).dialog("close");
         }
@@ -494,33 +496,6 @@ function deleteAddress(addressId, address) {
             console.error('Error details:', error.message, error.stack);
         });
 }
-
-function toggleCartDisplay() {
-    var cartElement = document.getElementById('cart');
-    if (cartElement.style.display === 'block') {
-        hideCart();
-    } else {
-        showCart();
-    }
-}
-
-function showCart() {
-    var cartElement = document.getElementById('cart');
-    if (cartElement) {
-        cartElement.style.display = 'block';
-    }
-}
-
-function hideCart() {
-    var cartElement = document.getElementById('cart');
-    if (cartElement) {
-        cartElement.style.display = 'none';
-    }
-}
-
-document.getElementById('cart-btn').addEventListener('click', function () {
-    toggleCartDisplay();
-});
 
 function removeItem(parentIndex, dishId) {
     var updatedCart = [];

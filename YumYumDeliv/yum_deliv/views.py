@@ -65,24 +65,35 @@ def homepageContext(request):
     address = database.collection("user_address").stream()
     adrs = [ad.to_dict() for ad in address]
     context['address'] = adrs
-    ordered_dishes = request.COOKIES.get('orderedDishes')
-    if ordered_dishes:
-        ordered_dishes_data = json.loads(ordered_dishes)
+
+    for rest in restaurants:
         cart = []
         cost_cart = 0
-        for order in ordered_dishes_data:
-            dish_db = (
-                database.collection("dishes")
-                .where("id", "==", int(order["id"]))
-                .stream()
-            )
-            select_dish = [dish.to_dict() for dish in dish_db]
-            if select_dish:
-                cart.append(select_dish)
-                cost_cart += order['quantity'] * float(select_dish[0]["cost"])
-                select_dish[0]['quantity'] = order['quantity']
-        context['cart'] = cart
-        context['cost_cart'] = cost_cart
+        ordered_dishes_key = f'orderDishes-"{rest["url_address"]}"-{uid}'
+        ordered_dishes = request.COOKIES.get(ordered_dishes_key)
+
+        if ordered_dishes:
+            ordered_dishes_data = json.loads(ordered_dishes)
+
+            for order in ordered_dishes_data:
+                dish_id = int(order["id"])
+
+                dish = (
+                    database.collection("dishes")
+                    .where("id", "==", dish_id)
+                    .limit(1)
+                    .stream()
+                )
+                select_dish = [dish.to_dict() for dish in dish]
+
+                if select_dish:
+                    dish_data = select_dish[0]
+                    dish_data['quantity'] = order['quantity']
+                    cart.append(dish_data)
+                    cost_cart += order['quantity'] * float(dish_data["cost"])
+            context[f'cart-{rest["url_address"]}'] = cart
+            context[f'cost_cart-{rest["url_address"]}'] = cost_cart
+            # raise ValueError('A very specific bad thing happened.')
     return context
 
 

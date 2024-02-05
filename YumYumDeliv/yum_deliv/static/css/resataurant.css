@@ -254,3 +254,6 @@ h1.rest-title {
     border-radius: 4px;
     cursor: pointer;
 }
+.cart-container{
+    display: none;
+}

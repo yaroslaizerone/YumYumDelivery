@@ -31,7 +31,7 @@
     <div class="row">
         <!-- Колонка навигации -->
         <div class="col-2" id="navigation">
-            <p><i class="fa-solid fa-arrow-left"></i> Все рестораны</p>
+            <a href="/"><p><i class="fa-solid fa-arrow-left"></i> Все рестораны</p></a>
             <p><strong>Меню</strong></p>
             {% for type in type_dishes %}
             <p><a href="#{{ type.name }}">{{ type.name }}</a></p>
@@ -74,14 +74,13 @@
         <div class="col-2 pr-0" id="cart-body">
             <h2>Корзина</h2>
             <p style="cursor: pointer;" onclick="clearCart()">Очистить</p>
-            <ul id="cart-list"></ul>
+            <ul id="cart-list-col"></ul>
             <button id="btn_place" onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
         </div>
     </div>
 </div>
 <script>localStorage.setItem('url_rest', JSON.stringify('{{restaurant.0.url_address}}'));</script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.1/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="{% static 'js/homepage.js' %}"></script>
 <script src="{% static 'js/resataurant.js' %}"></script>
 </body>

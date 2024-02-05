@@ -2,81 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
     <style>
-        #cd-cart {
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        #container {
+            transition: margin-left 0.5s;
+        }
+
+        #sidebar {
+            width: 0;
+            height: 100%;
+            background-color: #3498db;
             position: fixed;
             top: 0;
-            right: -100%;
-            height: 100%;
-            padding-top: 50px; /* header height */
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            transition: right 0.3s;
+            right: 0;
+            overflow-x: hidden;
+            padding-top: 60px;
+            transition: 0.5s;
+            color: white;
+            z-index: 1;
         }
 
-        #cd-cart.speed-in {
-            right: 0;
+        #sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+
+        #sidebar a:hover {
+            color: #f1f1f1;
+        }
+
+        #main {
+            transition: margin-right 0.5s;
+        }
+
+        /* Прозрачный фон */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        #openBtn {
+            font-size: 30px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        #cartContent {
+            padding: 20px;
+            color: white;
+        }
+
+        .cartItem {
+            margin-bottom: 10px;
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
-
 <body>
-<header>
-    <div id="logo"></div>
 
-    <div id="cd-hamburger-menu"><a class="cd-img-replace" href="#0">Menu</a></div>
-    <div id="cd-cart-trigger"><a class="cd-img-replace" href="#0">Cart</a></div>
+<button onclick="openNav()" id="openBtn">&#9654; Открыть корзину</button>
 
+<div id="container">
+    <div id="main">
+        <!-- Ваш контент страницы здесь -->
+        <h1>Ваша страница</h1>
+    </div>
 
-</header>
+    <div id="sidebar">
+        <h2>Корзина</h2>
+        <div id="cartContent">
+            {% for item in cart %}
+                {% for dish in item %}
+                    <div class="cartItem">
+                        <p>{{ dish.name }} - {{ dish.quantity }} шт. - {{ dish.cost }} ₽</p>
+                        <button onclick="removeItem('{{ dish.id }}')">Удалить</button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            <p>Итого: {{ cost_cart }} ₽</p>
+            <button onclick="location.href='{% url 'ordered' %}'">Оформить заказ</button>
+        </div>
+        <button onclick="closeNav()">Закрыть корзину</button>
+    </div>
 
-<nav id="main-nav">
-    <ul>
-        <li><a href="#0">Home</a></li>
-        <li><a href="#0">About</a></li>
-        <li><!-- ... --></li>
-    </ul>
-</nav>
+    <!-- Прозрачный фон -->
+    <div id="overlay" onclick="closeNav()"></div>
+</div>
 
-<main>
-    <!-- content here -->
-</main>
-
-<div id="cd-shadow-layer"></div>
-
-<div id="cd-cart">
-    <h2>Cart</h2>
-    <ul class="cd-cart-items">
-        <li>
-            <!-- ... -->
-        </li>
-
-        <li>
-            <!-- ... -->
-        </li>
-    </ul> <!-- cd-cart-items -->
-
-    <div class="cd-cart-total">
-        <p>Total <span>$39.96</span></p>
-    </div> <!-- cd-cart-total -->
-
-    <a href="#0" class="checkout-btn">Checkout</a>
-
-    <p class="cd-go-to-cart"><a href="#0">Go to cart page</a></p>
-</div> <!-- cd-cart -->
 <script>
-    function move_navigation($navigation, $MQ) {
-        if ($(window).width() >= $MQ) {
-            $navigation.detach();
-            $navigation.appendTo('header');
-        } else {
-            $navigation.detach();
-            $navigation.insertAfter('header');
-        }
+    function openNav() {
+        document.getElementById("sidebar").style.width = "500px";
+        document.getElementById("container").style.marginLeft = "500px";
+        document.getElementById("overlay").style.display = "block";
+    }
+
+    function closeNav() {
+        document.getElementById("sidebar").style.width = "0";
+        document.getElementById("container").style.marginLeft= "0";
+        document.getElementById("overlay").style.display = "none";
+    }
+
+    function removeItem(itemId) {
+        // Реализация удаления товара из корзины по itemId
+        // Можете использовать AJAX для отправки запроса на сервер
     }
 </script>
+
 </body>
 </html>
