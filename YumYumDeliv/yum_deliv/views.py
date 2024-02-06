@@ -93,7 +93,6 @@ def homepageContext(request):
                     cost_cart += order['quantity'] * float(dish_data["cost"])
             context[f'cart-{rest["url_address"]}'] = cart
             context[f'cost_cart-{rest["url_address"]}'] = cost_cart
-            # raise ValueError('A very specific bad thing happened.')
     return context
 
 
@@ -117,7 +116,7 @@ def postsignIn(request):
         if user_role == '1':
             response = redirect('/')
             response.set_cookie('uid', uid)
-        elif user_role == '2' or user_role == '5':
+        elif user_role == '2' or user_role == '5' or user_role == '6':
                 role = (
                     database.collection("role")
                     .where("id", "==", int(user_role))
@@ -238,10 +237,11 @@ def restContext(slug):
     orders = [order.to_dict() for order in orders_retaraunt]
     menu = (
         database.collection("dishes")
-        .where("restaurant", "==", rest[0]['id'])
+        .where("restaurant", "==", int(rest[0]['id']))
         .stream()
     )
     dishes = [dish.to_dict() for dish in menu]
+    print(dishes)
     context = {
         "categories_dish": types_data_dish,
         "categories_rest": type_data_rests,

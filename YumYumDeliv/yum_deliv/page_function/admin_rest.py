@@ -40,7 +40,7 @@ def addDish(request, rest_slug):
                 "fats": fats, "restaurant": restaurant[0]}
 
         if photo:
-            data['image'] = uploadPhoto(photo)
+            data['photo'] = uploadPhoto(photo)
 
         database.collection("dishes").add(data)
 
@@ -88,6 +88,7 @@ def restaurant(request, url_rest):
         "dishes": dishes,
         "cart": cart
     }
+    print(dishes)
     context.update(user_context)
     return render(request, 'Resataurant.html', context)
 
