@@ -21,7 +21,7 @@ body {
     margin: 0 auto;
 }
 
-.admin-panel {
+.admin-panel{
     display: flex;
     justify-content: space-around;
     background-color: #fff;
@@ -315,4 +315,14 @@ h2 {
 /* Style the dropdown content */
 .custom-select option {
     padding: 8px;
+}
+
+.title-panel{
+    font-size: 24px;
+    font-weight: bolder;
+    width: 100%;
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    text-align: center;
 }

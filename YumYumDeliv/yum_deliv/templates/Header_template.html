@@ -20,7 +20,7 @@
         padding-top: 60px;
         transition: 0.5s;
         color: white;
-        z-index: 1;
+        z-index: 2;
     }
 
     #sidebar a {
@@ -44,7 +44,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.3);
-        z-index: 0;
+        z-index: 1;
     }
 
     #cartContent {
@@ -337,23 +337,24 @@
 </div>
 
 <div class="menu" id="dialog-all-address" title="Сохранённые адреса">
-    {% for adr in address %}
-    <li>
-        <a class="dropdown-item"
-           href="#"
-           data-type="user-address"
-           data-entrance="{{ adr.entrance }}"
-           data-flat="{{ adr.flat }}"
-           data-floor="{{ adr.floor }}"
-           data-intercom="{{ adr.intercom }}">
-            {{ adr.streetAndNumber }}
-        </a>
-        <button class="btn btn-danger" onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить
-            адрес
-        </button>
-    </li>
-    {% endfor %}
+    <ul class="list-group">
+        {% for adr in address %}
+        <li class="list-group-item">
+            <a class="dropdown-item"
+               href="#"
+               data-type="user-address"
+               data-entrance="{{ adr.entrance }}"
+               data-flat="{{ adr.flat }}"
+               data-floor="{{ adr.floor }}"
+               data-intercom="{{ adr.intercom }}">
+                {{ adr.streetAndNumber }}
+            </a>
+            <button class="btn btn-danger btn-sm ml-2" onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес</button>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
+
 <script>
     function openNav() {
         document.getElementById("overlay").style.display = "block";
@@ -472,19 +473,20 @@
 
         let partialName = '';
         let foundCookie = '';
+        let cartIsEmpty = true;
 
         {% for rest in restaurants %}
         partialName = 'cart-"{{ rest.url_address }}"-{{ user.0.uid }}';
         foundCookie = getCookieByPartialName(partialName);
 
         if (foundCookie) {
+            cartIsEmpty = false;
             let restId = '';
             let ListCartRest = document.getElementById(`cart-list`);
             let RestTitle = document.getElementById(`restaurantPanel`);
 
             if (ListCartRest) {
                 const cartItems = foundCookie ? JSON.parse(foundCookie) : [];
-                console.log(cartItems);
                 cartItems.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'cart-item';
@@ -522,7 +524,7 @@
                 if (lastSelectedRestaurant === '{{ rest.id }}') {
                     p.classList.add('selected');
                     $('#cartClearBtn').click( function () {
-                        clearRestCart('{{ rest.url_address }}')
+                        clearRestCart('{{ rest.url_address }}');
                     });
                     $('#btn_place').click( function () {
                         location.href='/ordered/{{ rest.url_address }}';
@@ -549,21 +551,68 @@
                             clearRestCart(firstRestaurantId);
                         });
                         $('#btn_place').click( function () {
-                            location.href='/ordered/{{ rest.url_address }}';
+                            location.href=`/ordered/${Rest}`;
                         });
                     }
                 }
-
                 RestTitle.appendChild(p);
             }
-        } else {
-            console.log('Cookie с указанной частью названия не найдена.');
         }
         {% endfor %}
+        if (cartIsEmpty) {
+            let emptyCartMessage = document.createElement('p');
+            emptyCartMessage.textContent = 'Корзина пуста';
+            cartList.appendChild(emptyCartMessage);
+        }
     }
 
     $(document).ready(function () {
-        updateCartView()
+        updateCartView();
+        var selectCart = localStorage.getItem('lastSelectedRestaurant');
+
+        {% for rest in restaurants %}
+        if (selectCart == '{{rest.id}}') {
+            partialName = 'cart-"{{ rest.url_address }}"-{{ user.0.uid }}';
+            foundCookie = getCookieByPartialName(partialName);
+
+            if (!foundCookie) {
+                // Если ресторан не существует (был удален), выбираем первый доступный ресторан
+                const firstRestaurant = document.querySelector('.restaurant');
+
+                if (firstRestaurant) {
+                    firstRestaurant.classList.add('selected');
+                    const firstRestaurantId = firstRestaurant.id;
+                    localStorage.setItem('lastSelectedRestaurant', firstRestaurantId);
+                    hidingCart(firstRestaurantId);
+
+                    $('#cartClearBtn').click(function () {
+                        clearRestCart(firstRestaurantId);
+                    });
+                    $('#btn_place').click(function () {
+                        location.href = '/ordered/{{ rest.url_address }}';
+                    });
+                }
+            }
+        } else if (!selectCart){
+            const firstRestaurant = document.querySelector('.restaurant');
+
+                if (firstRestaurant) {
+                    firstRestaurant.classList.add('selected');
+                    const firstRestaurantId = firstRestaurant.id;
+                    localStorage.setItem('lastSelectedRestaurant', firstRestaurantId);
+                    hidingCart(firstRestaurantId);
+
+                    $('#cartClearBtn').click(function () {
+                        clearRestCart(firstRestaurantId);
+                    });
+                    $('#btn_place').click(function () {
+                        location.href = '/ordered/{{ rest.url_address }}';
+                    });
+                }
+        }
+        {% endfor %}
+
+
     });
 
     document.getElementById("user_add_address").addEventListener("submit", function(event) {
