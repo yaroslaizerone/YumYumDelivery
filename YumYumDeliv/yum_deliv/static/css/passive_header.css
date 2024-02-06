@@ -1,0 +1,32 @@
+.header-main {
+    background-color: #38A9CC;
+    padding: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center; /* Центрирование элементов по горизонтали */
+    align-items: center;
+    text-align: center;
+}
+
+.navbar img {
+    max-width: 100%;
+    height: auto;
+}
+
+.logo-compani {
+    display: inline-block;
+    max-width: 100%; /* Максимальная ширина блока по размеру контейнера */
+    padding: 10px;
+    margin-left: 20px; /* Добавлено: отступ слева от логотипа */
+}
+
+.back-button {
+    margin-left: 20px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+}
+
