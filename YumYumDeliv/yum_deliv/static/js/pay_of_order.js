@@ -1,38 +1,92 @@
-// Получение публичного ключа Stripe
-const stripe = Stripe('pk_test_51OfyQwCnR33iv6iiVbuStuYuEeYvF2G9cJOuikYvu2hYUAf31ncveX3bRwWUUBBavqxquArlGHHomSY9sZtyCxHQ00d8FswAWJ');
+document.querySelector('.card-number-input').oninput = () => {
+    document.querySelector('.card-number-box').innerText = document.querySelector('.card-number-input').value;
+}
 
-// Создание элемента Card для ввода данных карты
-const elements = stripe.elements();
-const cardElement = elements.create('card');
+document.querySelector('.card-holder-input').oninput = () => {
+    document.querySelector('.card-holder-name').innerText = document.querySelector('.card-holder-input').value;
+}
 
-// Монтируем элемент карты на странице
-cardElement.mount('#card-element');
+document.querySelector('.month-input').oninput = () => {
+    document.querySelector('.exp-month').innerText = document.querySelector('.month-input').value;
+}
 
-// Обработка события отправки формы
-const form = document.getElementById('payment-form');
-form.addEventListener('submit', async (event) => {
-    event.preventDefault();
+document.querySelector('.year-input').oninput = () => {
+    document.querySelector('.exp-year').innerText = document.querySelector('.year-input').value;
+}
 
-    // Получаем дополнительные данные из формы
-    const cardHolderName = document.getElementById('card_holder_name').value;
+document.querySelector('.cvv-input').onmouseenter = () => {
+    document.querySelector('.front').style.transform = 'perspective(1000px) rotateY(-180deg)';
+    document.querySelector('.back').style.transform = 'perspective(1000px) rotateY(0deg)';
+}
 
-    // Отправляем запрос на создание токена карты
-    const { token, error } = await stripe.createToken(cardElement, { name: cardHolderName });
+document.querySelector('.cvv-input').onmouseleave = () => {
+    document.querySelector('.front').style.transform = 'perspective(1000px) rotateY(0deg)';
+    document.querySelector('.back').style.transform = 'perspective(1000px) rotateY(180deg)';
+}
 
-    // Обрабатываем результат создания токена
-    if (error) {
-        // Ошибка при создании токена
-        console.error(error);
-    } else {
-        // Успешно создан токен
-        console.log('Token:', token);
-        // Отправляем токен на сервер для обработки платежа
-        processPaymentOnServer(token);
-    }
+document.querySelector('.cvv-input').oninput = () => {
+    document.querySelector('.cvv-box').innerText = document.querySelector('.cvv-input').value;
+}
+
+$(document).ready(function() {
+    $('.card-number-input').on('input', function() {
+        // Удаляем все нечисловые символы и пробелы
+        var cardNumber = $(this).val().replace(/\D/g, '');
+
+        // Форматируем номер карты, добавляя пробелы после каждых четырех цифр
+        var formattedCardNumber = '';
+        for (var i = 0; i < cardNumber.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formattedCardNumber += ' ';
+            }
+            formattedCardNumber += cardNumber.charAt(i);
+        }
+
+        // Устанавливаем отформатированный номер карты обратно в поле ввода
+        $(this).val(formattedCardNumber);
+
+        // Проверяем длину номера карты после удаления нечисловых символов и пробелов
+        // Если длина больше 16 символов, обрезаем номер до 16 символов
+        if (cardNumber.length > 16) {
+            cardNumber = cardNumber.slice(0, 16);
+        }
+
+        // Проверка контрольной суммы по алгоритму Луна
+        var sum = 0;
+        var shouldDouble = false;
+        for (var i = cardNumber.length - 1; i >= 0; i--) {
+            var digit = parseInt(cardNumber.charAt(i));
+
+            if (shouldDouble) {
+                if ((digit *= 2) > 9) digit -= 9;
+            }
+
+            sum += digit;
+            shouldDouble = !shouldDouble;
+        }
+        var valid = (sum % 10) === 0;
+
+        // Устанавливаем стиль для указания валидности/невалидности номера карты
+        $(this).css('border', valid ? '2px solid green' : '2px solid red');
+    });
+
 });
 
-// Функция для отправки токена на сервер
-function processPaymentOnServer(token) {
-    // Ваш код для отправки токена на сервер Django
-    // Можете использовать AJAX-запрос или другие методы
+function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (match) return match[2];
+}
+
+function getCookieByPartialName(partialName) {
+    const cookies = document.cookie.split('; ');
+
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        if (cookie.includes(partialName)) {
+            const [name, value] = cookie.split('=');
+            return getCookie(name);
+        }
+    }
+
+    return null;
 }

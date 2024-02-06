@@ -24,7 +24,8 @@ urlpatterns = [
     # URLs Оплаты
     path('place_order/', views.placeOrder, name='place_order'),
     path('ordered/<slug:url_rest>', views.ordered, name='ordered'),
-    path('payOfOrder/', views.payOfOrder, name='payOfOrder'),
+    path('payOfOrder/<slug:url_rest>', views.payOfOrder, name='payOfOrder'),
+    path('public_order/', views.publicOrder,  name='publucOrder'),
     # URLs Пользователя
     path('orders/<slug:uid>', views.orders, name="orders"),
     path('update_user_data/<slug:uid>', user_functions.updateUserData, name="updata_user_data"),

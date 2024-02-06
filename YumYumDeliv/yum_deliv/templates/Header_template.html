@@ -268,17 +268,17 @@
         {% csrf_token %}
 
         <div class="mb-3">
-            <input required id="typedataSuggestions" name="address" class="form-control address-input" type="search"
+            <input required id="typedataSuggestions" name="address-user" class="form-control address-input" type="search"
                    spellcheck="false"
-                   autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" disabled>
+                   autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" readonly>
         </div>
 
         <div class="mb-3">
             <div class="address-input-group">
-                <input id="flat" name="flat" type="number" class="form-control" placeholder="Квартира" required>
-                <input id="intercom" name="intercom" type="number" class="form-control" placeholder="Домофон" required>
-                <input id="entrance" name="entrance" type="number" class="form-control" placeholder="Подъезд" required>
-                <input id="floor" name="floor" type="number" class="form-control" placeholder="Этаж" required>
+                <input id="flat" name="flat" type="number" class="form-control" placeholder="Квартира" required min="1" max="999"/>
+                <input id="intercom" name="intercom" type="number" class="form-control" placeholder="Домофон" required min="1" max="999"/>
+                <input id="entrance" name="entrance" type="number" class="form-control" placeholder="Подъезд" required min="1" max="999"/>
+                <input id="floor" name="floor" type="number" class="form-control" placeholder="Этаж" required min="1" max="999"/>
             </div>
         </div>
 
@@ -422,6 +422,7 @@
 
     function saveLastSelectedRestaurant(restaurantId) {
         localStorage.setItem('lastSelectedRestaurant', restaurantId);
+        updateCartView();
     }
 
     // Функция для увеличения количества блюда в корзине
@@ -564,5 +565,42 @@
     $(document).ready(function () {
         updateCartView()
     });
+
+    document.getElementById("user_add_address").addEventListener("submit", function(event) {
+        var fieldsToCheck = ["flat", "intercom", "entrance", "floor"];
+        var addressUserValue = document.getElementById("typedataSuggestions").value;
+
+        if (!addressUserValue.trim()) {
+            alert("Пожалуйста, укажите адрес.");
+            event.preventDefault();
+            return;
+        }
+
+        for (var i = 0; i < fieldsToCheck.length; i++) {
+            var fieldValue = parseInt(document.getElementById(fieldsToCheck[i]).value);
+
+            if (isNaN(fieldValue) || fieldValue < 0 || fieldValue > 999) {
+                alert("Пожалуйста, введите корректное значение для поля '" + getFieldLabel(fieldsToCheck[i]) + "' (от 10 до 999).");
+                document.getElementById(fieldsToCheck[i]).value = "";
+                event.preventDefault();
+                return;
+            }
+        }
+    });
+
+    function getFieldLabel(fieldId) {
+        switch (fieldId) {
+            case "flat":
+                return "Квартира";
+            case "intercom":
+                return "Домофон";
+            case "entrance":
+                return "Подъезд";
+            case "floor":
+                return "Этаж";
+            default:
+                return "";
+        }
+    }
 
 </script>

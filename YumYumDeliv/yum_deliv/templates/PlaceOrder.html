@@ -6,130 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформление заказа</title>
     <link rel="stylesheet" href="{% static 'css/place_order.css' %}">
+    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
 
-        .header-main {
-            background-color: #38A9CC;
-            padding: 10px 0;
-            width: 100%;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: center; /* Центрирование элементов по горизонтали */
-            align-items: center;
-            text-align: center;
-        }
-
-        .navbar img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .logo-compani {
-            display: inline-block;
-            max-width: 100%; /* Максимальная ширина блока по размеру контейнера */
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-left: 20px; /* Добавлено: отступ слева от логотипа */
-        }
-
-        .back-button {
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-
-        .column {
-            display: inline-block;
-            vertical-align: top;
-            width: 45%;
-            margin-top: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        #orderItems {
-            list-style-type: none;
-            padding: 10px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #orderItemsHeading {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        #orderItems li {
-            display: flex;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            padding: 10px;
-        }
-
-        .dish-img {
-            max-width: 150px;
-            border-radius: 8px;
-            margin-right: 10px;
-        }
-
-        #total-cost {
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-
-        #total-cost-with-delivery {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        form {
-            margin-top: 25px;
-        }
-
-        .back-button i {
-            margin-right: 5px;
-        }
-
-        .container-fluid {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        ul#orderItems {
-            list-style-type: none;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
-
-        #orderForm {
-            margin-left: 50px;
-        }
     </style>
 </head>
 <body>
-<header class="header-main">
-    <i class="fa-solid fa-arrow-left back-button" onclick="goBack()"></i>
-    <div class="logo-compani">
-        <a href="/" class="navbar-brand"><img class="logo" src="{% static 'res/logo.png' %}" alt="Логотип"></a>
-    </div>
-</header>
+
+{% block header %}{% include 'Passive_header.html' %}{% endblock %}
 
 <div class="container-fluid">
     <div class="column">
-        <form id="orderForm" action="/payOfOrder/" method="post">
+        <form id="orderForm" action="/payOfOrder/{{ restaurant.0.url_address }}" method="post">
             {% csrf_token %}
             <label style="text-align: center;">Подробности доставки</label>
 
@@ -155,35 +44,149 @@
         </form>
     </div>
     <div class="column">
-        <ul id="orderItems">
-            <li id="orderItemsHeading">
-                <label class="text-structur">Состав заказа</label>
-            </li>
-            {% for dish in dishes %}
-            <li id="dish_{{ dish.id }}" data-cost="{{ dish.cost }}" data-quantity="{{ dish.quantity }}" style="align-items: center;">
-                <div style="display: flex; align-items: center;">
-                    <img class="dish-img" src="{{ dish.photo }}" alt="{{ dish.name }}">
-                    <div>
-                        {{ dish.name }} - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
-                    </div>
-                </div>
-                <button class="delete-btn" onclick="removeDish('{{ dish.id }}', '{{ dish.cost }}')" style="max-height: 50px; margin-left: 10px;">Удалить</button>
-            </li>
-            {% endfor %}
-            <li id="total-cost">
-                <label id="totalCostValue"></label>
-            </li>
-            <li>
-                <label>Доставка: 20 ₽</label>
-            </li>
-            <li id="total-cost-with-delivery">
-                <label id="totalCostWithDeliveryValue"></label>
-            </li>
-        </ul>
+        <label class="text-structur">Состав заказа</label>
+        <label class="clear-cart" id="clear" onclick="clearRestCart('{{ restaurant.0.url_address }}')">Очистить корзину</label>
+        <ul id="cart-list"></ul>
+        <label id="totalCostValue"></label>
+        <label>Доставка: 20 ₽</label>
+        <label id="totalCostWithDeliveryValue"></label>
     </div>
 </div>
 
 <script src="{% static 'js/place_order.js' %}"></script>
 <script src="https://kit.fontawesome.com/680b9acf9e.js" crossorigin="anonymous"></script>
+<script>
+    let uidCookie = getCookie('uid');
+    function updateCartView() {
+    let cartList = document.getElementById('cart-list');
+    cartList.innerHTML = '';
+
+    let partialName = '';
+    let foundCookie = '';
+
+    {% for rest in restaurant %}
+        partialName = `cart-"{{ rest.url_address }}"-${uidCookie}`;
+        foundCookie = getCookieByPartialName(partialName);
+
+        if (foundCookie) {
+            let restId = '';
+            let ListCartRest = document.getElementById(`cart-list`);
+
+            if (ListCartRest) {
+                const cartItems = foundCookie ? JSON.parse(foundCookie) : [];
+                CostOrder = 0;
+                cartItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'cart-item';
+                    li.id = '{{ rest.id }}';
+                    li.dataset.restaurant = '{{ rest.id }}';
+
+                    const totalCostForItem = item.cost * item.quantity;
+
+                    restId = "${item.restaurant}";
+
+                    li.innerHTML = `
+                            <img src="${item.photo}" alt="${item.name}">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">${totalCostForItem} ₽</div>
+                                <div class="cart-item-weight">${item.weight} г</div>
+                            </div>
+                            <div class="cart-item-counter">
+                                <button type="button" onclick="decreaseQuantity('${item.id}', '{{ rest.url_address }}')">-</button>
+                                <input type="text" class="dish-quantity" value="${item.quantity}" readonly>
+                                <button type="button" onclick="increaseQuantity('${item.id}', '{{ rest.url_address }}')">+</button>
+                            </div>`;
+
+                    ListCartRest.appendChild(li);
+                    CostOrder += totalCostForItem;
+                });
+                var totalCostValueElement = document.getElementById('totalCostValue');
+                totalCostValueElement.textContent = 'Итого: ' + CostOrder + ' ₽';
+                var WithDeliveryValueElement = document.getElementById('totalCostWithDeliveryValue');
+                WithDeliveryValueElement.textContent = 'Общая сумма: ' + (CostOrder+20) + ' ₽';
+            }
+         }
+    {% endfor %}
+}
+
+    function clearRestCart(Rest) {
+        const userDecision = confirm('Хотите очистить корзину? (Корзина останется пустой, и оформление заказа прервётся)');
+        if (userDecision) {
+            let deleteRestCart = NameByPartial(Rest);
+            document.cookie = deleteRestCart + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/';
+        }
+    }
+
+    function NameByPartial(partialName) {
+        const cookies = document.cookie.split('; ');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            if (cookie.includes(partialName)) {
+                const [name, value] = cookie.split('=');
+                return name;
+            }
+        }
+        return null;
+    }
+
+    function getCookieByPartialName(partialName) {
+        const cookies = document.cookie.split('; ');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            if (cookie.includes(partialName)) {
+                const [name, value] = cookie.split('=');
+                return getCookie(name);
+            }
+        }
+
+        return null;
+    }
+
+    function increaseQuantity(itemId, rest) {
+        updateCartItemQuantity(itemId, 1, rest);
+    }
+
+    // Функция для уменьшения количества блюда в корзине
+    function decreaseQuantity(itemId, rest) {
+        updateCartItemQuantity(itemId, -1, rest);
+    }
+
+    // Функция для обновления количества блюда в корзине
+    function updateCartItemQuantity(itemId, change, rest) {
+        let partialName = `cart-"${rest}"-${uidCookie}`;
+        let foundCookie = getCookieByPartialName(partialName);
+
+        if (foundCookie) {
+            let cartItems = JSON.parse(foundCookie);
+
+            // Находим блюдо в корзине по его ID
+            const index = cartItems.findIndex(item => item.id === itemId);
+
+            if (index !== -1) {
+                // Увеличиваем или уменьшаем количество
+                cartItems[index].quantity += change;
+
+                // Если количество стало 0, удаляем блюдо из корзины
+                if (cartItems[index].quantity <= 0) {
+                    cartItems.splice(index, 1);
+                }
+
+                // Обновляем cookie с обновленной корзиной
+                document.cookie = `${partialName}=${JSON.stringify(cartItems)}; path=/;`;
+
+                // Обновляем отображение корзины
+                updateCartView();
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        updateCartView()
+    });
+</script>
 </body>
 </html>

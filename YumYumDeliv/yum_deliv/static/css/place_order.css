@@ -1,7 +1,166 @@
 /* Стили для формы заказа */
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 0;
+}
+
+.column {
+    display: inline-block;
+    vertical-align: top;
+    width: 45%;
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#orderItems {
+    list-style-type: none;
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#orderItemsHeading {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+#orderItems li {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.dish-img {
+    max-width: 150px;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
+#total-cost {
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+#total-cost-with-delivery {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+form {
+    margin-top: 25px;
+}
+
+.back-button i {
+    margin-right: 5px;
+}
+
+.container-fluid {
+    display: flex;
+    justify-content: space-between;
+}
+
+ul#orderItems {
+    list-style-type: none;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+#orderForm {
+    margin-left: 50px;
+}
+
+#cart-list {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cart-item img {
+    width: 100px;
+    height: 100px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.cart-item-details {
+    display: flex;
+    flex-direction: column; /* Изменено на вертикальное расположение элементов */
+    align-items: center;
+}
+
+.cart-item-name {
+    font-weight: bold;
+    margin-bottom: 10px; /* Добавлен отступ между именем и счетчиком */
+}
+
+.cart-item-counter {
+    display: flex;
+    align-items: center;
+    flex-direction: row; /* Изменено на горизонтальное расположение элементов */
+}
+
+.cart-item-counter button {
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cart-item-counter input {
+    margin: 0 5px;
+    padding: 5px;
+    text-align: center;
+    width: 30px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-width: 40px; /* Оптимизированная максимальная ширина */
+}
+
+#cart-list li {
+    margin-bottom: 20px;
+}
+
+#cart-list img {
+    width: 100px; /* Размер изображения блюда */
+    height: 100px;
+    margin-right: 10px;
+    border-radius: 8px; /* Закругление углов изображения в корзине */
+}
+
+.cart-item-price {
+    font-size: 14px;
+    color: #4CAF50; /* Зеленый цвет для цены */
+}
+
+.cart-item-weight {
+    font-size: 12px;
+    color: #555; /* Серый цвет для веса */
+}
+
+.clear-cart {
+    cursor: pointer;
 }
 
 h1 {

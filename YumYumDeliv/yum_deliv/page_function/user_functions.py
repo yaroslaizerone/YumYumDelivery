@@ -49,7 +49,7 @@ def userAddress(request, uid):
     flat = request.POST.get('flat')
     floor = request.POST.get('floor')
     intercom = request.POST.get('intercom')
-    streetAndNumber = request.POST.get('address')
+    streetAndNumber = request.POST.get('address-user')
 
     data = {
         "id": id,

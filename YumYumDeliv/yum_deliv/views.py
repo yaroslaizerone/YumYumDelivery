@@ -297,24 +297,21 @@ def placeOrder(request):
 
 
 def ordered(request, url_rest):
-    dishes, id_rest, summa = orderedTake(request)
-
     restaurant = (
         database.collection("restaurant")
-        .where("id", "==", id_rest)
+        .where("url_address", "==", url_rest)
         .stream()
     )
 
-    name_rest = [name.to_dict() for name in restaurant]
+    rest = [restauran.to_dict() for restauran in restaurant]
 
     context = {
-        'dishes': dishes,
-        'rest_name': name_rest,
+        'restaurant': rest,
     }
     return render(request, 'PlaceOrder.html', context)
 
 
-def payOfOrder(request):
+def payOfOrder(request, url_rest):
     if request.method == "POST":
         collection_reference = db.collection('orders')
         documents = collection_reference.get()
@@ -323,9 +320,16 @@ def payOfOrder(request):
         user_cookie = request.COOKIES.get('uid')
         user = None
 
+        rest_current = (
+            database.collection("restaurant")
+            .where('url_address', '==', url_rest)
+            .stream()
+        )
+        rest = [res.to_dict() for res in rest_current]
+
         if user_cookie:
             user = user_cookie
-            dishes, id_rest, summa = orderedTake(request)
+            dishes, id_rest, summa = orderedTake(request, url_rest)
             flat = request.POST.get('flatNumber')
             street = request.POST.get('street')
             entrance = request.POST.get('entrance')
@@ -343,18 +347,31 @@ def payOfOrder(request):
                      "intercom": intercom, "data_time": data_time,
                      "floor": floor, "comment": comment
                      }
-        database.collection("orders").add(new_order)
         context = {
-            'order': dishes,
+            'restaurant': rest,
+            'order': new_order,
         }
 
-    return render(request, 'PayOfOrder.html', context)
+        return render(request, 'PayOfOrder.html', context)
 
 
-def orderedTake(request):
+def publicOrder(request):
+    if request.method == 'POST':
+        order_data = request.POST.get('orderData')
+        decoded_data = str(order_data).replace('&#x27;', "'")
+        order_dict = eval(decoded_data)
+
+        db.collection("orders").add(order_dict)
+
+        return redirect("/")
+
+
+def orderedTake(request, url_rest):
     dishes = []
     summa = 0
-    ordered_dishes_cookie = request.COOKIES.get('orderedDishes')
+    uid = request.COOKIES.get('uid')
+    cookie_key = f'cart-"{url_rest}"-{uid}'
+    ordered_dishes_cookie = request.COOKIES.get(cookie_key)
     ordered_dishes_data = None
 
     if ordered_dishes_cookie:

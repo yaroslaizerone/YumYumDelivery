@@ -1,36 +1,210 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <title>Credit Card Form</title>
-
-    <!-- Stripe.js -->
-    <script src="https://js.stripe.com/v3/"></script>
 
     <!-- Подключение вашего собственного CSS -->
     <link rel="stylesheet" href="{% static 'css/pay_of_order.css' %}">
 </head>
 <body class="container">
+    {% block header %}{% include 'Passive_header.html' %}{% endblock %}
+<!--Вывод содержимого заказа-->
+    <h1 style="margin-top: 10px"  >Оплата заказа из ресторана {{restaurant.0.name}}</h1>
+    <div class="order-container" style="width: 450px;">
+        <label class="text-structur">Состав заказа</label>
+        <ul id="cart-list"></ul>
+        <label id="totalCostValue"></label>
+        <label>Доставка: 20 ₽</label>
+        <label id="totalCostWithDeliveryValue"></label>
+    </div>
 
-    <h1 class="mt-5">Order Payment</h1>
+    <div class="container">
 
-    <form id="payment-form" class="mt-3">
-        <div class="mb-3">
-            <label for="card_holder_name" class="form-label">Cardholder Name:</label>
-            <input type="text" id="card_holder_name" class="form-control" placeholder="Enter cardholder name" required>
+        <div class="card-container">
+
+            <div class="front">
+                <div class="image">
+                    <img src="../static/res/chip.png" alt="">
+                    <img src="../static/res/mir.png" alt="">
+                </div>
+                <div class="card-number-box">################</div>
+                <div class="flexbox">
+                    <div class="box">
+                        <span>card holder</span>
+                        <div class="card-holder-name">full name</div>
+                    </div>
+                    <div class="box">
+                        <span>expires</span>
+                        <div class="expiration">
+                            <span class="exp-month">mm</span>
+                            <span class="exp-year">yy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back">
+                <div class="stripe"></div>
+                <div class="box">
+                    <span>cvv</span>
+                    <div class="cvv-box"></div>
+                    <img src="../static/res/mir.png" alt="">
+                </div>
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label for="card-element" class="form-label">Credit Card Details:</label>
-            <div id="card-element" class="form-control"></div>
-        </div>
+        <form action="">
+            <div class="inputBox">
+                <span>Номер карты</span>
+                <input type="text" maxlength="19" class="card-number-input">
+            </div>
+            <div class="inputBox">
+                <span>Владелец карты</span>
+                <input type="text" class="card-holder-input" maxlength="32">
+            </div>
+            <div class="flexbox">
+                <div class="inputBox">
+                    <span>Истечение mm</span>
+                    <select class="month-input">
+                        <option value="month" selected disabled>МЕСЯЦ</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                        <option value="06">06</option>
+                        <option value="07">07</option>
+                        <option value="08">08</option>
+                        <option value="09">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
+                <div class="inputBox">
+                    <span>Истечение yy</span>
+                    <select class="year-input">
+                        <option value="year" selected disabled>ГОД</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                        <option value="2031">2031</option>
+                        <option value="2032">2032</option>
+                        <option value="2033">2033</option>
+                    </select>
+                </div>
+                <div class="inputBox">
+                    <span>cvv</span>
+                    <input type="number" maxlength="4" class="cvv-input">
+                </div>
+            </div>
+            <input type="submit" value="Оплатить" class="submit-btn">
+        </form>
 
-        <button type="button" id="btn_pay" class="btn btn-primary" onclick="processPayment()">Pay Now</button>
-    </form>
-
-    <!-- Подключение вашего собственного JavaScript -->
+    </div>
     <script src="{% static 'js/pay_of_order.js' %}"></script>
+    <script>
+        let uidCookie = getCookie('uid');
+    function updateCartView() {
+    let cartList = document.getElementById('cart-list');
+    cartList.innerHTML = '';
+
+    let partialName = '';
+    let foundCookie = '';
+
+    {% for rest in restaurant %}
+        partialName = `cart-"{{ rest.url_address }}"-${uidCookie}`;
+        foundCookie = getCookieByPartialName(partialName);
+
+        if (foundCookie) {
+            let restId = '';
+            let ListCartRest = document.getElementById(`cart-list`);
+
+            if (ListCartRest) {
+                const cartItems = foundCookie ? JSON.parse(foundCookie) : [];
+                CostOrder = 0;
+                cartItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'cart-item';
+                    li.id = '{{ rest.id }}';
+                    li.dataset.restaurant = '{{ rest.id }}';
+
+                    const totalCostForItem = item.cost * item.quantity;
+
+                    restId = "${item.restaurant}";
+
+                    li.innerHTML = `
+                            <img src="${item.photo}" alt="${item.name}">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">${totalCostForItem} ₽</div>
+                                <div class="cart-item-weight">${item.weight} г</div>
+                            </div>
+                            <div class="cart-item-counter">
+                                <input type="text" class="dish-quantity" value="${item.quantity}" readonly>шт.</input>
+                            </div>`;
+
+                    ListCartRest.appendChild(li);
+                    CostOrder += totalCostForItem;
+                });
+                var totalCostValueElement = document.getElementById('totalCostValue');
+                totalCostValueElement.textContent = 'Итого: ' + CostOrder + ' ₽';
+                var WithDeliveryValueElement = document.getElementById('totalCostWithDeliveryValue');
+                WithDeliveryValueElement.textContent = 'Общая сумма к оплате: ' + (CostOrder+20) + ' ₽';
+            }
+         }
+    {% endfor %}
+    }
+
+        $(document).ready(function () {
+            updateCartView();
+            $('.submit-btn').on('click', function (event) {
+                // Предотвращаем стандартное поведение отправки формы
+                event.preventDefault();
+
+                // Получаем данные заказа
+                var orderData = '{{ order }}';
+
+                // Получаем CSRF-токен из cookies
+                var csrftoken = getCookie('csrftoken');
+
+                // Формируем данные запроса в формате JSON
+                var requestData = {
+                    'csrfmiddlewaretoken': csrftoken,
+                    'orderData': orderData
+                };
+
+                let uidCookie = getCookie('uid');
+                let CartName = `cart-"{{ restaurant.0.url_address }}"-${uidCookie}`;
+                document.cookie = CartName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                // Отправляем AJAX-запрос на сервер
+                $.ajax({
+                    headers: {
+                        "X-CSRFToken": csrftoken
+                    },
+                    url: '/public_order/', // Убедитесь, что это правильный URL
+                    type: "POST", // Используйте метод POST для защищенных действий
+                    data: requestData,
+                    success: function (result) {
+                        console.log(result);
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
