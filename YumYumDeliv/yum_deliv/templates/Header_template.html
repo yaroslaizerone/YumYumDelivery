@@ -568,6 +568,23 @@
 
     $(document).ready(function () {
         updateCartView();
+
+        $('#btn_place').click(function () {
+            var uidCookie = getCookie('uid');
+
+            // Если UID cookie отсутствует
+            if (!uidCookie) {
+                // Показываем уведомление пользователю
+                alert('Для оформления заказа необходимо авторизоваться!');
+                location.href = '/logout';
+                return;
+            }
+
+            // Если UID cookie присутствует, перенаправляем пользователя на страницу оформления заказа
+            // замените '/login' на адрес страницы входа или регистрации
+
+        });
+
         var selectCart = localStorage.getItem('lastSelectedRestaurant');
 
         {% for rest in restaurants %}
@@ -651,5 +668,4 @@
                 return "";
         }
     }
-
 </script>

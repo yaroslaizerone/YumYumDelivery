@@ -65,6 +65,8 @@
 </head>
 <body>
 
+{% block header %}{% include 'Passive_header.html' %}{% endblock %}
+
 <div class="flex-container">
     <div id="order-list">
         {% for order in orders %}

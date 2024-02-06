@@ -169,6 +169,8 @@ def editDish(request, rest, dish_id):
         # Check if a photo has been uploaded
         if photo:
             download_url = uploadPhoto(photo)
+        else:
+            download_url = None
 
         data = {
             "name": name,
