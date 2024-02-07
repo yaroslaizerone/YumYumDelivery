@@ -249,15 +249,23 @@ document.addEventListener('click', function (event) {
     }
 });
 
-$(document).ready(function() {
-        $('.col.cart-container').hide();
-        $('.placeOrdBtn').click(function () {
-            var uidCookie = getCookie('uid');
-            if (!uidCookie) {
-                alert('Для оформления заказа необходимо авторизоваться!');
-                location.href = '/logout';
-                return;
-            }
+function placeByOrder(restURL) {
+    var uidCookie = getCookie('uid');
+    if (!uidCookie) {
+        alert('Для оформления заказа необходимо авторизоваться!');
+        location.href = '/logout';
+        return;
+    } else {
+        var cartRest = getCookie(cartName);
+        if (cartRest == null) {
+            alert('Для оформления заказа необходимо выбрать хотя бы один товар.');
+            return;
+        } else{
+            window.location.href = restURL;
+        }
+    }
+}
 
-        });
-    });
+$(document).ready(function () {
+    $('.col.cart-container').hide();
+});

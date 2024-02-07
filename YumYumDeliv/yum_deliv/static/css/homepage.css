@@ -543,10 +543,9 @@ button {
     background-color: #c82333;
 }
 
-.container {
-    margin-left: 320px;
-    margin-right: 20px; /* Add some right margin for better spacing */
-    padding: 0;
+.type-rest-panel {
+    position: relative; /* Устанавливаем относительное позиционирование */
+    left: 10px; /* Устанавливаем начальное значение отступа */
 }
 
 .avatar_menu {

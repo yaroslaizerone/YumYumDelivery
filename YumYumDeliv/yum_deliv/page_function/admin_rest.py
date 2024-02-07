@@ -88,7 +88,6 @@ def restaurant(request, url_rest):
         "dishes": dishes,
         "cart": cart
     }
-    print(dishes)
     context.update(user_context)
     return render(request, 'Resataurant.html', context)
 

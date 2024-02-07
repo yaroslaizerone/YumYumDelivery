@@ -228,7 +228,6 @@ def restContext(slug):
         .stream()
     )
     rest = [res.to_dict() for res in rest_current]
-    print(rest)
     orders_retaraunt = (
         database.collection("orders")
         .where("restaurant", "==", rest[0]['id'])
@@ -241,7 +240,6 @@ def restContext(slug):
         .stream()
     )
     dishes = [dish.to_dict() for dish in menu]
-    print(dishes)
     context = {
         "categories_dish": types_data_dish,
         "categories_rest": type_data_rests,

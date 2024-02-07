@@ -29,7 +29,7 @@
         </div>
     </nav>
 </header>
-<div class="container">
+<div class="type-rest-panel container">
     <h1 id="main-title">Все рестораны</h1>
     <div class="div">
         <a class="type-rest" id="all_rest" href="#" data-type="0">Все</a>
@@ -50,14 +50,16 @@
         {% endif %}
         {% endfor %}
     </div>
-    <div class="restaurant-block">
-        {% for restaurant in restaurants %}
-        <div class="restaurant-item" data-type-rest="{{ restaurant.type }}" data-name="{{ restaurant.name }}" onclick="location.href='/restaurant/{{ restaurant.url_address }}'">
-            <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
-            <h2 id="title-rest-{{ restaurant.id }}">{{ restaurant.name }}</h2>
-        </div>
-        {% endfor %}
+</div>
+
+<div class="restaurant-block">
+    {% for restaurant in restaurants %}
+    <div class="restaurant-item" data-type-rest="{{ restaurant.type }}" data-name="{{ restaurant.name }}"
+         onclick="location.href='/restaurant/{{ restaurant.url_address }}'">
+        <img class="photo-rest" src="{{ restaurant.image }}" alt="{{ restaurant.name }} image">
+        <h2 id="title-rest-{{ restaurant.id }}">{{ restaurant.name }}</h2>
     </div>
+    {% endfor %}
 </div>
 </body>
 <script src="{% static 'js/homepage.js' %}"></script>

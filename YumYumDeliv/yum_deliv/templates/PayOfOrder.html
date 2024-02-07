@@ -196,8 +196,8 @@
                     url: '/public_order/', // Убедитесь, что это правильный URL
                     type: "POST", // Используйте метод POST для защищенных действий
                     data: requestData,
-                    success: function (result) {
-                        console.log(result);
+                    success: function () {
+                        window.location.href = '/';
                     },
                     error: function (error) {
                         console.log(error);

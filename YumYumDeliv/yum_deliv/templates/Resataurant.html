@@ -75,7 +75,7 @@
             <h2>Корзина</h2>
             <p style="cursor: pointer;" onclick="clearCart()">Очистить</p>
             <ul id="cart-list-col"></ul>
-            <button id="btn_place" class="placeOrdBtn" onclick="location.href='/ordered/{{ restaurant.0.url_address }}'">Оформить заказ</button>
+            <button id="btn_place" class="placeOrdBtn" onclick="placeByOrder('/ordered/{{ restaurant.0.url_address }}')">Оформить заказ</button>
         </div>
     </div>
 </div>

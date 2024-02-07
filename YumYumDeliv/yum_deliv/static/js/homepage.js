@@ -235,7 +235,8 @@ $("#my-address-btn").on("click", function () {
         title: "Сохранённые адреса",
         modal: true,
         height: "auto",
-        width: "auto",
+        width: 350,
+        minWidth: 350,
         close: function () {
             $(this).dialog("close");
         }
