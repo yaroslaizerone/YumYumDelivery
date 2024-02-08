@@ -1,0 +1,4 @@
+couriers@gmail.com           --- Курьер
+oper@gmail.com               --- Оператор
+test@test.com                --- Пользователь
+kolpackov.yarosl@yandex.ru   --- Администратор ресторана Гриль №1

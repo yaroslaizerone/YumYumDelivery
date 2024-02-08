@@ -100,46 +100,46 @@ def postsignIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         pasw = request.POST.get('pass')
-        # try:
-        user = authe.sign_in_with_email_and_password(email, pasw)
-        uid = user['localId']
+        try:
+            user = authe.sign_in_with_email_and_password(email, pasw)
+            uid = user['localId']
 
-        roles = (
-            database.collection("authentication")
-            .where("uid", "==", uid)
-            .stream()
-        )
-        role_data = []
-        for role in roles:
-            role_data.append(role.to_dict())
-        user_role = role_data[0]['role']
-        if user_role == '1':
-            response = redirect('/')
-            response.set_cookie('uid', uid)
-        elif user_role == '2' or user_role == '5' or user_role == '6':
-                role = (
-                    database.collection("role")
-                    .where("id", "==", int(user_role))
-                    .stream()
-                )
-                role_data = []
-                for rol in role:
-                    role_data.append(rol.to_dict())
-                for r in role_data:
-                   return redirect('adminRest', rest_slug=r['role'])
-        elif user_role == '3':
-            return redirect('/operator_panel/')
-        elif user_role == '4':
-            return redirect(f'/couriers_panel/{uid}')
-        else:
-            logger.info(user_role)
-            return HttpResponse("Some default response or redirect")
+            roles = (
+                database.collection("authentication")
+                .where("uid", "==", uid)
+                .stream()
+            )
+            role_data = []
+            for role in roles:
+                role_data.append(role.to_dict())
+            user_role = role_data[0]['role']
+            if user_role == '1':
+                response = redirect('/')
+                response.set_cookie('uid', uid)
+            elif user_role == '2' or user_role == '5' or user_role == '6':
+                    role = (
+                        database.collection("role")
+                        .where("id", "==", int(user_role))
+                        .stream()
+                    )
+                    role_data = []
+                    for rol in role:
+                        role_data.append(rol.to_dict())
+                    for r in role_data:
+                       return redirect('adminRest', rest_slug=r['role'])
+            elif user_role == '3':
+                return redirect('/operator_panel/')
+            elif user_role == '4':
+                return redirect(f'/couriers_panel/{uid}')
+            else:
+                logger.info(user_role)
+                return HttpResponse("Some default response or redirect")
 
-            response.set_cookie('uid', uid)
-        return response
-        # except Exception as e:
-        #     message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
-        #     return render(request, "Login.html", {"message": message})
+                response.set_cookie('uid', uid)
+            return response
+        except Exception as e:
+            message = f"Invalid Credentials!! Please Check your Data. Error: {str(e)}"
+            return render(request, "Login.html", {"message": message})
 
 
 # TODO Удалять при выходе
