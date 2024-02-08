@@ -39,4 +39,5 @@ urlpatterns = [
     #URLs Курьера
     path('couriers_panel/<slug:uid>', couriers.init, name='couriers'),
     path('get_order/<slug:uid>/<slug:order_id>', couriers.getOrder, name='getOrder'),
+    path('mark_order_completed/', couriers.markOrderCompleted, name='mark_order_completed'),
 ]

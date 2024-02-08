@@ -9,9 +9,20 @@ def init(request, uid):
         .stream()
     )
     orders = [order.to_dict() for order in orders_all]
+    restaurant = (
+        database.collection("restaurant")
+        .stream()
+    )
+    rest = [restaur.to_dict() for restaur in restaurant]
     for ord in orders:
         total_weight = sum(int(dish['weight']) for dish in ord['dishes'])
         ord['total_weight'] = str(total_weight/1000)
+
+        for restaur in rest:
+            if restaur['id'] == ord['restaurant']:
+                ord['rest_name'] = restaur['name']
+                ord['rest_address'] = restaur['address']
+                break
 
     context_courier = {
         "orders": orders,
@@ -37,3 +48,23 @@ def getOrder(request, uid, order_id):
         db.collection("orders").document(document_id).update(data_courier)
 
     return JsonResponse({'status': 'ok'})
+
+
+def markOrderCompleted(request):
+    if request.method == 'POST':
+        try:
+            orderID = request.POST.get('order_id')
+            data = {
+                'order_status': "Выполнен",
+            }
+            dish_request = (
+                database.collection("orders")
+                .where("id", "==", int(orderID))
+            )
+            docs = dish_request.stream()
+            for doc in docs:
+                document_id = doc.id
+                database.collection("orders").document(document_id).update(data)
+            return JsonResponse({'message': f'Статус для заказа({orderID}) был успешно изменен.'})
+        except:
+            return JsonResponse({'message': 'Критическая ошибка.'})
