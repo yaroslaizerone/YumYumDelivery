@@ -72,27 +72,30 @@ function decreaseQuantity(dishID) {
 }
 
 function updateCart() {
-    const cartList = document.getElementById('cart-list-col');
+    const cartList = document.getElementById('cart_list_rest');
     cartList.innerHTML = '';
 
     cartItems.forEach(item => {
         const li = document.createElement('li');
-        li.className = 'cart-item';
+        li.className = 'cart-item-rest';
 
         const totalCostForItem = item.cost * item.quantity;
 
         li.innerHTML = `
             <img src="${item.photo}" alt="${item.name}">
-            <div class="cart-item-details">
-                <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-price">${totalCostForItem} ₽</div>
-                <div class="cart-item-weight">${item.weight} г</div>
+            <div class="cart-item-rest-content">
+                <div class="cart-item-rest-details">
+                    <div class="cart-item-rest-name">${item.name}</div>
+                    <div class="cart-item-rest-price">${totalCostForItem} ₽</div>
+                    <div class="cart-item-rest-weight">${item.weight} г</div>
+                </div>
+                <div class="cart-item-rest-counter">
+                    <button type="button" onclick="decreaseQuantity('${item.id}')">-</button>
+                    <input type="text" class="dish-quantity" value="${item.quantity}" readonly>
+                    <button type="button" onclick="increaseQuantity('${item.id}')">+</button>
+                </div>
             </div>
-            <div class="cart-item-counter">
-                <button type="button" onclick="decreaseQuantity('${item.id}')">-</button>
-                <input type="text" class="dish-quantity" value="${item.quantity}" readonly>
-                <button type="button" onclick="increaseQuantity('${item.id}')">+</button>
-            </div>
+            
         `;
         cartList.appendChild(li);
     });

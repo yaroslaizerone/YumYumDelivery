@@ -37,8 +37,8 @@
                         <p class="card-text"><strong>Комментарий:</strong> {{ order.comment }}</p>
                         <p class="card-text"><strong>Курьер:</strong> {{ order.courier }}</p>
                         <p class="card-text"><strong>Время оформления:</strong> {{ order.data_time }}</p>
-                        <p class="card-text"><strong>Адрес:</strong> {{ order.street }}, {{ order.house }},
-                            Подъезд: {{ order.entrance }}, Этаж: {{ order.floor }}, Квартира: {{ order.house }}
+                        <p class="card-text"><strong>Адрес:</strong> {{ order.street }},
+                            Подъезд: {{ order.entrance }}, Этаж: {{ order.floor }}, Квартира: {{ order.intercom }}
                         </p>
                         <h5 class="card-title mt-3">Состав заказа</h5>
                         <div class="card">
@@ -61,10 +61,10 @@
                                 data-order="{{ order.id }}" onclick="deleteOrder('{{ order.id }}')">
                             Удалить заказ
                         </button>
-                        <button type="button" class="btn btn-primary mt-3" data-toggle="modal"
-                                data-repit-order="{{ order.id }}">
-                            Повторить
-                        </button>
+<!--                        <button type="button" class="btn btn-primary mt-3" data-toggle="modal"-->
+<!--                                data-repit-order="{{ order.id }}">-->
+<!--                            Повторить-->
+<!--                        </button>-->
                     </div>
                 </div>
                 {% endfor %}

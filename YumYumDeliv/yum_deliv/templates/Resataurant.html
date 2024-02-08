@@ -30,7 +30,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Колонка навигации -->
-        <div class="col-2" id="navigation">
+        <div class="col-3 col-md-2" id="navigation">
             <a href="/"><p><i class="fa-solid fa-arrow-left"></i> Все рестораны</p></a>
             <p><strong>Меню</strong></p>
             {% for type in type_dishes %}
@@ -38,7 +38,7 @@
             {% endfor %}
         </div>
         <!-- Колонка основного контента -->
-        <div class="col-8 center_content" id="main-content">
+        <div class="col-md-7 col-xl-8 center_content" id="main-content">
             <div class="image-container">
                 <div class="rest-logo">
                     <img src="{{ restaurant.0.image }}" alt="{{ restaurant.0.name }}">
@@ -71,10 +71,10 @@
             {% endfor %}
         </div>
         <!-- Колонка корзины -->
-        <div class="col-2 pr-0" id="cart-body">
+        <div class="col-md-3 col-xl-2 col-2 pr-0" id="cart-body">
             <h2>Корзина</h2>
             <p style="cursor: pointer;" onclick="clearCart()">Очистить</p>
-            <ul id="cart-list-col"></ul>
+            <ul id="cart_list_rest"></ul>
             <button id="btn_place" class="placeOrdBtn" onclick="placeByOrder('/ordered/{{ restaurant.0.url_address }}')">Оформить заказ</button>
         </div>
     </div>

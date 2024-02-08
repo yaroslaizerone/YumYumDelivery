@@ -82,14 +82,19 @@ h1.rest-title {
 }
 
 /* Стили для элементов корзины */
-#cart-list {
+#cart_list_rest {
+    height: 100%;
+    overflow-y: auto;
     list-style: none;
     padding: 0;
 }
 
-.cart-item {
+.cart-item-rest-content{
+    width: 100%;
+}
+
+.cart-item-rest {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
     padding: 10px;
@@ -98,31 +103,33 @@ h1.rest-title {
     overflow: hidden;
 }
 
-.cart-item img {
-    width: 50px;
-    height: 50px;
+.cart-item-rest img {
+    width: 80px;
+    height: 80px;
     border-radius: 4px;
     margin-right: 10px;
 }
 
-.cart-item-details {
+.cart-item-rest-details {
     display: flex;
     flex-direction: column; /* Изменено на вертикальное расположение элементов */
     align-items: center;
 }
 
-.cart-item-name {
+.cart-item-rest-name {
+    text-align: center;
     font-weight: bold;
     margin-bottom: 10px; /* Добавлен отступ между именем и счетчиком */
 }
 
-.cart-item-counter {
+.cart-item-rest-counter {
     display: flex;
+    justify-content: center;
     align-items: center;
     flex-direction: row; /* Изменено на горизонтальное расположение элементов */
 }
 
-.cart-item-counter button {
+.cart-item-rest-counter button {
     background-color: #4CAF50;
     color: #fff;
     border: none;
@@ -131,7 +138,7 @@ h1.rest-title {
     cursor: pointer;
 }
 
-.cart-item-counter input {
+.cart-item-rest-counter input {
     margin: 0 5px;
     padding: 5px;
     text-align: center;
@@ -152,12 +159,12 @@ h1.rest-title {
     border-radius: 8px; /* Закругление углов изображения в корзине */
 }
 
-.cart-item-price {
+.cart-item-rest-price {
     font-size: 14px;
     color: #4CAF50; /* Зеленый цвет для цены */
 }
 
-.cart-item-weight {
+.cart-item-rest-weight {
     font-size: 12px;
     color: #555; /* Серый цвет для веса */
 }
@@ -167,11 +174,13 @@ h1.rest-title {
     position: sticky;
     top: 20px;
     z-index: 1;
-    height: 100px;
+    height: 80%;
     margin-left: auto;
+    display: grid;
+    justify-content: center;
 }
 
-#btn_place, #btn_clear {
+.placeOrdBtn{
     background-color: #4CAF50;
     color: #fff;
     padding: 10px 20px;
@@ -179,11 +188,11 @@ h1.rest-title {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    display: flex;
+    margin-bottom: 20px;
+    justify-content: center; /* Центрирование по горизонтали */
 }
 
-#btn_clear {
-    background-color: #f44336;
-}
 
 #btn_place:hover, #btn_clear:hover {
     background-color: #45a049;
@@ -257,3 +266,4 @@ h1.rest-title {
 .cart-container{
     display: none;
 }
+

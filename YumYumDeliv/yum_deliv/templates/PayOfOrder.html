@@ -60,19 +60,19 @@
 
         </div>
 
-        <form action="">
+        <form method="post">
             <div class="inputBox">
                 <span>Номер карты</span>
-                <input type="text" maxlength="19" class="card-number-input">
+                <input type="text" maxlength="19" class="card-number-input" required/>
             </div>
             <div class="inputBox">
                 <span>Владелец карты</span>
-                <input type="text" class="card-holder-input" maxlength="32">
+                <input type="text" class="card-holder-input" maxlength="32" required pattern="[A-Za-z]+"/>
             </div>
             <div class="flexbox">
                 <div class="inputBox">
                     <span>Истечение mm</span>
-                    <select class="month-input">
+                    <select class="month-input" required>
                         <option value="month" selected disabled>МЕСЯЦ</option>
                         <option value="01">01</option>
                         <option value="02">02</option>
@@ -90,7 +90,7 @@
                 </div>
                 <div class="inputBox">
                     <span>Истечение yy</span>
-                    <select class="year-input">
+                    <select class="year-input" required>
                         <option value="year" selected disabled>ГОД</option>
                         <option value="2024">2024</option>
                         <option value="2025">2025</option>
@@ -106,10 +106,10 @@
                 </div>
                 <div class="inputBox">
                     <span>cvv</span>
-                    <input type="number" maxlength="4" class="cvv-input">
+                    <input type="number" maxlength="4" class="cvv-input" required/>
                 </div>
             </div>
-            <input type="submit" value="Оплатить" class="submit-btn">
+            <input type="submit" value="Оплатить" class="submit-btn"/>
         </form>
 
     </div>
@@ -173,6 +173,29 @@
                 // Предотвращаем стандартное поведение отправки формы
                 event.preventDefault();
 
+                // Проверяем все поля формы на заполнение
+                var isValidForm = true;
+
+                $('form input, form select').each(function () {
+                    if ($(this).prop('required') && !$(this).val()) {
+                        isValidForm = false;
+                        // Отмечаем поле как невалидное
+                        $(this).addClass('invalid');
+                    }
+                });
+
+                // Если форма невалидна, прерываем отправку данных
+                if (!isValidForm) {
+                    alert('Для оплаты заказа необходимо ввести все данные!');
+                    return;
+                }
+
+                var cardNumber = $('.card-number-input').val();
+                if (!isValidCardNumber(cardNumber)) {
+                    alert('Номер карты невалиден!');
+                    return;
+                }
+
                 // Получаем данные заказа
                 var orderData = '{{ order }}';
 
@@ -188,6 +211,7 @@
                 let uidCookie = getCookie('uid');
                 let CartName = `cart-"{{ restaurant.0.url_address }}"-${uidCookie}`;
                 document.cookie = CartName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
                 // Отправляем AJAX-запрос на сервер
                 $.ajax({
                     headers: {
@@ -204,6 +228,32 @@
                     }
                 });
             });
+            function isValidCardNumber(cardNumber) {
+                // Удаляем все нечисловые символы и пробелы
+                cardNumber = cardNumber.replace(/\D/g, '');
+
+                // Проверяем длину номера карты
+                if (cardNumber.length !== 16) {
+                    return false;
+                }
+
+                // Проверка контрольной суммы по алгоритму Луна
+                var sum = 0;
+                var shouldDouble = false;
+                for (var i = cardNumber.length - 1; i >= 0; i--) {
+                    var digit = parseInt(cardNumber.charAt(i));
+
+                    if (shouldDouble) {
+                        if ((digit *= 2) > 9) digit -= 9;
+                    }
+
+                    sum += digit;
+                    shouldDouble = !shouldDouble;
+                }
+
+                return (sum % 10) === 0;
+            }
+
         });
     </script>
 </body>

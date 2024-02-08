@@ -219,12 +219,6 @@ h2 {
     margin-bottom: 15px;
 }
 
-#orders-block {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-
 .orders-list {
     max-width: 200px;
     padding: 10px;

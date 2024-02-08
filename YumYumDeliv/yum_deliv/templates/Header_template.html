@@ -94,8 +94,8 @@
     }
 
     .cart-item img {
-        width: 50px;
-        height: 50px;
+        width: 80px;
+        height: 80px;
         border-radius: 4px;
         margin-right: 10px;
     }
@@ -107,6 +107,7 @@
     }
 
     .cart-item-name {
+        text-align: center;
         font-weight: bold;
         margin-bottom: 10px; /* Добавлен отступ между именем и счетчиком */
     }
@@ -114,6 +115,7 @@
     .cart-item-counter {
         display: flex;
         align-items: center;
+        justify-content: center;
         flex-direction: row; /* Изменено на горизонтальное расположение элементов */
     }
 
@@ -140,12 +142,6 @@
         margin-bottom: 20px;
     }
 
-    #cart-list img {
-        width: 50px; /* Размер изображения блюда */
-        height: 50px;
-        margin-right: 10px;
-        border-radius: 8px; /* Закругление углов изображения в корзине */
-    }
 
     .cart-item-price {
         font-size: 14px;
@@ -156,18 +152,22 @@
         font-size: 12px;
         color: #555; /* Серый цвет для веса */
     }
-    .cart-h2{
+
+    .cart-h2 {
         margin: 10px;
     }
-    .title-cart{
+
+    .title-cart {
         display: flex;
         justify-content: space-around;
     }
-    .clearbtn{
+
+    .clearbtn {
         margin-top: 20px;
         cursor: pointer;
     }
-    #btn_place{
+
+    #btn_place {
         cursor: pointer;
     }
 </style>
@@ -203,7 +203,8 @@
     </div>
 </div>
 <div class="col cart-container">
-    <button class="dropbtn" id="cart-btn" onClick="openNav()"><i class="fa fa-shopping-basket" aria-hidden="true"></i></button>
+    <button class="dropbtn" id="cart-btn" onClick="openNav()"><i class="fa fa-shopping-basket" aria-hidden="true"></i>
+    </button>
 
     <div id="sidebar">
         <div class="title-cart">
@@ -250,7 +251,7 @@
         {% else %}
         <img src="https://sun9-34.userapi.com/impg/_ApH2UZSWSf9IaPtbXoXLSh20Ghpp12OqEo1_w/U0WAp4LnwgM.jpg?size=604x604&quality=95&sign=566b6ecf3dfb2b8b9a8e4d7a4022a86d&c_uniq_tag=ITcVtKV4QWIcQBwvc_5otZExmn3-mRmqDNz7iKGjEDM&type=album"
              alt="Default Avatar" class="avatar" id="avatar-anonim">
-        <div class="menu" id="menu-anonim">
+        <div class="menu avatar_menu" id="menu-anonim">
             <ul>
                 <li><a class="dropdown-item" href="{% url 'log' %}">Войти</a></li>
             </ul>
@@ -268,17 +269,22 @@
         {% csrf_token %}
 
         <div class="mb-3">
-            <input required id="typedataSuggestions" name="address-user" class="form-control address-input" type="search"
+            <input required id="typedataSuggestions" name="address-user" class="form-control address-input"
+                   type="search"
                    spellcheck="false"
                    autocorrect="off" autocomplete="off" autocapitalize="off" placeholder="Укажите адрес" readonly>
         </div>
 
         <div class="mb-3">
             <div class="address-input-group">
-                <input id="flat" name="flat" type="number" class="form-control" placeholder="Квартира" required min="1" max="999"/>
-                <input id="intercom" name="intercom" type="number" class="form-control" placeholder="Домофон" required min="1" max="999"/>
-                <input id="entrance" name="entrance" type="number" class="form-control" placeholder="Подъезд" required min="1" max="999"/>
-                <input id="floor" name="floor" type="number" class="form-control" placeholder="Этаж" required min="1" max="999"/>
+                <input id="flat" name="flat" type="number" class="form-control" placeholder="Квартира" required min="1"
+                       max="999"/>
+                <input id="intercom" name="intercom" type="number" class="form-control" placeholder="Домофон" required
+                       min="1" max="999"/>
+                <input id="entrance" name="entrance" type="number" class="form-control" placeholder="Подъезд" required
+                       min="1" max="999"/>
+                <input id="floor" name="floor" type="number" class="form-control" placeholder="Этаж" required min="1"
+                       max="999"/>
             </div>
         </div>
 
@@ -349,7 +355,9 @@
                data-intercom="{{ adr.intercom }}">
                 {{ adr.streetAndNumber }}
             </a>
-            <button class="btn btn-danger btn-sm ml-2" onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес</button>
+            <button class="btn btn-danger btn-sm ml-2"
+                    onclick="deleteAddress('{{ adr.id }}', '{{ adr.streetAndNumber }}')">Удалить адрес
+            </button>
         </li>
         {% endfor %}
     </ul>
@@ -383,7 +391,7 @@
         saveLastSelectedRestaurant(restaurantId);
     }
 
-    function hidingCart(restaurantId){
+    function hidingCart(restaurantId) {
         var dishes = document.querySelectorAll('.cart-item');
         dishes.forEach(function (dish) {
             if (dish.dataset.restaurant === restaurantId) {
@@ -515,7 +523,9 @@
                 const p = document.createElement('p');
                 p.className = 'restaurant';
                 p.id = '{{ rest.id }}';
-                p.onclick = function () { selectRestaurant(this, '{{ rest.id }}'); };
+                p.onclick = function () {
+                    selectRestaurant(this, '{{ rest.id }}');
+                };
                 p.innerHTML = '{{ rest.name }}';
 
                 // Проверяем, был ли выбран ресторан ранее, и восстанавливаем его
@@ -523,15 +533,15 @@
                 hidingCart(lastSelectedRestaurant);
                 if (lastSelectedRestaurant === '{{ rest.id }}') {
                     p.classList.add('selected');
-                    $('#cartClearBtn').click( function () {
+                    $('#cartClearBtn').click(function () {
                         clearRestCart('{{ rest.url_address }}');
                     });
-                    $('#btn_place').click( function () {
-                        location.href='/ordered/{{ rest.url_address }}';
+                    $('#btn_place').click(function () {
+                        location.href = '/ordered/{{ rest.url_address }}';
                     });
                 }
 
-                function clearRestCart(Rest){
+                function clearRestCart(Rest) {
                     let deleteRestCart = NameByPartial(Rest);
                     document.cookie = deleteRestCart + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                     let titleRestCart = document.getElementById("{{ rest.id }}");
@@ -550,11 +560,12 @@
                         $('#cartClearBtn').click(function () {
                             clearRestCart(firstRestaurantId);
                         });
-                        $('#btn_place').click( function () {
-                            location.href=`/ordered/${Rest}`;
+                        $('#btn_place').click(function () {
+                            location.href = `/ordered/${Rest}`;
                         });
                     }
                 }
+
                 RestTitle.appendChild(p);
             }
         }
@@ -610,29 +621,29 @@
                     });
                 }
             }
-        } else if (!selectCart){
+        } else if (!selectCart) {
             const firstRestaurant = document.querySelector('.restaurant');
 
-                if (firstRestaurant) {
-                    firstRestaurant.classList.add('selected');
-                    const firstRestaurantId = firstRestaurant.id;
-                    localStorage.setItem('lastSelectedRestaurant', firstRestaurantId);
-                    hidingCart(firstRestaurantId);
+            if (firstRestaurant) {
+                firstRestaurant.classList.add('selected');
+                const firstRestaurantId = firstRestaurant.id;
+                localStorage.setItem('lastSelectedRestaurant', firstRestaurantId);
+                hidingCart(firstRestaurantId);
 
-                    $('#cartClearBtn').click(function () {
-                        clearRestCart(firstRestaurantId);
-                    });
-                    $('#btn_place').click(function () {
-                        location.href = '/ordered/{{ rest.url_address }}';
-                    });
-                }
+                $('#cartClearBtn').click(function () {
+                    clearRestCart(firstRestaurantId);
+                });
+                $('#btn_place').click(function () {
+                    location.href = '/ordered/{{ rest.url_address }}';
+                });
+            }
         }
         {% endfor %}
 
 
     });
 
-    document.getElementById("user_add_address").addEventListener("submit", function(event) {
+    document.getElementById("user_add_address").addEventListener("submit", function (event) {
         var fieldsToCheck = ["flat", "intercom", "entrance", "floor"];
         var addressUserValue = document.getElementById("typedataSuggestions").value;
 

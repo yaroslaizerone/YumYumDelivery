@@ -7,6 +7,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/rest_admin.css' %}">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,16 +18,8 @@
 <body>
 
 <header class="header-main">
-        <nav class="navbar">
-            <div class="container">
-                <div class="row">
-                    <div class="col">
-                        <img src="{% static 'res/logo.png' %}" alt="Logo" onclick="window.location.replace('/');">
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
+    {% block header %}{% include 'Passive_header.html' %}{% endblock %}
+</header>
 <div class="title-panel">Панель администратора ресторана &laquo;{{ rest.0.name }}&raquo;</div>
 <div class="admin-panel">
     <h1 id="menu-link">Блюда ресторана</h1>
@@ -71,111 +65,177 @@
                     {% endfor %}
                 </td>
                 <td><img src="{{ dish.photo }}" alt="{{ dish.name }}"></td>
-                <td class="dish-actions">
-                    <form class="delete_dish" id="delete_dish_{{ dish.id }}" method="post" action="/delete_dish/{{ rest_slug }}/{{ dish.id }}">
+                <td class="dish-actions d-flex justify-content-center align-items-center">
+                    <form class="delete_dish" id="delete_dish_{{ dish.id }}" method="post"
+                          action="/delete_dish/{{ rest_slug }}/{{ dish.id }}">
                         {% csrf_token %}
-                        <button type="submit">Удалить</button>
+                        <button type="submit" class="btn btn-danger">Удалить</button>
                     </form>
-                    <button id="open-menu-dialog-btn-edit_{{ dish.id }}">Изменить</button>
+
+                    <button id="open-menu-dialog-btn-edit_{{ dish.id }}" class="btn btn-info">Изменить</button>
                 </td>
             </tr>
         {% endfor %}
     </tbody>
-</table>
-    <button id="open-menu-dialog-btn">Добавить блюдо</button>
+   </table>
+    <div class="d-flex justify-content-center">
+        <button id="open-menu-dialog-btn" class="btn btn-primary">Добавить блюдо</button>
+    </div>
     <div id="menu-dialog">
-        <form id="add-form" action="/add_dish/{{rest_slug}}" method="post" enctype="multipart/form-data">
+        <form id="add-form" action="/add_dish/{{rest_slug}}" method="post" enctype="multipart/form-data" class="mb-4">
             {% csrf_token %}
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required><br>
-
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" required></textarea><br>
-
-            <label for="type-food">Type of dishes:</label>
-            <select class="js-select2" id="type-food" name="type-food" placeholder="Выберите тип блюда" style="width: 150px">
-                {% for category in categories_dish %}
-                    <option value="{{category.id}}">{{category.type}}</option>
-                {% endfor %}
-            </select><br>
-
-            <label for="weight">Weight (grams):</label>
-            <input type="number" id="weight" name="weight" required><br>
-
-            <label for="cost">Cost:</label>
-            <input type="number" id="cost" name="cost" required><br>
-
-            <label for="photo_dish">Photo:</label>
-            <input type="file" id="photo_dish" name="photo_dish" accept="image/*" onchange="handleImageUpload()"><br>
-
-            <div id="image-preview-container">
-                <img id="image-preview" src="#" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+            <div class="mb-1">
+                <label for="name" class="form-label">Название:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
 
-            <label for="calories">Calories:</label>
-            <input type="number" id="calories" name="calories" required><br>
+            <div class="mb-1">
+                <label for="description" class="form-label">Описание:</label>
+                <textarea class="form-control" id="description" name="description" required></textarea>
+            </div>
 
-            <label for="proteins">Proteins:</label>
-            <input type="number" id="proteins" name="proteins" required><br>
+            <div class="mb-1">
+                <label for="type-food" class="form-label">Тип блюда:</label>
+                <select class="form-select js-select2" id="type-food" name="type-food" style="width: 100%" required>
+                    {% for category in categories_dish %}
+                    <option value="{{category.id}}">{{category.type}}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <label for="carbohydrates">Carbohydrates:</label>
-            <input type="number" id="carbohydrates" name="carbohydrates" required><br>
+            <div class="row mb-1">
+                <div class="col-md-6">
+                    <label for="weight" class="form-label">Вес (граммы):</label>
+                    <input type="number" class="form-control" id="weight" name="weight" required>
+                </div>
 
-            <label for="fats">Fats:</label>
-            <input type="number" id="fats" name="fats" required><br>
+                <div class="col-md-6">
+                    <label for="cost" class="form-label">Цена:</label>
+                    <input type="number" class="form-control" id="cost" name="cost" required>
+                </div>
+            </div>
 
-            <button type="submit">Add Dish</button>
+            <div class="mb-1">
+                <label for="photo_dish" class="form-label">Фото:</label>
+                <input type="file" class="form-control" id="photo_dish" name="photo_dish" accept="image/*" onchange="handleImageUpload()" required>
+            </div>
+
+            <div id="image-preview-container" class="mb-1" style="justify-content: center; display: flex">
+                <img id="image-preview" src="#" alt="Превью" style="max-width: 300px; max-height: 300px; display: none; justify-content: center">
+            </div>
+
+            <div class="row mb-1">
+                <div class="col-md-6">
+                    <label for="calories" class="form-label">Калории:</label>
+                    <input type="number" class="form-control" id="calories" name="calories" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="proteins" class="form-label">Белки:</label>
+                    <input type="number" class="form-control" id="proteins" name="proteins" required>
+                </div>
+            </div>
+
+            <div class="row mb-1">
+                <div class="col-md-6">
+                    <label for="carbohydrates" class="form-label">Углеводы:</label>
+                    <input type="number" class="form-control" id="carbohydrates" name="carbohydrates" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="fats" class="form-label">Жиры:</label>
+                    <input type="number" class="form-control" id="fats" name="fats" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Добавить блюдо</button>
         </form>
-        <button id="close-dialog">Close</button>
+
+                <button id="close-dialog" class="btn btn-warning">Закрыть</button>
     </div>
     {% for dish in dishes %}
-        <div id="menu-dialog-edit_{{ dish.id }}">
-            <form id="edit-form_{{ dish.id }}" action="/edit/{{ rest_slug }}/{{ dish.id }}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <label for="name">Name:</label>
-                <input type="text" id="name-edit_{{ dish.id }}" name="name" value="{{ dish.name }}" required><br>
+    <div id="menu-dialog-edit_{{ dish.id }}">
+        <form id="edit-form_{{ dish.id }}" action="/edit/{{ rest_slug }}/{{ dish.id }}" method="post"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="mb-1">
+                    <label for="name" class="form-label">Название:</label>
+                    <input type="text" class="form-control" id="name-edit_{{ dish.id }}" name="name"
+                           value="{{ dish.name }}" required>
+                </div>
 
-                <label for="description">Description:</label>
-                <textarea id="description-edit_{{ dish.id }}" name="description" required>{{ dish.description }}</textarea><br>
+                <div class="mb-1">
+                    <label for="description" class="form-label">Описание:</label>
+                    <textarea class="form-control" id="description-edit_{{ dish.id }}" name="description" required>{{ dish.description }}</textarea>
+                </div>
 
-                <label for="type-food">Type of dishes:</label>
-                <select class="js-select2" id="type-food-edit_{{ dish.id }}" name="type-food" placeholder="Выберите тип блюда" style="width: 150px">
-                    {% for category in categories_dish %}
+                <div class="mb-1" style="width: 100%">
+                    <label for="type-food" class="form-label">Тип блюда:</label>
+                    <select class="form-select js-select2" id="type-food-edit_{{ dish.id }}" name="type-food"
+                            style="width: 100%">
+                        {% for category in categories_dish %}
                         <option value="{{category.id}}" {% if category.id == dish.dish_type %}selected{% endif %}>
                             {{category.type}}
                         </option>
-                    {% endfor %}
-                </select><br>
-
-                <label for="weight">Weight (grams):</label>
-                <input type="number" id="weight-edit_{{ dish.id }}" name="weight" value="{{ dish.weight }}" required><br>
-
-                <label for="cost">Cost:</label>
-                <input type="number" id="cost-edit_{{ dish.id }}" name="cost" value="{{ dish.cost }}" required><br>
-
-                <label for="photo_dish">Photo:</label>
-                <input type="file" id="photo_dish-edit_{{ dish.id }}" name="photo_dish" accept="image/*" onchange="handleImageUploadEdit('{{ dish.id }}')"><br>
-
-                <div id="image-preview-container-edit">
-                    <img id="image-preview-edit_{{ dish.id }}" src="{{ dish.photo }}" alt="Preview" style="max-width: 300px; max-height: 300px; display: none;">
+                        {% endfor %}
+                    </select>
                 </div>
 
-                <label for="calories">Calories:</label>
-                <input type="number" id="calories-edit_{{ dish.id }}" name="calories" value="{{ dish.calories }}" required><br>
+                <div class="col-md-6 mb-1">
+                    <label for="weight" class="form-label">Вес (граммы):</label>
+                    <input type="number" class="form-control" id="weight-edit_{{ dish.id }}" name="weight"
+                           value="{{ dish.weight }}" required>
+                </div>
 
-                <label for="proteins">Proteins:</label>
-                <input type="number" id="proteins-edit_{{ dish.id }}" name="proteins" value="{{ dish.proteins }}" required><br>
+                <div class="col-md-6 mb-1">
+                    <label for="cost" class="form-label">Цена:</label>
+                    <input type="number" class="form-control" id="cost-edit_{{ dish.id }}" name="cost"
+                           value="{{ dish.cost }}" required>
+                </div>
 
-                <label for="carbohydrates">Carbohydrates:</label>
-                <input type="number" id="carbohydrates-edit_{{ dish.id }}" name="carbohydrates" value="{{ dish.carbohydrates }}" required><br>
+                <div class="mb-1">
+                    <label for="photo_dish" class="form-label">Фото:</label>
+                    <input type="file" class="form-control" id="photo_dish-edit_{{ dish.id }}" name="photo_dish"
+                           accept="image/*" onchange="handleImageUploadEdit('{{ dish.id }}')">
+                </div>
 
-                <label for="fats">Fats:</label>
-                <input type="number" id="fats-edit_{{ dish.id }}" name="fats" value="{{ dish.fats }}" required><br>
-                    <button type="submit">Edit Dish</button>
-                </form>
-                <button id="close-dialog-edit_{{ dish.id }}">Close</button>
-        </div>
-        {% endfor %}
+                <div id="image-preview-container-edit" class="mb-1" style="justify-content: center; display: flex">
+                    <img id="image-preview-edit_{{ dish.id }}" src="{{ dish.photo }}" alt="Превью"
+                         style="max-width: 300px; max-height: 300px; display: flex; justify-content: center">
+                </div>
+
+                <div class="col-md-6 mb-1">
+                    <label for="calories" class="form-label">Калории:</label>
+                    <input type="number" class="form-control" id="calories-edit_{{ dish.id }}" name="calories"
+                           value="{{ dish.calories }}" required>
+                </div>
+
+                <div class="col-md-6 mb-1">
+                    <label for="proteins" class="form-label">Белки:</label>
+                    <input type="number" class="form-control" id="proteins-edit_{{ dish.id }}" name="proteins"
+                           value="{{ dish.proteins }}" required>
+                </div>
+
+                <div class="col-md-6 mb-1">
+                    <label for="carbohydrates" class="form-label">Углеводы:</label>
+                    <input type="number" class="form-control" id="carbohydrates-edit_{{ dish.id }}" name="carbohydrates"
+                           value="{{ dish.carbohydrates }}" required>
+                </div>
+
+                <div class="col-md-6 mb-1">
+                    <label for="fats" class="form-label">Жиры:</label>
+                    <input type="number" class="form-control" id="fats-edit_{{ dish.id }}" name="fats"
+                           value="{{ dish.fats }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Редактировать блюдо</button>
+        </form>
+        <button id="close-dialog-edit_{{ dish.id }}" class="btn btn-secondary">Закрыть</button>
+    </div>
+
+    {% endfor %}
     </div>
 
 <form id="info-form" action="/republic/{{rest_slug}}" method="post" enctype="multipart/form-data">
@@ -230,49 +290,65 @@
     </div>
 </form>
 
-    <div id="orders-block">
-        {% for order in orders %}
-        <div class="container mt-5 orders-list" id="el-{{ order.id }}">
+<div class="container mt-5" id="orders-block">
+    <div class="row">
+        <!-- Левая колонка с заказами -->
+        <div class="col-md-4">
             <h2>Список заказов</h2>
-            <li class="order-list" id="md-{{ order.id }}" data-order-id="{{ order.id }}">
-                <p id="orderId" data-order-id="{{ order.id }}"><strong>ID заказа:</strong> {{ order.id }}</p>
-                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
-                <p><strong>Статус заказа:</strong> {{ order.order_status }}</p>
-            </li>
+            <div id="orders-list">
+                {% for order in orders %}
+                    {% if order.order_status != "Передан курьеру" %}
+                        <div class="order-list mb-3 rounded border" id="md-{{ order.id }}" data-order-id="{{ order.id }}">
+                            <p id="orderId" data-order-id="{{ order.id }}"><strong>ID заказа:</strong> {{ order.id }}</p>
+                            <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
+                            <p><strong>Статус заказа:</strong> {{ order.order_status }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
-        <div id="od-{{ order.id }}" class="container mt-5 order-details with-box-shadow" data-detail-id="{{ order.id }}" hidden="">
-            <h2>Детали заказа</h2>
-            <div id="order-details-container">
-                <p><strong>ID заказа:</strong>{{ order.id }}</p>
-                <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
-                <p><strong>Блюда</strong></p>
-                </p>
+
+        <!-- Правая колонка с информацией о выбранном заказе -->
+        <div class="col-md-8">
+            {% for order in orders %}
+            <div class="order-details with-box-shadow mb-5" id="od-{{ order.id }}" data-detail-id="{{ order.id }}" hidden>
+                <h2>Детали заказа</h2>
+                <div id="order-details-container">
+                    <p><strong>ID заказа:</strong> {{ order.id }}</p>
+                    <p><strong>Дата и время:</strong> {{ order.data_time }}</p>
+                    <p><strong>Блюда</strong></p>
                     {% for dish in order.dishes %}
-                    <img src="{{ dish.photo }}" alt="{{ dish.name }}" class="compact-image">
-                    <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
-                    {% endfor %}
-                </p>
-                <p><strong>Сумма заказа:</strong> {{ order.summa }} ₽</p>
-                <p><strong>Курьер:</strong> <a href="{{ order.courier }}">{{ order.courier }}</a></p>
-                <button id="status_{{ order.id }}" type="button">Изменить статус заказа</button>
-            </div>
-            <div id="status-dialog_{{ order.id }}" class="status-dialog">
-                <form id="status-form_{{ order.id }}" method="post" action="/change_status/{{ rest_slug }}/{{ order.id }}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <label for="status-dish_{{ order.id }}">Статус заказа: {{order.order_status}}</label>
-                    <div class="custom-select-container">
-                        <select class="js-select2 custom-select" id="status-dish_{{ order.id }}" name="status" required>
-                            <option value="Заказ оформлен" selected>Заказ оформлен</option>
-                            <option value="Сборка">Сборка</option>
-                            <option value="Передан курьеру">Передан курьеру</option>
-                        </select>
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ dish.photo }}" alt="{{ dish.name }}" class="compact-image me-2">
+                        <div>
+                            <strong>{{ dish.name }}</strong> - {{ dish.cost }} ₽ x {{ dish.quantity }} шт.
+                        </div>
                     </div>
-                </form>
+                    {% endfor %}
+                    <p><strong>Сумма заказа:</strong> {{ order.summa }} ₽</p>
+                    <p><strong>Курьер:</strong> <a href="{{ order.courier }}">{{ order.courier }}</a></p>
+                    <button id="status_{{ order.id }}" type="button" class="btn btn-primary">Изменить статус заказа</button>
+                </div>
+                <div id="status-dialog_{{ order.id }}" class="status-dialog mt-3" style="display: none;">
+                    <form id="status-form_{{ order.id }}" method="post" action="/change_status/{{ rest_slug }}/{{ order.id }}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label for="status-dish_{{ order.id }}" class="form-label">Статус заказа: {{ order.order_status }}</label>
+                        <div class="custom-select-container">
+                            <select class="js-select2 custom-select" id="status-dish_{{ order.id }}" name="status" required>
+                                <option value="Заказ оформлен" selected>Заказ оформлен</option>
+                                <option value="Сборка">Сборка</option>
+                                <option value="Сборка">Готов</option>
+                                <option value="Передан курьеру">Передан курьеру</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
+
 <script>
     function handleImageUploadEdit(dishId) {
             const inputPhotoEdit = document.getElementById(`photo_dish-edit_${dishId}`);
@@ -468,6 +544,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (editDialog.dialog('instance') === undefined) {
                     // Initialize the edit dialog if not already initialized
                     editDialog.dialog({
+                        title: 'Редактирование блюда',
                         autoOpen: false,
                         width: 400,
                         modal: true
@@ -504,49 +581,46 @@ document.addEventListener('DOMContentLoaded', function () {
         {% endfor %}
 
         {% for order in orders %}
-            $('#status_{{ order.id }}').click(function () {
-                const statusDialog = $("#status-dialog_{{ order.id }}");
-                const submitForm = $("#status-form_{{ order.id }}");
+    $('#status_{{ order.id }}').click(function () {
+        const statusDialog = $("#status-dialog_{{ order.id }}");
+        $("#status-form_{{ order.id }}").show();
 
-                if (statusDialog.dialog('instance') === undefined) {
-                    // Initialize the status dialog if not already initialized
-                    statusDialog.dialog({
-                        autoOpen: false,
-                        width: 400,
-                        height: 320,
-                        modal: true,
-                        buttons: {
-                            'Submit': function() {
-                                submitForm.submit();  // Submit the form when the dialog's Submit button is clicked
-                                $(this).dialog('close');
-                            },
-                            'Cancel': function() {
-                                $(this).dialog('close');
-                            }
-                        }
-                    });
+        if (statusDialog.dialog('instance') === undefined) {
+            // Initialize the status dialog if not already initialized
+            statusDialog.dialog({
+                autoOpen: false,
+                title: 'Изменение статуса заказа',
+                width: 400,
+                height: 320,
+                modal: true,
+                buttons: {
+                    'Сохранить': function () {
+                        $("#status-form_{{ order.id }}").submit();  // Submit the form when the dialog's Submit button is clicked
+                        $(this).dialog('close');
+                    },
+                    'Закрыть': function () {
+                        $(this).dialog('close');
+                    }
                 }
-
-                $('form').hide();
-                $('#menu-form').hide();
-                $('#status-form_{{ order.id }}').show();
-
-                // Open the status dialog
-                statusDialog.dialog('open');
-
-                // Initialize Select2 for the element with id 'status-dish'
-                $('#status-dish_{{ order.id }}').select2({
-                    placeholder: "Выберите статус заказа",
-                    language: "ru",
-                    tags: true,
-                    dropdownParent: $("#status-dialog_{{ order.id }}")
-                });
             });
+        }
 
-            // Close status dialogs
-            $('#close-dialog-status_{{ order.id }}').click(function () {
-                $("#status-dialog_{{ order.id }}").dialog("close");
-            });
+        // Open the status dialog
+        statusDialog.dialog('open');
+
+        // Initialize Select2 for the element with id 'status-dish'
+        $('#status-dish_{{ order.id }}').select2({
+            placeholder: "Выберите статус заказа",
+            language: "ru",
+            tags: true,
+            dropdownParent: $("#status-dialog_{{ order.id }}")
+        });
+    });
+
+    // Close status dialogs
+    $('#close-dialog-status_{{ order.id }}').click(function () {
+        $("#status-dialog_{{ order.id }}").dialog("close");
+    });
         {% endfor %}
 
     });
