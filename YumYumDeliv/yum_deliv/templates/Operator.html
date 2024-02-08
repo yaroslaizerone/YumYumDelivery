@@ -32,7 +32,7 @@
                     {% for feedback in feedbacks %}
                     <li class="list-group-item feedback-list" data-feedback-id="{{ feedback.id }}">
                         <div>#{{ feedback.id }}</div>
-                        <div>Номер заказа-{{ feedback.order_id }}</div>
+                        <div>Номер заказа {{ feedback.order_id }}</div>
                         <div>Время обращения {{ feedback.datetime_feedback }}</div>
                         <div></div>
                     </li>
@@ -57,10 +57,8 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p class="card-text"><strong>Comment:</strong> {{ feedback.comment }}</p>
-                                            <p class="card-text"><strong>Date and Time:</strong> {{
-                                                feedback.datetime_feedback }}</p>
-                                            <p class="card-text" id="email" name="email"><strong>Email:</strong> {{
-                                                feedback.email }}</p>
+                                            <p class="card-text"><strong>Date and Time:</strong> {{ feedback.datetime_feedback }}</p>
+                                            <p class="card-text" id="email" name="email"><strong>Email:</strong> {{ feedback.email }}</p>
                                             <input type="hidden" name="email" value="{{ feedback.email }}">
                                             <p class="card-text"><strong>ID:</strong> {{ feedback.id }}</p>
                                             <p class="card-text"><strong>Order ID:</strong> {{ feedback.order_id }}</p>

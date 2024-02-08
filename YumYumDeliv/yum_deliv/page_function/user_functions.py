@@ -90,7 +90,9 @@ def createSupport(request, uid):
         reason = request.POST.get('reason')
         comment = request.POST.get('comment')
         uploaded_files = request.FILES.getlist('attachment')
-        datetime_feedback = datetime.datetime.now()
+        current_datetime = datetime.datetime.now()
+        datetime_feedback = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        status = "Отправлен в поддержку"
         id = randomAlphanumericString(10)
 
         # Данные для сохранения в Firestore
@@ -101,6 +103,7 @@ def createSupport(request, uid):
             'comment': comment,
             'datetime_feedback': datetime_feedback,
             'id': id,
+            'status': status,
         }
 
         # Проверка, если есть загруженные файлы

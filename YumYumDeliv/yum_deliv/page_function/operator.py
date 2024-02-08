@@ -1,7 +1,6 @@
-from yum_deliv.views import database
+from yum_deliv.views import database, db
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
-from yum_deliv.views import db
 
 
 def init(request):
@@ -38,4 +37,4 @@ def sendResponse(request, feedback):
                   from_email='kolpackov.yarosl@gmail.com',
                   recipient_list=[email],
                   fail_silently=False)
-        return redirect('operator_panel/')
+        return init(request)
