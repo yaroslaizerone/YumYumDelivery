@@ -106,7 +106,7 @@
                 </div>
                 <div class="inputBox">
                     <span>cvv</span>
-                    <input type="number" maxlength="4" class="cvv-input" required/>
+                    <input type="text" pattern="\d{4}" class="cvv-input" id="cvv_inp" required onkeyup="this.value = this.value.replace(/[^\d]/g,'');">
                 </div>
             </div>
             <input type="submit" value="Оплатить" class="submit-btn"/>
